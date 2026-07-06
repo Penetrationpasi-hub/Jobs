@@ -1,0 +1,26 @@
+name: Bahnpolitik sammeln
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  sammeln:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests openpyxl
+      - name: DIP-Daten abrufen
+        env:
+          DIP_API_KEY: ${{ secrets.DIP_API_KEY }}
+        run: python bahnpolitik_dip.py
+      - name: Ergebnisse committen
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add bahnpolitik.sqlite bahnpolitik_gesamt.xlsx
+          git commit -m "Datenlauf $(date +%F)" || echo "keine Aenderungen"
+          git push
