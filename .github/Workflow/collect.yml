@@ -1,1 +1,32 @@
+# Nach .github/workflows/collect.yml kopieren
+name: BA Jobdaten sammeln
 
+on:
+  schedule:
+    - cron: "30 4 * * *"   # taeglich 04:30 UTC = 06:30 deutscher Sommerzeit
+  workflow_dispatch: {}     # manueller Start moeglich
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Daten abrufen
+        run: python collect_jobs.py
+
+      - name: Commit und Push
+        run: |
+          git config user.name "ba-jobmonitor"
+          git config user.email "actions@github.com"
+          git add data/
+          git diff --cached --quiet && echo "Keine Aenderungen" && exit 0
+          git commit -m "Jobdaten $(date -u +%F)"
+          git push
