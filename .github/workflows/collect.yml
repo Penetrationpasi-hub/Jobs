@@ -2,7 +2,7 @@ name: Daten sammeln
 
 on:
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -19,11 +19,9 @@ jobs:
           python-version: "3.12"
 
       - name: Pakete installieren
-        run: pip install requests openpyxl
+        run: pip install openpyxl
 
-      - name: Daten abrufen
-        env:
-          DIP_API_KEY: ${{ secrets.DIP_API_KEY }}
+      - name: Sammeln und auswerten
         run: python collect_jobs.py
 
       - name: Ergebnisse committen
