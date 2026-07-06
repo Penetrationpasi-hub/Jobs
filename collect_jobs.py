@@ -368,11 +368,15 @@ def build_excel():
                 value=f'=IF({col_v30}{i}="","",{col_ges}{i}-{col_v30}{i})')
     style_header(ak, nr + 6)
     bar = BarChart()
-    bar.title = "Top 10 Berufe (gesamt, aktuell)"
-    bar.height, bar.width = 9, 18
-    bar.add_data(Reference(ak, min_col=nr + 2, min_row=1, max_row=11),
+    bar.type = "bar"          # Querbalken, Berufsnamen bleiben lesbar
+    bar.grouping = "stacked"
+    bar.overlap = 100
+    bar.title = "Top 15 Berufe nach Region (aktuell)"
+    bar.height, bar.width = 14, 20
+    bar.add_data(Reference(ak, min_col=2, max_col=nr + 1,
+                           min_row=1, max_row=16),
                  titles_from_data=True)
-    bar.set_categories(Reference(ak, min_col=1, min_row=2, max_row=11))
+    bar.set_categories(Reference(ak, min_col=1, min_row=2, max_row=16))
     ak.add_chart(bar, f"A{len(top40) + 4}")
 
     # ---------------- Log (Rohdaten) + Standzeit-Formeln
