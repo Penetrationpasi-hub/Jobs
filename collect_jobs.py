@@ -33,7 +33,7 @@ HEADERS = {
 # Die API kennt keinen sauberen Landkreis-Filter, daher Naeherung ueber Umkreise.
 # Waiblingen eng (15 km) als Kernregion, die Kreise grob ueber zentrale Orte.
 REGIONS = {
-    "waiblingen_15km": {"wo": "Waiblingen", "umkreis": 15},
+    "waiblingen_30km": {"wo": "Waiblingen", "umkreis": 30},
     "rems-murr-kreis": {"wo": "Backnang", "umkreis": 25},
     "ostalbkreis": {"wo": "Aalen", "umkreis": 30},
 }
@@ -190,6 +190,7 @@ from datetime import date, datetime
 
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart.marker import Marker
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
@@ -198,7 +199,8 @@ DATA = os.path.join(BASE, "data")
 OUT = os.path.join(BASE, "arbeitsmarkt_auswertung.xlsx")
 
 REGION_NAMEN = {
-    "waiblingen_15km": "Waiblingen 15 km",
+    "waiblingen_15km": "Waiblingen 15 km (alt)",
+    "waiblingen_30km": "Waiblingen 30 km",
     "rems-murr-kreis": "Rems-Murr-Kreis",
     "ostalbkreis": "Ostalbkreis",
 }
@@ -328,6 +330,9 @@ def build_excel():
     cats = Reference(zt, min_col=1, min_row=2, max_row=len(daten) + 1)
     ch.add_data(ref, titles_from_data=True)
     ch.set_categories(cats)
+    for s in ch.series:
+        s.marker = Marker(symbol="circle", size=7)
+        s.smooth = False
     zt.add_chart(ch, f"A{len(daten) + 4}")
 
     # ---------------- Berufe-Zeitreihe (Top 20, Summe ueber Regionen)
