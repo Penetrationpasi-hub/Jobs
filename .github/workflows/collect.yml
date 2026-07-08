@@ -1,4 +1,4 @@
-name: Daten sammeln
+ name: Daten sammeln
 
 on:
   schedule:
@@ -30,4 +30,5 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add -A
           git commit -m "Datenlauf $(date +%F)" || echo "keine Aenderungen"
+          git pull --rebase origin main
           git push
