@@ -5,6 +5,9 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sammeln:
     runs-on: ubuntu-latest
@@ -27,4 +30,5 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add -A
           git commit -m "Datenlauf $(date +%F)" || echo "keine Aenderungen"
+          git pull --rebase origin main
           git push
