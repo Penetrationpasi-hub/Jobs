@@ -258,7 +258,11 @@ def build_excel():
     daten = sorted({r["datum"] for r in berufe})
     stand = daten[-1]
     stand_d = as_date(stand)
-    regionen = sorted({r["region"] for r in berufe})
+    snap_map = {(s["datum"], s["region"]): int(s["stellen_gesamt"]) for s in snaps}
+    # Aktive Suchgebiete (am Stichtag erhoben) zuerst, eingestellte ans Ende
+    alle_reg = sorted({r["region"] for r in berufe} | {s["region"] for s in snaps})
+    aktiv = [r for r in alle_reg if (stand, r) in snap_map]
+    regionen = aktiv + [r for r in alle_reg if r not in aktiv]
     reg_name = lambda r: REGION_NAMEN.get(r, r)
 
     # Vergleichsdaten: naechster vorhandener Stichtag ca. 7 bzw. 30 Tage zurueck
@@ -271,10 +275,11 @@ def build_excel():
     brb = {}
     for r in berufe:
         brb[(r["datum"], r["region"], r["beruf"])] = int(r["anzahl"])
+    # ueber brb (dedupliziert) aggregieren: schuetzt vor Doppelzaehlung,
+    # falls die Erhebung an einem Tag mehrfach lief
     bges = {}
-    for r in berufe:
-        k = (r["datum"], r["beruf"])
-        bges[k] = bges.get(k, 0) + int(r["anzahl"])
+    for (d, _rg, b), n in brb.items():
+        bges[(d, b)] = bges.get((d, b), 0) + n
 
     top_akt = sorted((b for (d, b) in bges if d == stand),
                      key=lambda b: -bges[(stand, b)])
@@ -303,29 +308,44 @@ def build_excel():
                 "'Stellen gesamt' in der Zeitreihe ist exakt.")
     zs["A8"] = ("Arbeitslosenzahlen fuer das Blatt AL-Relation manuell aus "
                 "statistik.arbeitsagentur.de eintragen (blaue Spalte).")
+    zs["A9"] = ("Hinweis: Die Suchgebiete ueberschneiden sich (Umkreissuchen), "
+                "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
+                "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
+                "stehen in der Zeitreihe rechts neben der Summenspalte.")
     for c in ("A2", "A3", "A4", "A5"):
         zs[c].font = Font(name=ARIAL, bold=True)
 
     # ---------------- Zeitreihe (snapshots: stellen_gesamt exakt)
     zt = wb.create_sheet("Zeitreihe")
-    zt.append(["Datum"] + [reg_name(r) for r in regionen] + ["Gesamt"])
-    snap_map = {(s["datum"], s["region"]): int(s["stellen_gesamt"]) for s in snaps}
+    n_akt = len(aktiv)
+    alt_reg = regionen[n_akt:]
+    zt.append(["Datum"] + [reg_name(r) for r in aktiv] + ["Summe Suchgebiete"]
+              + [reg_name(r) for r in alt_reg])
     for i, d in enumerate(daten, start=2):
         zt.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
-        for j, r in enumerate(regionen, start=2):
+        for j, r in enumerate(aktiv, start=2):
             zt.cell(row=i, column=j, value=snap_map.get((d, r)))
-        lc = get_column_letter(len(regionen) + 1)
-        zt.cell(row=i, column=len(regionen) + 2,
-                value=f"=SUM(B{i}:{lc}{i})")
+        # Summe nur ueber aktive Gebiete -> Reihe bleibt ueber die Zeit
+        # vergleichbar, auch wenn ein Suchgebiet eingestellt wurde
+        zt.cell(row=i, column=n_akt + 2,
+                value=f"=SUM(B{i}:{get_column_letter(n_akt + 1)}{i})")
+        for j, r in enumerate(alt_reg, start=n_akt + 3):
+            zt.cell(row=i, column=j, value=snap_map.get((d, r)))
     style_header(zt, len(regionen) + 2)
     for row in zt.iter_rows(min_row=2, min_col=2):
         for c in row:
             c.number_format = "#,##0"
     ch = LineChart()
-    ch.title = "Offene Stellen je Region"
-    ch.y_axis.title = "Stellen"
+    ch.title = "Offene Stellen je Suchgebiet"
     ch.height, ch.width = 9, 18
-    ref = Reference(zt, min_col=2, max_col=len(regionen) + 2,
+    ch.x_axis.title = "Datum"
+    ch.y_axis.title = "Stellen"
+    ch.x_axis.delete = False   # Achsen explizit einblenden, sonst
+    ch.y_axis.delete = False   # unterdrueckt Excel die Beschriftung
+    ch.x_axis.number_format = "DD.MM."
+    ch.y_axis.number_format = "#,##0"
+    ch.legend.position = "b"
+    ref = Reference(zt, min_col=2, max_col=n_akt + 2,
                     min_row=1, max_row=len(daten) + 1)
     cats = Reference(zt, min_col=1, min_row=2, max_row=len(daten) + 1)
     ch.add_data(ref, titles_from_data=True)
@@ -371,9 +391,15 @@ def build_excel():
     bar.type = "bar"          # Querbalken, Berufsnamen bleiben lesbar
     bar.grouping = "stacked"
     bar.overlap = 100
-    bar.title = "Top 15 Berufe nach Region (aktuell)"
+    bar.gapWidth = 50
+    bar.title = "Top 15 Berufe nach Suchgebiet (aktuell)"
     bar.height, bar.width = 14, 20
-    bar.add_data(Reference(ak, min_col=2, max_col=nr + 1,
+    bar.x_axis.delete = False  # Berufsnamen an der Achse einblenden
+    bar.y_axis.delete = False
+    bar.y_axis.number_format = "#,##0"
+    bar.legend.position = "b"
+    # nur aktive Suchgebiete als Serien (eingestellte Spalten sind leer)
+    bar.add_data(Reference(ak, min_col=2, max_col=n_akt + 1,
                            min_row=1, max_row=16),
                  titles_from_data=True)
     bar.set_categories(Reference(ak, min_col=1, min_row=2, max_row=16))
