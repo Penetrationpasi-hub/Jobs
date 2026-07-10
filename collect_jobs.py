@@ -271,6 +271,11 @@ def build_excel():
         return ziel[-1] if ziel else None
     d7, d30 = vergleich(7), vergleich(30)
 
+    # Kalenderzeitraum der Erhebung in Wochen: Basis fuer Abgangsraten.
+    # Kalendertage statt Erhebungstage, weil Stellen auch an Tagen ohne
+    # Lauf enden koennen und beim naechsten Lauf als beendet auffallen.
+    erhebungswochen = ((stand_d - as_date(daten[0])).days + 1) / 7
+
     # Bestaende je (datum, region, beruf) und je (datum, beruf) gesamt
     brb = {}
     for r in berufe:
@@ -302,6 +307,9 @@ def build_excel():
     zs["B4"] = ", ".join(reg_name(r) for r in regionen)
     zs["A5"] = "Stellen je gesehen (Log)"
     zs["B5"] = len(log)
+    zs["A6"] = "Erhebungszeitraum (Wochen)"
+    zs["B6"] = round(erhebungswochen, 2)
+    zs["B6"].number_format = "0.00"
     zs["A7"] = ("Hinweis: Bei Regionen mit mehr als 6000 Treffern laedt die "
                 "API nur 6000 Stellen im Detail. Die Berufs- und "
                 "Arbeitgeberzahlen sind dort eine Stichprobe, die Spalte "
@@ -312,7 +320,11 @@ def build_excel():
                 "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
                 "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
                 "stehen in der Zeitreihe rechts neben der Summenspalte.")
-    for c in ("A2", "A3", "A4", "A5"):
+    zs["A10"] = ("Standzeit-Blatt: 'Beendete pro Woche in % der offenen "
+                 "Stellen' ist die Umschlaggeschwindigkeit des Bestands. "
+                 "Beispiel: 5 % heisst, der aktuelle Bestand waere "
+                 "rechnerisch in rund 20 Wochen einmal komplett erneuert.")
+    for c in ("A2", "A3", "A4", "A5", "A6"):
         zs[c].font = Font(name=ARIAL, bold=True)
 
     # ---------------- Zeitreihe (snapshots: stellen_gesamt exakt)
@@ -427,8 +439,11 @@ def build_excel():
     top_log = sorted(cnt, key=lambda b: -cnt[b])[:30]
     st = wb.create_sheet("Standzeit")
     st.append(["Beruf", "Stellen im Log", "Aktuell offen",
-               "Beendet", "Ø Standzeit beendeter Stellen (Tage)"])
+               "Beendet", "Ø Standzeit beendeter Stellen (Tage)",
+               "Ø Beendete Stellen pro Woche",
+               "Beendete pro Woche in % der offenen Stellen"])
     stand_ref = "Zusammenfassung!$B$2"
+    wochen_ref = "Zusammenfassung!$B$6"
     for i, b in enumerate(top_log, start=2):
         st.cell(row=i, column=1, value=b)
         st.cell(row=i, column=2,
@@ -443,7 +458,16 @@ def build_excel():
                 value=f'=IFERROR(ROUND(AVERAGEIFS(Log!$G$2:$G${nlog},'
                       f'Log!$C$2:$C${nlog},A{i},'
                       f'Log!$F$2:$F${nlog},"<"&{stand_ref}),1),"")')
-    style_header(st, 5)
+        # Abgangsrate: beendete Stellen je Kalenderwoche der Erhebung ...
+        st.cell(row=i, column=6,
+                value=f'=ROUND(D{i}/{wochen_ref},2)')
+        st.cell(row=i, column=6).number_format = "0.00"
+        # ... und dieselbe Rate bezogen auf den aktuell offenen Bestand.
+        # 5 % je Woche bedeutet: Bestand rechnerisch in 20 Wochen erneuert.
+        st.cell(row=i, column=7,
+                value=f'=IF(C{i}=0,"",D{i}/({wochen_ref}*C{i}))')
+        st.cell(row=i, column=7).number_format = "0.0%"
+    style_header(st, 7)
 
     # ---------------- Arbeitgeber (Top 25 nach offenen Stellen)
     off = {}
