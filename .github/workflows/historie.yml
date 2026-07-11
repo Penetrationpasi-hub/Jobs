@@ -1,0 +1,49 @@
+# Ablageort im Repo: .github/workflows/historie.yml
+# (Ordner klein geschrieben und mit s, bekannte Stolperfalle)
+name: Historische Arbeitsmarktdaten
+
+on:
+  schedule:
+    - cron: "23 5 3 * *"   # monatlich am 3., 05:23 UTC (Daten kommen monatlich)
+  workflow_dispatch: {}     # manueller Start fuer den ersten Backfill
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-push
+  cancel-in-progress: false
+
+jobs:
+  sammeln:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhaengigkeiten
+        run: pip install openpyxl
+
+      - name: Daten holen und Excel bauen
+        env:
+          GENESIS_USER: ${{ secrets.GENESIS_USER }}
+          GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
+          # optional: Tabellencodes ueberschreiben, falls das Log es verlangt
+          # TAB_ALO: 13211-01-03-4-B
+          # TAB_BESCH: 13111-01-03-4
+          # TAB_BEV: 12411-04-02-4
+          # TAB_PROG: 12421-01-01-4
+          # STARTYEAR: "2008"
+        run: python arbeitsmarkt_historie.py
+
+      - name: Ergebnisse committen
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A data_historie arbeitsmarkt_historie.xlsx || echo "nichts zu adden"
+          git commit -m "Historiendaten aktualisiert ($(date -u +%F))" || echo "keine Aenderungen"
+          git pull --rebase origin ${GITHUB_REF_NAME}
+          git push
