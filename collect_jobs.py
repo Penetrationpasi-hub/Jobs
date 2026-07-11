@@ -189,8 +189,7 @@ import os
 from datetime import date, datetime
 
 from openpyxl import Workbook
-from openpyxl.chart import BarChart, LineChart, Reference
-from openpyxl.chart.marker import Marker
+from openpyxl.chart import AreaChart3D, Reference
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
@@ -271,11 +270,6 @@ def build_excel():
         return ziel[-1] if ziel else None
     d7, d30 = vergleich(7), vergleich(30)
 
-    # Kalenderzeitraum der Erhebung in Wochen: Basis fuer Abgangsraten.
-    # Kalendertage statt Erhebungstage, weil Stellen auch an Tagen ohne
-    # Lauf enden koennen und beim naechsten Lauf als beendet auffallen.
-    erhebungswochen = ((stand_d - as_date(daten[0])).days + 1) / 7
-
     # Bestaende je (datum, region, beruf) und je (datum, beruf) gesamt
     brb = {}
     for r in berufe:
@@ -307,9 +301,6 @@ def build_excel():
     zs["B4"] = ", ".join(reg_name(r) for r in regionen)
     zs["A5"] = "Stellen je gesehen (Log)"
     zs["B5"] = len(log)
-    zs["A6"] = "Erhebungszeitraum (Wochen)"
-    zs["B6"] = round(erhebungswochen, 2)
-    zs["B6"].number_format = "0.00"
     zs["A7"] = ("Hinweis: Bei Regionen mit mehr als 6000 Treffern laedt die "
                 "API nur 6000 Stellen im Detail. Die Berufs- und "
                 "Arbeitgeberzahlen sind dort eine Stichprobe, die Spalte "
@@ -320,11 +311,7 @@ def build_excel():
                 "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
                 "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
                 "stehen in der Zeitreihe rechts neben der Summenspalte.")
-    zs["A10"] = ("Standzeit-Blatt: 'Beendete pro Woche in % der offenen "
-                 "Stellen' ist die Umschlaggeschwindigkeit des Bestands. "
-                 "Beispiel: 5 % heisst, der aktuelle Bestand waere "
-                 "rechnerisch in rund 20 Wochen einmal komplett erneuert.")
-    for c in ("A2", "A3", "A4", "A5", "A6"):
+    for c in ("A2", "A3", "A4", "A5"):
         zs[c].font = Font(name=ARIAL, bold=True)
 
     # ---------------- Zeitreihe (snapshots: stellen_gesamt exakt)
@@ -347,13 +334,15 @@ def build_excel():
     for row in zt.iter_rows(min_row=2, min_col=2):
         for c in row:
             c.number_format = "#,##0"
-    ch = LineChart()
+    ch = AreaChart3D()
+    ch.grouping = "standard"   # 3D-Flaeche, nicht gestapelt
     ch.title = "Offene Stellen je Suchgebiet"
     ch.height, ch.width = 9, 18
     ch.x_axis.title = "Datum"
     ch.y_axis.title = "Stellen"
     ch.x_axis.delete = False   # Achsen explizit einblenden, sonst
     ch.y_axis.delete = False   # unterdrueckt Excel die Beschriftung
+    ch.z_axis.delete = False   # Serienachse (Tiefe) der 3D-Flaeche
     ch.x_axis.number_format = "DD.MM."
     ch.y_axis.number_format = "#,##0"
     ch.legend.position = "b"
@@ -362,9 +351,6 @@ def build_excel():
     cats = Reference(zt, min_col=1, min_row=2, max_row=len(daten) + 1)
     ch.add_data(ref, titles_from_data=True)
     ch.set_categories(cats)
-    for s in ch.series:
-        s.marker = Marker(symbol="circle", size=7)
-        s.smooth = False
     zt.add_chart(ch, f"A{len(daten) + 4}")
 
     # ---------------- Berufe-Zeitreihe (Top 20, Summe ueber Regionen)
@@ -399,23 +385,21 @@ def build_excel():
         ak.cell(row=i, column=nr + 6,
                 value=f'=IF({col_v30}{i}="","",{col_ges}{i}-{col_v30}{i})')
     style_header(ak, nr + 6)
-    bar = BarChart()
-    bar.type = "bar"          # Querbalken, Berufsnamen bleiben lesbar
-    bar.grouping = "stacked"
-    bar.overlap = 100
-    bar.gapWidth = 50
-    bar.title = "Top 15 Berufe nach Suchgebiet (aktuell)"
-    bar.height, bar.width = 14, 20
-    bar.x_axis.delete = False  # Berufsnamen an der Achse einblenden
-    bar.y_axis.delete = False
-    bar.y_axis.number_format = "#,##0"
-    bar.legend.position = "b"
+    fl = AreaChart3D()
+    fl.grouping = "standard"   # 3D-Flaeche, nicht gestapelt
+    fl.title = "Top 15 Berufe nach Suchgebiet (aktuell)"
+    fl.height, fl.width = 14, 20
+    fl.x_axis.delete = False   # Berufsnamen an der Achse einblenden
+    fl.y_axis.delete = False
+    fl.z_axis.delete = False   # Serienachse (Tiefe) der 3D-Flaeche
+    fl.y_axis.number_format = "#,##0"
+    fl.legend.position = "b"
     # nur aktive Suchgebiete als Serien (eingestellte Spalten sind leer)
-    bar.add_data(Reference(ak, min_col=2, max_col=n_akt + 1,
-                           min_row=1, max_row=16),
-                 titles_from_data=True)
-    bar.set_categories(Reference(ak, min_col=1, min_row=2, max_row=16))
-    ak.add_chart(bar, f"A{len(top40) + 4}")
+    fl.add_data(Reference(ak, min_col=2, max_col=n_akt + 1,
+                          min_row=1, max_row=16),
+                titles_from_data=True)
+    fl.set_categories(Reference(ak, min_col=1, min_row=2, max_row=16))
+    ak.add_chart(fl, f"A{len(top40) + 4}")
 
     # ---------------- Log (Rohdaten) + Standzeit-Formeln
     lg = wb.create_sheet("Log")
@@ -439,11 +423,8 @@ def build_excel():
     top_log = sorted(cnt, key=lambda b: -cnt[b])[:30]
     st = wb.create_sheet("Standzeit")
     st.append(["Beruf", "Stellen im Log", "Aktuell offen",
-               "Beendet", "Ø Standzeit beendeter Stellen (Tage)",
-               "Ø Beendete Stellen pro Woche",
-               "Beendete pro Woche in % der offenen Stellen"])
+               "Beendet", "Ø Standzeit beendeter Stellen (Tage)"])
     stand_ref = "Zusammenfassung!$B$2"
-    wochen_ref = "Zusammenfassung!$B$6"
     for i, b in enumerate(top_log, start=2):
         st.cell(row=i, column=1, value=b)
         st.cell(row=i, column=2,
@@ -458,16 +439,7 @@ def build_excel():
                 value=f'=IFERROR(ROUND(AVERAGEIFS(Log!$G$2:$G${nlog},'
                       f'Log!$C$2:$C${nlog},A{i},'
                       f'Log!$F$2:$F${nlog},"<"&{stand_ref}),1),"")')
-        # Abgangsrate: beendete Stellen je Kalenderwoche der Erhebung ...
-        st.cell(row=i, column=6,
-                value=f'=ROUND(D{i}/{wochen_ref},2)')
-        st.cell(row=i, column=6).number_format = "0.00"
-        # ... und dieselbe Rate bezogen auf den aktuell offenen Bestand.
-        # 5 % je Woche bedeutet: Bestand rechnerisch in 20 Wochen erneuert.
-        st.cell(row=i, column=7,
-                value=f'=IF(C{i}=0,"",D{i}/({wochen_ref}*C{i}))')
-        st.cell(row=i, column=7).number_format = "0.0%"
-    style_header(st, 7)
+    style_header(st, 5)
 
     # ---------------- Arbeitgeber (Top 25 nach offenen Stellen)
     off = {}
