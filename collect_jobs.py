@@ -11,10 +11,15 @@ Outputs (im Ordner data/):
   berufe.csv      - Anzahl Stellen pro Beruf, Tag und Region (Top-Auswertung)
   jobs_log.csv    - jede jemals gesehene Stelle mit first_seen/last_seen
                     -> ermoeglicht Laufzeit- und Fluktuationsanalysen
+  arbeitslose.csv - monatliche Arbeitslose + Quote je Kreis aus der
+                    Regionaldatenbank Deutschland (GENESIS, EVAS 13211).
+                    Benoetigt env GENESIS_USER / GENESIS_PASS
+                    (kostenloses Konto auf regionalstatistik.de).
 """
 
 import csv
 import json
+import os
 import sys
 import time
 import urllib.parse
@@ -36,12 +41,199 @@ REGIONS = {
     "waiblingen_30km": {"wo": "Waiblingen", "umkreis": 30},
     "rems-murr-kreis": {"wo": "Backnang", "umkreis": 25},
     "ostalbkreis": {"wo": "Aalen", "umkreis": 30},
+    "backnang_10km": {"wo": "Backnang", "umkreis": 10},
+    # Ostseite Stuttgarts: die API kennt nur Ort + Umkreis, keine
+    # Stadtbezirke. Naeherung ueber Fellbach (grenzt direkt an
+    # Bad Cannstatt/Untertuerkheim), kleiner Radius.
+    "stuttgart_ost": {"wo": "Fellbach", "umkreis": 8},
 }
 
 PAGE_SIZE = 100
 MAX_PAGES = 60          # Sicherheitslimit: 6000 Stellen pro Region
 REQUEST_PAUSE = 1.0     # Sekunden zwischen Requests, hoeflich bleiben
 DATA_DIR = Path(__file__).parent / "data"
+
+# ---------------- Regionaldatenbank Deutschland (GENESIS, EVAS 13211)
+# Monatliche Arbeitslose und Arbeitslosenquoten auf Kreisebene.
+# Kostenloses Konto auf regionalstatistik.de noetig, Zugangsdaten als
+# GitHub Secrets GENESIS_USER / GENESIS_PASS. Nur POST, GET ist abgeschaltet.
+GENESIS_BASE = "https://www.regionalstatistik.de/genesisWS/rest/2020"
+# Kreistabelle Arbeitslose/Quoten, Monatswerte. Falls der Code nicht passt,
+# listet fetch_arbeitslose() den Katalog und man setzt env AL_TABLE.
+AL_TABLE = os.environ.get("AL_TABLE", "13211-01-03-4-B")
+AL_KREISE = {
+    "08119": "Rems-Murr-Kreis",
+    "08136": "Ostalbkreis",
+}
+# Suchgebiet -> AGS fuer die Kreis-Relation im Excel
+REGION_ZU_AGS = {
+    "rems-murr-kreis": "08119",
+    "ostalbkreis": "08136",
+    "waiblingen_30km": "08119",   # Waiblingen liegt im Rems-Murr-Kreis
+}
+AL_CSV = DATA_DIR / "arbeitslose.csv"
+
+
+def genesis_creds() -> tuple[str, str] | None:
+    user = os.environ.get("GENESIS_USER", "").strip()
+    pw = os.environ.get("GENESIS_PASS", "").strip()
+    if not user or not pw:
+        return None
+    return user, pw
+
+
+def genesis_post(endpoint: str, params: dict) -> bytes:
+    """POST an die GENESIS-REST-Schnittstelle, Zugangsdaten im Header."""
+    user, pw = genesis_creds()
+    body = urllib.parse.urlencode(params).encode("utf-8")
+    req = urllib.request.Request(
+        f"{GENESIS_BASE}/{endpoint}", data=body, method="POST",
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": user,
+            "password": pw,
+            "User-Agent": HEADERS["User-Agent"],
+        })
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        return resp.read()
+
+
+MONAT_NUM = {f"MONAT{m:02d}": m for m in range(1, 13)}
+
+
+def parse_zahl(s):
+    s = str(s or "").strip()
+    if s in ("", "-", ".", "...", "x", "/"):
+        return None
+    try:
+        f = float(s.replace(",", "."))
+    except ValueError:
+        return None
+    return int(f) if f.is_integer() else f
+
+
+def fetch_arbeitslose():
+    """Monatliche Arbeitslose je Kreis aus GENESIS ziehen -> arbeitslose.csv.
+
+    Voller Neuabruf ab Vorjahr bei jedem Lauf (Daten werden revidiert).
+    Ohne Zugangsdaten wird der Schritt uebersprungen, das Excel nutzt
+    dann den letzten Stand der CSV.
+    """
+    if genesis_creds() is None:
+        print("GENESIS_USER/GENESIS_PASS nicht gesetzt, "
+              "Arbeitslosen-Abruf uebersprungen.", file=sys.stderr)
+        return
+    jahr = date.today().year
+    params = {
+        "name": AL_TABLE,
+        "area": "free",
+        "regionalvariable": "KREISE",
+        "regionalkey": ",".join(AL_KREISE),
+        "startyear": jahr - 1,
+        "endyear": jahr,
+        "format": "ffcsv",
+        "language": "de",
+        "compress": "false",
+    }
+    try:
+        raw = genesis_post("data/tablefile", params)
+    except Exception as e:
+        print(f"GENESIS-Abruf fehlgeschlagen: {e}", file=sys.stderr)
+        _genesis_katalog_hinweis()
+        return
+    text = raw.decode("utf-8-sig", errors="replace")
+    if text.lstrip().startswith("{"):
+        # Fehlerantwort kommt als JSON (z.B. falscher Tabellencode/Login)
+        print(f"GENESIS-Fehlerantwort: {text[:400]}", file=sys.stderr)
+        _genesis_katalog_hinweis()
+        return
+
+    zeilen = {}   # (jahr, monat, ags) -> {arbeitslose, quote}
+    reader = csv.DictReader(text.splitlines(), delimiter=";")
+    feld = reader.fieldnames or []
+    # Wertspalten tolerant erkennen (Benennungen variieren je Tabelle)
+    f_alo = next((f for f in feld
+                  if "Arbeitslose" in f and "Anzahl" in f), None)
+    f_quote = next((f for f in feld if "quote" in f.lower()
+                    and "zivilen" in f.lower()), None) \
+        or next((f for f in feld if "quote" in f.lower()), None)
+    if not f_alo:
+        print(f"Wertspalte nicht gefunden. Spalten: {feld}", file=sys.stderr)
+        return
+    for row in reader:
+        ags = (row.get("1_Auspraegung_Code") or "").strip()
+        if ags not in AL_KREISE:
+            continue
+        try:
+            j = int((row.get("Zeit") or "0").strip())
+        except ValueError:
+            continue
+        m = MONAT_NUM.get((row.get("2_Auspraegung_Code") or "").strip())
+        if not j or not m:
+            continue
+        alo = parse_zahl(row.get(f_alo, ""))
+        if alo is None:
+            continue
+        quote = parse_zahl(row.get(f_quote, "")) if f_quote else None
+        zeilen[(j, m, ags)] = {"arbeitslose": alo, "quote": quote}
+
+    if not zeilen:
+        print("GENESIS: keine verwertbaren Zeilen erhalten.", file=sys.stderr)
+        return
+    # Bestehende CSV einlesen und mit neuen Monaten zusammenfuehren,
+    # damit Historie vor dem Abruffenster erhalten bleibt
+    if AL_CSV.exists():
+        with AL_CSV.open(newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                k = (int(row["jahr"]), int(row["monat"]), row["ags"])
+                zeilen.setdefault(k, {
+                    "arbeitslose": parse_zahl(row["arbeitslose"]),
+                    "quote": parse_zahl(row["quote"]),
+                })
+    with AL_CSV.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["jahr", "monat", "ags", "kreis", "arbeitslose", "quote"])
+        for (j, m, ags) in sorted(zeilen):
+            v = zeilen[(j, m, ags)]
+            w.writerow([j, m, ags, AL_KREISE[ags],
+                        v["arbeitslose"],
+                        "" if v["quote"] is None else v["quote"]])
+    print(f"Arbeitslosenzahlen aktualisiert: {len(zeilen)} Zeilen "
+          f"({AL_CSV.name}).")
+
+
+def _genesis_katalog_hinweis():
+    """Bei Problemen verfuegbare 13211er-Tabellen listen (Diagnose)."""
+    try:
+        raw = genesis_post("catalogue/tables", {
+            "selection": "13211*", "area": "free",
+            "pagelength": 60, "language": "de",
+        })
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+        for t in (data.get("List") or [])[:60]:
+            print(f"  Tabelle: {t.get('Code')} - {t.get('Content')}",
+                  file=sys.stderr)
+        print("Falls noetig: passenden Code als env AL_TABLE setzen.",
+              file=sys.stderr)
+    except Exception as e:
+        print(f"Katalogabruf fehlgeschlagen: {e}", file=sys.stderr)
+
+
+def lade_arbeitslose():
+    """arbeitslose.csv einlesen -> Liste sortierter Monatszeilen."""
+    if not AL_CSV.exists():
+        return []
+    rows = []
+    with AL_CSV.open(newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rows.append({
+                "jahr": int(row["jahr"]), "monat": int(row["monat"]),
+                "ags": row["ags"], "kreis": row["kreis"],
+                "arbeitslose": parse_zahl(row["arbeitslose"]),
+                "quote": parse_zahl(row["quote"]),
+            })
+    rows.sort(key=lambda r: (r["jahr"], r["monat"], r["ags"]))
+    return rows
 
 
 def fetch_page(params: dict) -> dict:
@@ -174,6 +366,8 @@ def main():
                berufe_rows)
     log = update_jobs_log(DATA_DIR / "jobs_log.csv", today, seen_jobs)
 
+    fetch_arbeitslose()
+
     print(f"\nFertig. Snapshots: {len(snapshot_rows)} Regionen, "
           f"Stellen-Log: {len(log)} Stellen insgesamt bekannt.")
 
@@ -202,6 +396,8 @@ REGION_NAMEN = {
     "waiblingen_30km": "Waiblingen 30 km",
     "rems-murr-kreis": "Rems-Murr-Kreis",
     "ostalbkreis": "Ostalbkreis",
+    "backnang_10km": "Backnang 10 km",
+    "stuttgart_ost": "Stuttgart Ost (Fellbach 8 km)",
 }
 
 ARIAL = "Arial"
@@ -305,8 +501,10 @@ def build_excel():
                 "API nur 6000 Stellen im Detail. Die Berufs- und "
                 "Arbeitgeberzahlen sind dort eine Stichprobe, die Spalte "
                 "'Stellen gesamt' in der Zeitreihe ist exakt.")
-    zs["A8"] = ("Arbeitslosenzahlen fuer das Blatt AL-Relation manuell aus "
-                "statistik.arbeitsagentur.de eintragen (blaue Spalte).")
+    zs["A8"] = ("Arbeitslose je Beruf fuer das Blatt AL-Relation weiterhin "
+                "manuell aus statistik.arbeitsagentur.de eintragen (blaue "
+                "Spalte). Kreiszahlen kommen automatisch aus der "
+                "Regionaldatenbank Deutschland (Blatt Arbeitslose).")
     zs["A9"] = ("Hinweis: Die Suchgebiete ueberschneiden sich (Umkreissuchen), "
                 "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
                 "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
@@ -459,7 +657,47 @@ def build_excel():
                 value=f'=COUNTIF(Log!$D$2:$D${nlog},A{i})')
     style_header(ag, 3)
 
-    # ---------------- AL-Relation (manuelle Eingabe)
+    # ---------------- Arbeitslose (Kreisebene, Regionaldatenbank/GENESIS)
+    al_daten = lade_arbeitslose()
+    monate = sorted({(r["jahr"], r["monat"]) for r in al_daten})
+    alm = {(r["jahr"], r["monat"], r["ags"]): r for r in al_daten}
+    ags_liste = list(AL_KREISE)
+    if al_daten:
+        ab = wb.create_sheet("Arbeitslose")
+        ab.append(["Monat"]
+                  + [f"{AL_KREISE[a]} Arbeitslose" for a in ags_liste]
+                  + [f"{AL_KREISE[a]} Quote %" for a in ags_liste])
+        for i, (j, m) in enumerate(monate, start=2):
+            ab.cell(row=i, column=1,
+                    value=date(j, m, 1)).number_format = "MM.YYYY"
+            for k, a in enumerate(ags_liste):
+                r = alm.get((j, m, a), {})
+                ab.cell(row=i, column=2 + k,
+                        value=r.get("arbeitslose")).number_format = "#,##0"
+                q = ab.cell(row=i, column=2 + len(ags_liste) + k,
+                            value=r.get("quote"))
+                q.number_format = "0.0"
+        style_header(ab, 1 + 2 * len(ags_liste))
+        nz = len(monate) + 1
+        abc = AreaChart3D()
+        abc.grouping = "standard"   # 3D-Flaeche wie die anderen Diagramme
+        abc.title = "Arbeitslose je Kreis (Monatswerte)"
+        abc.height, abc.width = 9, 18
+        abc.x_axis.title = "Monat"
+        abc.y_axis.title = "Arbeitslose"
+        abc.x_axis.delete = False
+        abc.y_axis.delete = False
+        abc.z_axis.delete = False
+        abc.x_axis.number_format = "MM.YY"
+        abc.y_axis.number_format = "#,##0"
+        abc.legend.position = "b"
+        abc.add_data(Reference(ab, min_col=2, max_col=1 + len(ags_liste),
+                               min_row=1, max_row=nz),
+                     titles_from_data=True)
+        abc.set_categories(Reference(ab, min_col=1, min_row=2, max_row=nz))
+        ab.add_chart(abc, f"A{nz + 3}")
+
+    # ---------------- AL-Relation (Berufe manuell, Kreise automatisch)
     al = wb.create_sheet("AL-Relation")
     al.append(["Beruf", "Offene Stellen (aktuell)",
                "Arbeitslose (manuell, BA-Statistik)",
@@ -473,6 +711,49 @@ def build_excel():
                 value=f'=IF(OR(C{i}="",B{i}=0),"",ROUND(C{i}/B{i},1))')
         al.cell(row=i, column=4).number_format = "0.0"
     style_header(al, 4)
+
+    if al_daten:
+        # Kreisblock unter der Berufstabelle: Arbeitslose (letzter Monat
+        # aus GENESIS) je offener Stelle des passenden Suchgebiets
+        j_l, m_l = monate[-1]
+        start = len(top20) + 4
+        al.cell(row=start, column=1,
+                value=f"Kreisebene (Arbeitslose Stand {m_l:02d}/{j_l}, "
+                      "Regionaldatenbank)")
+        al.cell(row=start, column=1).font = Font(name=ARIAL, bold=True)
+        al.cell(row=start + 1, column=1, value="Kreis")
+        al.cell(row=start + 1, column=2, value="Arbeitslose")
+        al.cell(row=start + 1, column=3, value="Offene Stellen (Suchgebiet)")
+        al.cell(row=start + 1, column=4, value="Arbeitslose je Stelle")
+        for c in range(1, 5):
+            z = al.cell(row=start + 1, column=c)
+            z.font = HEAD_FONT
+            z.fill = HEAD_FILL
+        zt_letzte = len(daten) + 1
+        zeile = start + 2
+        for reg, ags in REGION_ZU_AGS.items():
+            if reg not in aktiv or reg == "waiblingen_30km":
+                continue   # Umkreis Waiblingen liegt im Rems-Murr-Kreis
+            sp = get_column_letter(aktiv.index(reg) + 2)
+            al_zeile = len(monate) + 1   # letzter Monat im Blatt Arbeitslose
+            al_sp = get_column_letter(2 + ags_liste.index(ags))
+            al.cell(row=zeile, column=1, value=AL_KREISE[ags])
+            al.cell(row=zeile, column=2,
+                    value=f"=Arbeitslose!{al_sp}{al_zeile}"
+                    ).number_format = "#,##0"
+            al.cell(row=zeile, column=3,
+                    value=f"=Zeitreihe!{sp}{zt_letzte}"
+                    ).number_format = "#,##0"
+            al.cell(row=zeile, column=4,
+                    value=f'=IF(OR(B{zeile}="",C{zeile}=0),"",'
+                          f"ROUND(B{zeile}/C{zeile},1))")
+            al.cell(row=zeile, column=4).number_format = "0.0"
+            zeile += 1
+        al.cell(row=zeile + 1, column=1,
+                value=("Hinweis: Suchgebiete sind Umkreissuchen und decken "
+                       "die Kreise nur naeherungsweise ab. Arbeitslose je "
+                       "Beruf gibt es nicht in der Regionaldatenbank, "
+                       "die blaue Spalte oben bleibt daher manuell."))
 
     for ws in wb.worksheets:
         base_font(ws)
