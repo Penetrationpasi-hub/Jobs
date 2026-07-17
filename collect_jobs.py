@@ -49,7 +49,11 @@ REGIONS = {
 }
 
 PAGE_SIZE = 100
-MAX_PAGES = 60          # Sicherheitslimit: 6000 Stellen pro Region
+# Sicherheitslimit je Suchgebiet: 300 Seiten x 100 = 30000 Stellen.
+# Ein hartes API-Limit ist nicht dokumentiert; macht die API frueher
+# dicht (Fehler oder dauerhaft leere Seiten), bricht fetch_region
+# sauber ab und behaelt das Teilergebnis.
+MAX_PAGES = 300
 REQUEST_PAUSE = 1.0     # Sekunden zwischen Requests, hoeflich bleiben
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -64,12 +68,15 @@ AL_TABLE = os.environ.get("AL_TABLE", "13211-01-03-4-B")
 AL_KREISE = {
     "08119": "Rems-Murr-Kreis",
     "08136": "Ostalbkreis",
+    "08111": "Stuttgart",         # fuer das Suchgebiet Stuttgart Ost
 }
 # Suchgebiet -> AGS fuer die Kreis-Relation im Excel
 REGION_ZU_AGS = {
     "rems-murr-kreis": "08119",
     "ostalbkreis": "08136",
     "waiblingen_30km": "08119",   # Waiblingen liegt im Rems-Murr-Kreis
+    "backnang_10km": "08119",
+    "stuttgart_ost": "08111",     # Naeherung, Suchgebiet ist Fellbach 8 km
 }
 AL_CSV = DATA_DIR / "arbeitslose.csv"
 
@@ -236,7 +243,10 @@ def lade_arbeitslose():
     return rows
 
 
-def fetch_page(params: dict) -> dict:
+def fetch_page(params: dict) -> dict | None:
+    """Eine Ergebnisseite laden. Liefert None statt einer Exception,
+    wenn nach 3 Versuchen nichts kommt -- der Aufrufer entscheidet, ob
+    das ein API-Limit (Teilergebnis behalten) oder ein Ausfall ist."""
     qs = urllib.parse.urlencode(params)
     req = urllib.request.Request(f"{API_BASE}?{qs}", headers=HEADERS)
     for attempt in range(3):
@@ -246,12 +256,22 @@ def fetch_page(params: dict) -> dict:
         except Exception as e:
             print(f"  Fehler (Versuch {attempt + 1}/3): {e}", file=sys.stderr)
             time.sleep(5 * (attempt + 1))
-    raise RuntimeError(f"Abruf fehlgeschlagen: {params}")
+    print(f"  Aufgegeben: {params.get('wo')} Seite {params.get('page')}",
+          file=sys.stderr)
+    return None
 
 
 def fetch_region(region_params: dict) -> tuple[list[dict], int]:
-    """Alle Stellen einer Region einsammeln (paginiert)."""
+    """Alle Stellen einer Region einsammeln (paginiert).
+
+    Tolerant gegen ein API-seitiges Paginierungslimit: schlaegt eine
+    Seite > 1 dauerhaft fehl, wird abgebrochen und das Teilergebnis
+    behalten. Nur wenn schon Seite 1 scheitert, fliegt eine Exception.
+    Dubletten ueber Seitengrenzen (die Sortierung kann bei laufenden
+    Aenderungen verrutschen) werden per refnr uebersprungen.
+    """
     jobs = []
+    refs: set[str] = set()
     max_ergebnisse = 0
     for page in range(1, MAX_PAGES + 1):
         params = {
@@ -262,12 +282,24 @@ def fetch_region(region_params: dict) -> tuple[list[dict], int]:
             **region_params,
         }
         data = fetch_page(params)
-        max_ergebnisse = int(data.get("maxErgebnisse", 0))
+        if data is None:
+            if page == 1:
+                raise RuntimeError(f"Seite 1 nicht abrufbar: {region_params}")
+            print(f"  Stopp bei Seite {page} (moegliches API-Limit), "
+                  f"behalte {len(jobs)} Stellen.", file=sys.stderr)
+            break
+        max_ergebnisse = int(data.get("maxErgebnisse", 0)) or max_ergebnisse
         batch = data.get("stellenangebote", [])
         if not batch:
             break
-        jobs.extend(batch)
-        if len(jobs) >= max_ergebnisse:
+        for j in batch:
+            ref = j.get("refnr") or j.get("referenznummer")
+            if ref:
+                if ref in refs:
+                    continue
+                refs.add(ref)
+            jobs.append(j)
+        if max_ergebnisse and len(jobs) >= max_ergebnisse:
             break
         time.sleep(REQUEST_PAUSE)
     return jobs, max_ergebnisse
@@ -315,8 +347,18 @@ def main():
 
     for region, rparams in REGIONS.items():
         print(f"[{region}] Abruf laeuft ...")
-        jobs, total = fetch_region(rparams)
+        try:
+            jobs, total = fetch_region(rparams)
+        except Exception as e:
+            # Region ueberspringen statt den ganzen Lauf zu reissen; der
+            # Tag bleibt in der Zeitreihe dann leer (kein falsches 0)
+            print(f"[{region}] Abruf fehlgeschlagen, uebersprungen: {e}",
+                  file=sys.stderr)
+            continue
         print(f"[{region}] {len(jobs)} von {total} Stellen geladen")
+        if total > len(jobs):
+            print(f"[{region}] Hinweis: Detaildaten unvollstaendig "
+                  f"({len(jobs)}/{total}).", file=sys.stderr)
 
         berufe = Counter()
         arbeitszeit = Counter()
@@ -380,10 +422,12 @@ def main():
 
 import csv
 import os
+import statistics
 from datetime import date, datetime
 
 from openpyxl import Workbook
-from openpyxl.chart import AreaChart3D, Reference
+from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart.axis import ChartLines
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
@@ -399,6 +443,17 @@ REGION_NAMEN = {
     "backnang_10km": "Backnang 10 km",
     "stuttgart_ost": "Stuttgart Ost (Fellbach 8 km)",
 }
+
+# ---- Umfang der Blaetter. None = unbegrenzt (alle Eintraege). ------
+# Aktuell, Standzeit, Arbeitgeber und Arbeitgeber-Tempo zeigen ALLES.
+# Berufe-Zeitreihe legt je Beruf eine eigene SPALTE an und bleibt
+# deshalb gedeckelt (None geht auch, macht das Blatt nur sehr breit).
+# AL-Relation ist das Blatt mit manueller Eingabe, dort reichen 20.
+TOP_BERUFE_ZEITREIHE = 50
+TOP_AL_RELATION = 20
+# Arbeitgeber-Tempo: mindestens so viele beendete Stellen noetig,
+# sonst dominieren Einzelfaelle die Rangliste
+AG_TEMPO_MIN_BEENDET = 5
 
 ARIAL = "Arial"
 HEAD_FONT = Font(name=ARIAL, bold=True, color="FFFFFF")
@@ -419,13 +474,19 @@ def as_date(s):
     return datetime.strptime(s.strip(), "%Y-%m-%d").date()
 
 
-def style_header(ws, ncols):
+def standzeit_tage(r):
+    """Standzeit einer Log-Zeile in Tagen (erster Tag zaehlt mit)."""
+    return (as_date(r["last_seen"]) - as_date(r["first_seen"])).days + 1
+
+
+def style_header(ws, ncols, row=1):
     for c in range(1, ncols + 1):
-        cell = ws.cell(row=1, column=c)
+        cell = ws.cell(row=row, column=c)
         cell.font = HEAD_FONT
         cell.fill = HEAD_FILL
         cell.alignment = Alignment(horizontal="center", wrap_text=True)
-    ws.freeze_panes = "A2"
+    if row == 1:
+        ws.freeze_panes = "A2"
 
 
 def autosize(ws, maxw=45):
@@ -440,6 +501,60 @@ def base_font(ws):
             if c.font is None or c.font.name != ARIAL:
                 c.font = Font(name=ARIAL, bold=c.font.bold if c.font else False,
                               color=c.font.color if c.font else None)
+
+
+# ---- Diagramm-Helfer: 2D statt der alten 3D-Flaechen. --------------
+# Bei den AreaChart3D verdeckte die vorderste Flaeche alle kleineren
+# Reihen, und die Zeitachse war in der 3D-Perspektive unlesbar.
+
+def _achsen_sichtbar(ch, x_titel=None, y_titel=None,
+                     x_fmt=None, y_fmt="#,##0"):
+    # Excel unterdrueckt Achsen, wenn delete nicht explizit False ist
+    ch.x_axis.delete = False
+    ch.y_axis.delete = False
+    if x_titel:
+        ch.x_axis.title = x_titel
+    if y_titel:
+        ch.y_axis.title = y_titel
+    if x_fmt:
+        ch.x_axis.number_format = x_fmt
+    if y_fmt:
+        ch.y_axis.number_format = y_fmt
+    ch.y_axis.majorGridlines = ChartLines()
+    ch.legend.position = "b"
+
+
+def linien_chart(titel, x_titel, y_titel, x_fmt, n_kategorien,
+                 hoehe=10, breite=22):
+    """Liniendiagramm fuer Zeitreihen: jede Reihe bleibt sichtbar."""
+    ch = LineChart()
+    ch.title = titel
+    ch.height, ch.width = hoehe, breite
+    _achsen_sichtbar(ch, x_titel, y_titel, x_fmt)
+    # Datumsbeschriftung ausduennen, sonst wird die Achse bei vielen
+    # Erhebungstagen unleserlich (~12 Beschriftungen sind gut lesbar)
+    skip = max(1, n_kategorien // 12)
+    ch.x_axis.tickLblSkip = skip
+    ch.x_axis.tickMarkSkip = skip
+    return ch
+
+
+def balken_chart(titel, wert_titel, n_zeilen, hoehe=None, breite=22):
+    """Horizontales Balkendiagramm: lange Namen bleiben lesbar,
+    kleine Werte verschwinden nicht hinter grossen."""
+    ch = BarChart()
+    ch.type = "bar"
+    ch.grouping = "clustered"
+    ch.gapWidth = 60
+    ch.title = titel
+    ch.height = hoehe if hoehe else max(8.0, min(26.0, 1 + 0.75 * n_zeilen))
+    ch.width = breite
+    _achsen_sichtbar(ch, None, wert_titel)
+    # Rang 1 oben statt unten (Excel zeichnet Kategorien von unten nach
+    # oben); Wertachse dabei unten am Diagramm lassen
+    ch.x_axis.scaling.orientation = "maxMin"
+    ch.y_axis.crosses = "max"
+    return ch
 
 
 def build_excel():
@@ -478,8 +593,12 @@ def build_excel():
 
     top_akt = sorted((b for (d, b) in bges if d == stand),
                      key=lambda b: -bges[(stand, b)])
-    top20 = top_akt[:20]
-    top40 = top_akt[:40]
+    # frueher Top 20/40 -- jetzt zeigt Aktuell ALLE Berufe des Stichtags,
+    # nur das Spalten-Blatt und das Eingabe-Blatt bleiben begrenzt
+    bz_berufe = top_akt if TOP_BERUFE_ZEITREIHE is None \
+        else top_akt[:TOP_BERUFE_ZEITREIHE]
+    al_berufe = top_akt if TOP_AL_RELATION is None \
+        else top_akt[:TOP_AL_RELATION]
 
     wb = Workbook()
 
@@ -497,9 +616,10 @@ def build_excel():
     zs["B4"] = ", ".join(reg_name(r) for r in regionen)
     zs["A5"] = "Stellen je gesehen (Log)"
     zs["B5"] = len(log)
-    zs["A7"] = ("Hinweis: Bei Regionen mit mehr als 6000 Treffern laedt die "
-                "API nur 6000 Stellen im Detail. Die Berufs- und "
-                "Arbeitgeberzahlen sind dort eine Stichprobe, die Spalte "
+    zs["A7"] = (f"Hinweis: Das Script laedt bis zu {MAX_PAGES * PAGE_SIZE} "
+                "Stellen je Suchgebiet im Detail (bei API-Abbruch frueher, "
+                "siehe Actions-Log). Liegt 'Stellen gesamt' darueber, sind "
+                "Berufs- und Arbeitgeberzahlen eine Stichprobe; die Spalte "
                 "'Stellen gesamt' in der Zeitreihe ist exakt.")
     zs["A8"] = ("Arbeitslose je Beruf fuer das Blatt AL-Relation weiterhin "
                 "manuell aus statistik.arbeitsagentur.de eintragen (blaue "
@@ -509,6 +629,10 @@ def build_excel():
                 "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
                 "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
                 "stehen in der Zeitreihe rechts neben der Summenspalte.")
+    zs["A10"] = ("Alle Zahlen sind beim Erzeugen fest berechnet (keine "
+                 "Formeln), damit sie auch in Vorschau-Apps und auf dem "
+                 "Handy angezeigt werden. Einzige Ausnahme: die Relation "
+                 "zur blauen Eingabespalte in AL-Relation rechnet live.")
     for c in ("A2", "A3", "A4", "A5"):
         zs[c].font = Font(name=ARIAL, bold=True)
 
@@ -520,86 +644,76 @@ def build_excel():
               + [reg_name(r) for r in alt_reg])
     for i, d in enumerate(daten, start=2):
         zt.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
+        werte = []
         for j, r in enumerate(aktiv, start=2):
-            zt.cell(row=i, column=j, value=snap_map.get((d, r)))
+            v = snap_map.get((d, r))
+            zt.cell(row=i, column=j, value=v)
+            if v is not None:
+                werte.append(v)
         # Summe nur ueber aktive Gebiete -> Reihe bleibt ueber die Zeit
         # vergleichbar, auch wenn ein Suchgebiet eingestellt wurde
-        zt.cell(row=i, column=n_akt + 2,
-                value=f"=SUM(B{i}:{get_column_letter(n_akt + 1)}{i})")
+        zt.cell(row=i, column=n_akt + 2, value=sum(werte) if werte else None)
         for j, r in enumerate(alt_reg, start=n_akt + 3):
             zt.cell(row=i, column=j, value=snap_map.get((d, r)))
     style_header(zt, len(regionen) + 2)
     for row in zt.iter_rows(min_row=2, min_col=2):
         for c in row:
             c.number_format = "#,##0"
-    ch = AreaChart3D()
-    ch.grouping = "standard"   # 3D-Flaeche, nicht gestapelt
-    ch.title = "Offene Stellen je Suchgebiet"
-    ch.height, ch.width = 9, 18
-    ch.x_axis.title = "Datum"
-    ch.y_axis.title = "Stellen"
-    ch.x_axis.delete = False   # Achsen explizit einblenden, sonst
-    ch.y_axis.delete = False   # unterdrueckt Excel die Beschriftung
-    ch.z_axis.delete = False   # Serienachse (Tiefe) der 3D-Flaeche
-    ch.x_axis.number_format = "DD.MM."
-    ch.y_axis.number_format = "#,##0"
-    ch.legend.position = "b"
-    ref = Reference(zt, min_col=2, max_col=n_akt + 2,
-                    min_row=1, max_row=len(daten) + 1)
-    cats = Reference(zt, min_col=1, min_row=2, max_row=len(daten) + 1)
-    ch.add_data(ref, titles_from_data=True)
-    ch.set_categories(cats)
+    ch = linien_chart("Offene Stellen je Suchgebiet", "Datum", "Stellen",
+                      "DD.MM.", len(daten))
+    # nur die Suchgebiete als Linien; die Summe wuerde die Skala strecken
+    # und die einzelnen Gebiete optisch plattdruecken
+    ch.add_data(Reference(zt, min_col=2, max_col=n_akt + 1,
+                          min_row=1, max_row=len(daten) + 1),
+                titles_from_data=True)
+    ch.set_categories(Reference(zt, min_col=1, min_row=2,
+                                max_row=len(daten) + 1))
     zt.add_chart(ch, f"A{len(daten) + 4}")
 
-    # ---------------- Berufe-Zeitreihe (Top 20, Summe ueber Regionen)
+    # ---------------- Berufe-Zeitreihe (je Beruf eine Spalte, deshalb
+    #                  auf TOP_BERUFE_ZEITREIHE begrenzt)
     bz = wb.create_sheet("Berufe-Zeitreihe")
-    bz.append(["Datum"] + top20)
+    bz.append(["Datum"] + bz_berufe)
     for i, d in enumerate(daten, start=2):
         bz.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
-        for j, b in enumerate(top20, start=2):
+        for j, b in enumerate(bz_berufe, start=2):
             bz.cell(row=i, column=j, value=bges.get((d, b)))
-    style_header(bz, len(top20) + 1)
+    style_header(bz, len(bz_berufe) + 1)
 
-    # ---------------- Aktuell
+    # ---------------- Aktuell (alle Berufe des Stichtags)
     ak = wb.create_sheet("Aktuell")
     kopf = (["Beruf"] + [reg_name(r) for r in regionen] +
             ["Gesamt", f"Vor 7 Tagen ({d7 or 'n/a'})",
              f"Vor 30 Tagen ({d30 or 'n/a'})", "Δ 7 Tage", "Δ 30 Tage"])
     ak.append(kopf)
     nr = len(regionen)
-    col_ges = get_column_letter(nr + 2)
-    col_v7 = get_column_letter(nr + 3)
-    col_v30 = get_column_letter(nr + 4)
-    for i, b in enumerate(top40, start=2):
+    for i, b in enumerate(top_akt, start=2):
         ak.cell(row=i, column=1, value=b)
         for j, r in enumerate(regionen, start=2):
             ak.cell(row=i, column=j, value=brb.get((stand, r, b)))
-        ak.cell(row=i, column=nr + 2,
-                value=f"=SUM(B{i}:{get_column_letter(nr + 1)}{i})")
-        ak.cell(row=i, column=nr + 3, value=bges.get((d7, b)) if d7 else None)
-        ak.cell(row=i, column=nr + 4, value=bges.get((d30, b)) if d30 else None)
+        ges = bges.get((stand, b), 0)
+        v7 = bges.get((d7, b)) if d7 else None
+        v30 = bges.get((d30, b)) if d30 else None
+        ak.cell(row=i, column=nr + 2, value=ges)
+        ak.cell(row=i, column=nr + 3, value=v7)
+        ak.cell(row=i, column=nr + 4, value=v30)
         ak.cell(row=i, column=nr + 5,
-                value=f'=IF({col_v7}{i}="","",{col_ges}{i}-{col_v7}{i})')
+                value=(ges - v7) if v7 is not None else None)
         ak.cell(row=i, column=nr + 6,
-                value=f'=IF({col_v30}{i}="","",{col_ges}{i}-{col_v30}{i})')
+                value=(ges - v30) if v30 is not None else None)
     style_header(ak, nr + 6)
-    fl = AreaChart3D()
-    fl.grouping = "standard"   # 3D-Flaeche, nicht gestapelt
-    fl.title = "Top 15 Berufe nach Suchgebiet (aktuell)"
-    fl.height, fl.width = 14, 20
-    fl.x_axis.delete = False   # Berufsnamen an der Achse einblenden
-    fl.y_axis.delete = False
-    fl.z_axis.delete = False   # Serienachse (Tiefe) der 3D-Flaeche
-    fl.y_axis.number_format = "#,##0"
-    fl.legend.position = "b"
+    n_chart = min(15, len(top_akt))
+    fl = balken_chart(f"Top {n_chart} Berufe nach Suchgebiet (aktuell)",
+                      "Stellen", n_chart, hoehe=18, breite=24)
     # nur aktive Suchgebiete als Serien (eingestellte Spalten sind leer)
     fl.add_data(Reference(ak, min_col=2, max_col=n_akt + 1,
-                          min_row=1, max_row=16),
+                          min_row=1, max_row=n_chart + 1),
                 titles_from_data=True)
-    fl.set_categories(Reference(ak, min_col=1, min_row=2, max_row=16))
-    ak.add_chart(fl, f"A{len(top40) + 4}")
+    fl.set_categories(Reference(ak, min_col=1, min_row=2,
+                                max_row=n_chart + 1))
+    ak.add_chart(fl, f"A{len(top_akt) + 4}")
 
-    # ---------------- Log (Rohdaten) + Standzeit-Formeln
+    # ---------------- Log (Rohdaten)
     lg = wb.create_sheet("Log")
     lg.append(["Refnr", "Region", "Beruf", "Arbeitgeber",
                "Erstmals gesehen", "Zuletzt gesehen", "Standzeit (Tage)"])
@@ -610,52 +724,113 @@ def build_excel():
         lg.cell(row=i, column=4, value=r["arbeitgeber"])
         lg.cell(row=i, column=5, value=as_date(r["first_seen"])).number_format = DATUM_FMT
         lg.cell(row=i, column=6, value=as_date(r["last_seen"])).number_format = DATUM_FMT
-        lg.cell(row=i, column=7, value=f"=F{i}-E{i}+1")
+        lg.cell(row=i, column=7, value=standzeit_tage(r))
     style_header(lg, 7)
-    nlog = len(log) + 1
 
-    # ---------------- Standzeit je Beruf (Top 30 nach Log-Eintraegen)
-    cnt = {}
+    # ---------------- Standzeit je Beruf (ALLE Berufe im Log,
+    #                  sortiert nach Zahl der Log-Eintraege)
+    # Fest berechnet statt COUNTIFS: bei unbegrenzter Berufsliste und
+    # grossem Log wuerde Excel sonst bei jedem Oeffnen lange rechnen,
+    # und in Vorschau-Apps blieben Formelzellen leer.
+    beruf_stat = {}
     for r in log:
-        cnt[r["beruf"]] = cnt.get(r["beruf"], 0) + 1
-    top_log = sorted(cnt, key=lambda b: -cnt[b])[:30]
+        s = beruf_stat.setdefault(r["beruf"],
+                                  {"log": 0, "offen": 0, "dauern": []})
+        s["log"] += 1
+        if r["last_seen"] == stand:
+            s["offen"] += 1
+        else:
+            s["dauern"].append(standzeit_tage(r))
     st = wb.create_sheet("Standzeit")
-    st.append(["Beruf", "Stellen im Log", "Aktuell offen",
-               "Beendet", "Ø Standzeit beendeter Stellen (Tage)"])
-    stand_ref = "Zusammenfassung!$B$2"
-    for i, b in enumerate(top_log, start=2):
+    st.append(["Beruf", "Stellen im Log", "Aktuell offen", "Beendet",
+               "Ø Standzeit beendeter Stellen (Tage)"])
+    st_berufe = sorted(beruf_stat, key=lambda b: -beruf_stat[b]["log"])
+    for i, b in enumerate(st_berufe, start=2):
+        s = beruf_stat[b]
         st.cell(row=i, column=1, value=b)
-        st.cell(row=i, column=2,
-                value=f'=COUNTIF(Log!$C$2:$C${nlog},A{i})')
-        st.cell(row=i, column=3,
-                value=f'=COUNTIFS(Log!$C$2:$C${nlog},A{i},'
-                      f'Log!$F$2:$F${nlog},{stand_ref})')
-        st.cell(row=i, column=4,
-                value=f'=COUNTIFS(Log!$C$2:$C${nlog},A{i},'
-                      f'Log!$F$2:$F${nlog},"<"&{stand_ref})')
-        st.cell(row=i, column=5,
-                value=f'=IFERROR(ROUND(AVERAGEIFS(Log!$G$2:$G${nlog},'
-                      f'Log!$C$2:$C${nlog},A{i},'
-                      f'Log!$F$2:$F${nlog},"<"&{stand_ref}),1),"")')
+        st.cell(row=i, column=2, value=s["log"])
+        st.cell(row=i, column=3, value=s["offen"])
+        st.cell(row=i, column=4, value=len(s["dauern"]))
+        if s["dauern"]:
+            st.cell(row=i, column=5,
+                    value=round(statistics.mean(s["dauern"]), 1)
+                    ).number_format = "0.0"
     style_header(st, 5)
 
-    # ---------------- Arbeitgeber (Top 25 nach offenen Stellen)
-    off = {}
+    # ---------------- Arbeitgeber (alle mit aktuell offenen Stellen)
+    ag_stat = {}
     for r in log:
+        s = ag_stat.setdefault(r["arbeitgeber"],
+                               {"log": 0, "offen": 0, "dauern": []})
+        s["log"] += 1
         if r["last_seen"] == stand:
-            off[r["arbeitgeber"]] = off.get(r["arbeitgeber"], 0) + 1
-    top_ag = sorted(off, key=lambda a: -off[a])[:25]
+            s["offen"] += 1
+        else:
+            s["dauern"].append(standzeit_tage(r))
     ag = wb.create_sheet("Arbeitgeber")
     ag.append(["Arbeitgeber", "Offene Stellen (aktuell)",
-               "Stellen im Log gesamt"])
-    for i, a in enumerate(top_ag, start=2):
+               "Stellen im Log gesamt", "Beendet",
+               "Ø Standzeit beendeter Stellen (Tage)"])
+    offene_ag = sorted((a for a, s in ag_stat.items() if s["offen"]),
+                       key=lambda a: -ag_stat[a]["offen"])
+    for i, a in enumerate(offene_ag, start=2):
+        s = ag_stat[a]
         ag.cell(row=i, column=1, value=a)
-        ag.cell(row=i, column=2,
-                value=f'=COUNTIFS(Log!$D$2:$D${nlog},A{i},'
-                      f'Log!$F$2:$F${nlog},{stand_ref})')
-        ag.cell(row=i, column=3,
-                value=f'=COUNTIF(Log!$D$2:$D${nlog},A{i})')
-    style_header(ag, 3)
+        ag.cell(row=i, column=2, value=s["offen"])
+        ag.cell(row=i, column=3, value=s["log"])
+        ag.cell(row=i, column=4, value=len(s["dauern"]))
+        if s["dauern"]:
+            ag.cell(row=i, column=5,
+                    value=round(statistics.mean(s["dauern"]), 1)
+                    ).number_format = "0.0"
+    style_header(ag, 5)
+
+    # ---------------- Arbeitgeber-Tempo: wer besetzt am schnellsten?
+    # Rangliste nach kuerzester mittlerer Standzeit beendeter Stellen.
+    # Kurze Standzeit heisst nur "Anzeige schnell wieder offline" --
+    # meist Besetzung, es kann aber auch Loeschung oder Ablauf sein.
+    tempo = [(a, s) for a, s in ag_stat.items()
+             if len(s["dauern"]) >= AG_TEMPO_MIN_BEENDET]
+    tempo.sort(key=lambda t: (statistics.mean(t[1]["dauern"]),
+                              -len(t[1]["dauern"])))
+    tp = wb.create_sheet("Arbeitgeber-Tempo")
+    tp.append(["Arbeitgeber", "Ø Standzeit (Tage)", "Median (Tage)",
+               "Beendete Stellen", "Aktuell offen", "Stellen im Log",
+               "Anteil beendet"])
+    for i, (a, s) in enumerate(tempo, start=2):
+        tp.cell(row=i, column=1, value=a)
+        tp.cell(row=i, column=2,
+                value=round(statistics.mean(s["dauern"]), 1)
+                ).number_format = "0.0"
+        tp.cell(row=i, column=3,
+                value=round(statistics.median(s["dauern"]), 1)
+                ).number_format = "0.0"
+        tp.cell(row=i, column=4, value=len(s["dauern"]))
+        tp.cell(row=i, column=5, value=s["offen"])
+        tp.cell(row=i, column=6, value=s["log"])
+        tp.cell(row=i, column=7,
+                value=len(s["dauern"]) / s["log"]).number_format = "0%"
+    style_header(tp, 7)
+    hin = len(tempo) + 3
+    tp.cell(row=hin, column=1, value=(
+        f"Nur Arbeitgeber mit mindestens {AG_TEMPO_MIN_BEENDET} beendeten "
+        "Stellen (Rauschen von Einzelfaellen). 'Anteil beendet' zeigt den "
+        "Umschlag: hoch = es wird laufend besetzt und nachgelegt. Achtung "
+        "bei der Deutung: Zeitarbeitsfirmen schalten viele kurzlaufende "
+        "Anzeigen und stehen deshalb oft vorn; kurze Standzeit kann auch "
+        "Loeschung oder Ablauf der Anzeige statt Besetzung sein."))
+    if tempo:
+        n_bar = min(20, len(tempo))
+        bc = balken_chart(
+            f"Schnellste Arbeitgeber: Ø Standzeit in Tagen "
+            f"(min. {AG_TEMPO_MIN_BEENDET} beendete Stellen)",
+            "Ø Tage", n_bar, breite=24)
+        bc.add_data(Reference(tp, min_col=2, min_row=1, max_row=n_bar + 1),
+                    titles_from_data=True)
+        bc.set_categories(Reference(tp, min_col=1, min_row=2,
+                                    max_row=n_bar + 1))
+        bc.legend = None   # eine Serie, Legende ueberfluessig
+        tp.add_chart(bc, f"A{hin + 2}")
 
     # ---------------- Arbeitslose (Kreisebene, Regionaldatenbank/GENESIS)
     al_daten = lade_arbeitslose()
@@ -679,18 +854,8 @@ def build_excel():
                 q.number_format = "0.0"
         style_header(ab, 1 + 2 * len(ags_liste))
         nz = len(monate) + 1
-        abc = AreaChart3D()
-        abc.grouping = "standard"   # 3D-Flaeche wie die anderen Diagramme
-        abc.title = "Arbeitslose je Kreis (Monatswerte)"
-        abc.height, abc.width = 9, 18
-        abc.x_axis.title = "Monat"
-        abc.y_axis.title = "Arbeitslose"
-        abc.x_axis.delete = False
-        abc.y_axis.delete = False
-        abc.z_axis.delete = False
-        abc.x_axis.number_format = "MM.YY"
-        abc.y_axis.number_format = "#,##0"
-        abc.legend.position = "b"
+        abc = linien_chart("Arbeitslose je Kreis (Monatswerte)",
+                           "Monat", "Arbeitslose", "MM.YY", len(monate))
         abc.add_data(Reference(ab, min_col=2, max_col=1 + len(ags_liste),
                                min_row=1, max_row=nz),
                      titles_from_data=True)
@@ -702,9 +867,11 @@ def build_excel():
     al.append(["Beruf", "Offene Stellen (aktuell)",
                "Arbeitslose (manuell, BA-Statistik)",
                "Arbeitslose je Stelle"])
-    for i, b in enumerate(top20, start=2):
+    for i, b in enumerate(al_berufe, start=2):
         al.cell(row=i, column=1, value=b)
-        al.cell(row=i, column=2, value=f"=Aktuell!{col_ges}{i}")
+        # fester Wert statt Verweis auf Aktuell: so ist die Spalte auch
+        # in Vorschau-Apps und auf dem Handy gefuellt
+        al.cell(row=i, column=2, value=bges.get((stand, b), 0))
         c_in = al.cell(row=i, column=3)
         c_in.font = INPUT_FONT
         al.cell(row=i, column=4,
@@ -712,48 +879,52 @@ def build_excel():
         al.cell(row=i, column=4).number_format = "0.0"
     style_header(al, 4)
 
+    start = len(al_berufe) + 4
     if al_daten:
         # Kreisblock unter der Berufstabelle: Arbeitslose (letzter Monat
         # aus GENESIS) je offener Stelle des passenden Suchgebiets
         j_l, m_l = monate[-1]
-        start = len(top20) + 4
         al.cell(row=start, column=1,
                 value=f"Kreisebene (Arbeitslose Stand {m_l:02d}/{j_l}, "
                       "Regionaldatenbank)")
         al.cell(row=start, column=1).font = Font(name=ARIAL, bold=True)
-        al.cell(row=start + 1, column=1, value="Kreis")
-        al.cell(row=start + 1, column=2, value="Arbeitslose")
-        al.cell(row=start + 1, column=3, value="Offene Stellen (Suchgebiet)")
-        al.cell(row=start + 1, column=4, value="Arbeitslose je Stelle")
-        for c in range(1, 5):
-            z = al.cell(row=start + 1, column=c)
-            z.font = HEAD_FONT
-            z.fill = HEAD_FILL
-        zt_letzte = len(daten) + 1
+        for c, t in enumerate(["Kreis", "Arbeitslose",
+                               "Offene Stellen (Suchgebiet)",
+                               "Arbeitslose je Stelle"], start=1):
+            al.cell(row=start + 1, column=c, value=t)
+        style_header(al, 4, row=start + 1)
         zeile = start + 2
+        # Teil-/Ueberlappungsgebiete hier auslassen: Waiblingen 30 km und
+        # Backnang 10 km liegen im Rems-Murr-Kreis, Stuttgart Ost
+        # (Fellbach 8 km) deckt den Stadtkreis nur minimal ab
+        auslassen = {"waiblingen_30km", "backnang_10km", "stuttgart_ost"}
         for reg, ags in REGION_ZU_AGS.items():
-            if reg not in aktiv or reg == "waiblingen_30km":
-                continue   # Umkreis Waiblingen liegt im Rems-Murr-Kreis
-            sp = get_column_letter(aktiv.index(reg) + 2)
-            al_zeile = len(monate) + 1   # letzter Monat im Blatt Arbeitslose
-            al_sp = get_column_letter(2 + ags_liste.index(ags))
+            if reg not in aktiv or reg in auslassen or ags not in AL_KREISE:
+                continue
+            alo = alm.get((j_l, m_l, ags), {}).get("arbeitslose")
+            stellen = snap_map.get((stand, reg))
             al.cell(row=zeile, column=1, value=AL_KREISE[ags])
-            al.cell(row=zeile, column=2,
-                    value=f"=Arbeitslose!{al_sp}{al_zeile}"
-                    ).number_format = "#,##0"
-            al.cell(row=zeile, column=3,
-                    value=f"=Zeitreihe!{sp}{zt_letzte}"
-                    ).number_format = "#,##0"
-            al.cell(row=zeile, column=4,
-                    value=f'=IF(OR(B{zeile}="",C{zeile}=0),"",'
-                          f"ROUND(B{zeile}/C{zeile},1))")
-            al.cell(row=zeile, column=4).number_format = "0.0"
+            al.cell(row=zeile, column=2, value=alo).number_format = "#,##0"
+            al.cell(row=zeile, column=3, value=stellen).number_format = "#,##0"
+            if alo and stellen:
+                al.cell(row=zeile, column=4,
+                        value=round(alo / stellen, 1)).number_format = "0.0"
             zeile += 1
         al.cell(row=zeile + 1, column=1,
                 value=("Hinweis: Suchgebiete sind Umkreissuchen und decken "
                        "die Kreise nur naeherungsweise ab. Arbeitslose je "
                        "Beruf gibt es nicht in der Regionaldatenbank, "
                        "die blaue Spalte oben bleibt daher manuell."))
+    else:
+        al.cell(row=start, column=1, value=(
+            "Kreisdaten fehlen: data/arbeitslose.csv ist (noch) leer. "
+            "GENESIS_USER/GENESIS_PASS als GitHub-Secrets setzen "
+            "(kostenloses Konto auf regionalstatistik.de), dann fuellen "
+            "sich das Blatt Arbeitslose und dieser Block automatisch."))
+
+    # verbleibende Formeln (Relation zur blauen Spalte) beim Oeffnen
+    # in Excel/LibreOffice sicher durchrechnen lassen
+    wb.calculation.fullCalcOnLoad = True
 
     for ws in wb.worksheets:
         base_font(ws)
@@ -763,8 +934,6 @@ def build_excel():
     print(f"Stand {stand}, {len(daten)} Erhebungstage, "
           f"{len(log)} Stellen im Log.")
     return 0
-
-
 
 
 if __name__ == "__main__":
