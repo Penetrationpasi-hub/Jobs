@@ -8,6 +8,13 @@ on:
 permissions:
   contents: write
 
+# Nie zwei Laeufe gleichzeitig: ein zweiter Start wartet, bis der
+# erste fertig ist. Parallele Laeufe erzeugen sonst Merge-Konflikte
+# in den Daten-CSVs und der (binaeren, nie mergebaren) Excel.
+concurrency:
+  group: datenlauf
+  cancel-in-progress: false
+
 jobs:
   sammeln:
     runs-on: ubuntu-latest
@@ -22,6 +29,9 @@ jobs:
         run: pip install openpyxl
 
       - name: Sammeln und auswerten
+        env:
+          GENESIS_USER: ${{ secrets.GENESIS_USER }}
+          GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
         run: python collect_jobs.py
 
       - name: Ergebnisse committen
@@ -29,6 +39,17 @@ jobs:
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
           git add -A
-          git commit -m "Datenlauf $(date +%F)" || echo "keine Aenderungen"
-          git pull --rebase origin main
+          git commit -m "Datenlauf $(date +%F)" || { echo "keine Aenderungen"; exit 0; }
+          # Push mit Wiederholung: landet waehrend des Laufs ein Commit
+          # auf main (z.B. eine Script-Aenderung), wird davor rebased.
+          # Daten-Konflikte kann es dank concurrency nicht mehr geben.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase origin main || {
+              git rebase --abort
+              echo "::error::Rebase-Konflikt (Datendateien von Hand geaendert?) - Lauf neu starten."
+              exit 1
+            }
+            sleep 5
+          done
           git push
