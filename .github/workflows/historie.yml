@@ -43,7 +43,10 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add -A data_historie arbeitsmarkt_historie.xlsx || echo "nichts zu adden"
+          # einzeln adden: fehlt data_historie (z.B. ohne GENESIS-Secrets),
+          # soll die Excel trotzdem committet werden
+          [ -d data_historie ] && git add -A data_historie
+          git add -A arbeitsmarkt_historie.xlsx
           git commit -m "Historiendaten aktualisiert ($(date -u +%F))" || echo "keine Aenderungen"
-          git pull --rebase origin ${GITHUB_REF_NAME}
+          git pull --rebase --autostash origin ${GITHUB_REF_NAME}
           git push
