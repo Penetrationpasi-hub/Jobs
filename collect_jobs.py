@@ -28,7 +28,9 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-API_BASE = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs"
+# Seit 04.08.2026 antwortet /pc/v4/jobs nur noch mit
+# "403 No match found for request" -- die Suche laeuft ueber v6.
+API_BASE = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs"
 HEADERS = {
     "X-API-Key": "jobboerse-jobsuche",
     "User-Agent": "ba-jobmonitor/1.0 (privates Arbeitsmarkt-Monitoring)",
@@ -261,6 +263,29 @@ def fetch_page(params: dict) -> dict | None:
     return None
 
 
+def normalisiere_stelle(j: dict) -> dict:
+    """v6-Stelle auf die Feldnamen der alten v4-Antwort abbilden, damit
+    die Auswertung unveraendert bleibt (refnr, beruf, titel, arbeitgeber,
+    arbeitsort.ort). Alte v4-Felder haben Vorrang, falls vorhanden."""
+    ort = ""
+    if isinstance(j.get("arbeitsort"), dict):
+        ort = j["arbeitsort"].get("ort") or ""
+    if not ort:
+        for lok in j.get("stellenlokationen") or []:
+            adresse = (lok or {}).get("adresse") or {}
+            if adresse.get("ort"):
+                ort = adresse["ort"]
+                break
+    return {
+        **j,
+        "refnr": j.get("refnr") or j.get("referenznummer"),
+        "beruf": j.get("beruf") or j.get("hauptberuf"),
+        "titel": j.get("titel") or j.get("stellenangebotsTitel"),
+        "arbeitgeber": j.get("arbeitgeber") or j.get("firma"),
+        "arbeitsort": {"ort": ort},
+    }
+
+
 def fetch_region(region_params: dict) -> tuple[list[dict], int]:
     """Alle Stellen einer Region einsammeln (paginiert).
 
@@ -289,10 +314,10 @@ def fetch_region(region_params: dict) -> tuple[list[dict], int]:
                   f"behalte {len(jobs)} Stellen.", file=sys.stderr)
             break
         max_ergebnisse = int(data.get("maxErgebnisse", 0)) or max_ergebnisse
-        batch = data.get("stellenangebote", [])
+        batch = data.get("ergebnisliste") or data.get("stellenangebote") or []
         if not batch:
             break
-        for j in batch:
+        for j in map(normalisiere_stelle, batch):
             ref = j.get("refnr") or j.get("referenznummer")
             if ref:
                 if ref in refs:
@@ -355,6 +380,13 @@ def main():
             print(f"[{region}] Abruf fehlgeschlagen, uebersprungen: {e}",
                   file=sys.stderr)
             continue
+        if not jobs:
+            # 0 Stellen in einer ganzen Region heisst praktisch immer:
+            # Antwortformat geaendert. Nicht als echte 0 speichern.
+            print(f"[{region}] keine Stellen in der Antwort, uebersprungen "
+                  f"(maxErgebnisse={total}) -- API-Format pruefen.",
+                  file=sys.stderr)
+            continue
         print(f"[{region}] {len(jobs)} von {total} Stellen geladen")
         if total > len(jobs):
             print(f"[{region}] Hinweis: Detaildaten unvollstaendig "
@@ -412,6 +444,14 @@ def main():
 
     print(f"\nFertig. Snapshots: {len(snapshot_rows)} Regionen, "
           f"Stellen-Log: {len(log)} Stellen insgesamt bekannt.")
+
+    # GitHub-Annotationen, damit ein Ausfall nicht in einem gruenen
+    # Lauf untergeht (so blieb der Stand 04.08.-04.10.2026 unbemerkt).
+    fehlend = len(REGIONS) - len(snapshot_rows)
+    if fehlend:
+        print(f"::warning::{fehlend} von {len(REGIONS)} Regionen ohne Daten "
+              f"(Details im Log von 'Sammeln und auswerten').")
+    return len(snapshot_rows)
 
 
 
@@ -937,5 +977,10 @@ def build_excel():
 
 
 if __name__ == "__main__":
-    main()
+    if main() == 0:
+        # Kein einziger Abruf geklappt: Lauf rot werden lassen statt eine
+        # Excel mit altem Stand neu zu bauen und gruen zu committen.
+        print("::error::Keine Region abrufbar -- API-Endpunkt oder "
+              "Antwortformat der BA-Jobsuche pruefen.")
+        raise SystemExit(1)
     raise SystemExit(build_excel())
