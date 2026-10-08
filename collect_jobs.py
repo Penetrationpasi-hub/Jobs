@@ -28,7 +28,12 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-API_BASE = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs"
+# Die BA hat pc/v4/jobs Anfang August 2026 abgeschaltet (Antwort:
+# "403 No match found for request"). Aktuell ist pc/v6/jobs; die
+# App-Variante dient als Rueckfall. fetch_page probiert der Reihe nach
+# und merkt sich den ersten Endpunkt, der antwortet.
+API_ROOT = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service"
+API_ENDPOINTS = [f"{API_ROOT}/pc/v6/jobs", f"{API_ROOT}/pc/v4/app/jobs"]
 HEADERS = {
     "X-API-Key": "jobboerse-jobsuche",
     "User-Agent": "ba-jobmonitor/1.0 (privates Arbeitsmarkt-Monitoring)",
@@ -248,17 +253,42 @@ def fetch_page(params: dict) -> dict | None:
     wenn nach 3 Versuchen nichts kommt -- der Aufrufer entscheidet, ob
     das ein API-Limit (Teilergebnis behalten) oder ein Ausfall ist."""
     qs = urllib.parse.urlencode(params)
-    req = urllib.request.Request(f"{API_BASE}?{qs}", headers=HEADERS)
     for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                return json.loads(resp.read().decode("utf-8"))
-        except Exception as e:
-            print(f"  Fehler (Versuch {attempt + 1}/3): {e}", file=sys.stderr)
-            time.sleep(5 * (attempt + 1))
+        for base in list(API_ENDPOINTS):
+            req = urllib.request.Request(f"{base}?{qs}", headers=HEADERS)
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+            except Exception as e:
+                print(f"  Fehler {base.rsplit('/jobsuche-service/', 1)[-1]} "
+                      f"(Versuch {attempt + 1}/3): {e}", file=sys.stderr)
+                continue
+            if base != API_ENDPOINTS[0]:
+                # funktionierenden Endpunkt fuer alle weiteren Seiten vorziehen
+                API_ENDPOINTS.remove(base)
+                API_ENDPOINTS.insert(0, base)
+            return data
+        time.sleep(5 * (attempt + 1))
     print(f"  Aufgegeben: {params.get('wo')} Seite {params.get('page')}",
           file=sys.stderr)
     return None
+
+
+def normalisiere_stelle(j: dict) -> dict:
+    """v6 liefert je nach Auslieferung die alten Feldnamen (refnr, beruf,
+    arbeitgeber, arbeitsort) oder neue (referenznummer, hauptberuf, firma,
+    stellenlokationen). Hier auf die alten abbilden, damit Logs und Excel
+    unveraendert weiterlaufen."""
+    out = dict(j)
+    out["refnr"] = j.get("refnr") or j.get("referenznummer")
+    out["beruf"] = j.get("beruf") or j.get("hauptberuf")
+    out["titel"] = j.get("titel") or j.get("stellenangebotsTitel")
+    out["arbeitgeber"] = j.get("arbeitgeber") or j.get("firma")
+    if not isinstance(j.get("arbeitsort"), dict):
+        lok = j.get("stellenlokationen") or [{}]
+        adr = (lok[0] or {}).get("adresse") if isinstance(lok[0], dict) else None
+        out["arbeitsort"] = adr if isinstance(adr, dict) else {}
+    return out
 
 
 def fetch_region(region_params: dict) -> tuple[list[dict], int]:
@@ -288,11 +318,11 @@ def fetch_region(region_params: dict) -> tuple[list[dict], int]:
             print(f"  Stopp bei Seite {page} (moegliches API-Limit), "
                   f"behalte {len(jobs)} Stellen.", file=sys.stderr)
             break
-        max_ergebnisse = int(data.get("maxErgebnisse", 0)) or max_ergebnisse
-        batch = data.get("stellenangebote", [])
+        max_ergebnisse = int(data.get("maxErgebnisse", 0) or 0) or max_ergebnisse
+        batch = data.get("stellenangebote") or data.get("ergebnisliste") or []
         if not batch:
             break
-        for j in batch:
+        for j in map(normalisiere_stelle, batch):
             ref = j.get("refnr") or j.get("referenznummer")
             if ref:
                 if ref in refs:
@@ -409,6 +439,14 @@ def main():
     log = update_jobs_log(DATA_DIR / "jobs_log.csv", today, seen_jobs)
 
     fetch_arbeitslose()
+
+    if not snapshot_rows:
+        # Kein einziges Suchgebiet geladen: rot werden statt still eine
+        # unveraenderte Excel zu committen (so blieb der v4-Ausfall von
+        # August bis Oktober unbemerkt).
+        print("::error::Kein Suchgebiet abrufbar - BA-API pruefen.",
+              file=sys.stderr)
+        sys.exit(1)
 
     print(f"\nFertig. Snapshots: {len(snapshot_rows)} Regionen, "
           f"Stellen-Log: {len(log)} Stellen insgesamt bekannt.")
