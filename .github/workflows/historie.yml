@@ -56,6 +56,7 @@ jobs:
       - name: BA Berufe (Agentur Waiblingen)
         # Ausfall der BA-Seite soll den GENESIS-Teil nicht blockieren
         continue-on-error: true
+        timeout-minutes: 10
         run: python -u tools/ba_berufe.py
 
       - name: Daten holen und Excel bauen

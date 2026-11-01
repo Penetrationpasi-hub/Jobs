@@ -6,8 +6,10 @@ Agentur fuer Arbeit Waiblingen (= Rems-Murr-Kreis), Monatswerte.
 Quelle: Arbeitsmarktreport der BA-Statistik (Excel, Blatt "Berufe"),
   https://statistik.arbeitsagentur.de/Statistikdaten/Detail/JJJJMM/ama/
   amr-amr/amr-671-0-JJJJMM-xlsx.xlsx
-Kein Login noetig. Bereits geladene Monate werden uebersprungen, ein
-Lauf holt also nur neue Monate nach (der erste Lauf alle ab STARTMONAT).
+Kein Login noetig. Bereits geladene Monate werden uebersprungen; je Lauf
+hoechstens BA_MAX_MONATE neue Monate (neueste zuerst), damit die BA nicht
+mit "429 Too Many Requests" blockt. Bei 429 wird sofort aufgehoert, der
+naechste Lauf macht weiter. Jeder Monat wird direkt gespeichert.
 
 Output: data_historie/ba_berufe.csv  (monat;art;segment;anzahl)
 """
@@ -31,6 +33,12 @@ STARTMONAT = os.environ.get("BA_START", "2016-01")
 URL = ("https://statistik.arbeitsagentur.de/Statistikdaten/Detail/{ym}/ama/"
        "amr-amr/amr-{ag}-0-{ym}-xlsx.xlsx?__blob=publicationFile&v=1")
 UA = "arbeitsmarkt-historie/1.0 (privates Arbeitsmarkt-Monitoring)"
+MAX_MONATE = int(os.environ.get("BA_MAX_MONATE", "24"))
+PAUSE = float(os.environ.get("BA_PAUSE", "5"))
+
+
+class Gedrosselt(Exception):
+    """BA antwortet mit 429 - fuer diesen Lauf aufhoeren."""
 FELDER = ["monat", "art", "segment", "anzahl"]
 
 
@@ -47,13 +55,15 @@ def monate(start: str):
 def laden(ym: str) -> bytes | None:
     url = URL.format(ym=ym.replace("-", ""), ag=AGENTUR)
     req = urllib.request.Request(url, headers={"User-Agent": UA})
-    for versuch in range(3):
+    for versuch in range(2):
         try:
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=30) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 return None
+            if e.code == 429:
+                raise Gedrosselt()
             fehler = e
         except Exception as e:  # Netzwerk
             fehler = e
@@ -114,6 +124,16 @@ def parse_berufe(daten: bytes):
     return ergebnis
 
 
+def speichern(zeilen):
+    zeilen.sort(key=lambda z: (z["monat"], z["art"], z["segment"]))
+    tmp = CSV_PFAD.with_suffix(".tmp")
+    with tmp.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=FELDER, delimiter=";")
+        w.writeheader()
+        w.writerows(zeilen)
+    tmp.replace(CSV_PFAD)
+
+
 def main():
     CSV_PFAD.parent.mkdir(exist_ok=True)
     zeilen = []
@@ -122,10 +142,16 @@ def main():
             zeilen = list(csv.DictReader(f, delimiter=";"))
     vorhanden = {z["monat"] for z in zeilen}
     neu = fehlend = 0
-    for ym in monate(STARTMONAT):
-        if ym in vorhanden:
-            continue
-        daten = laden(ym)
+    offen = [ym for ym in monate(STARTMONAT) if ym not in vorhanden]
+    for ym in reversed(offen):            # neueste zuerst
+        if neu >= MAX_MONATE:
+            print(f"Limit {MAX_MONATE} Monate erreicht, Rest im naechsten Lauf.")
+            break
+        try:
+            daten = laden(ym)
+        except Gedrosselt:
+            print(f"{ym}: BA drosselt (429) - Abbruch, Rest im naechsten Lauf.")
+            break
         if daten is None:
             fehlend += 1
             continue
@@ -143,13 +169,11 @@ def main():
                            "anzahl": int(anz) if float(anz).is_integer()
                            else anz})
         neu += 1
+        speichern(zeilen)
         print(f"{ym}: {len(werte)} Werte")
-        time.sleep(0.5)
-    zeilen.sort(key=lambda z: (z["monat"], z["art"], z["segment"]))
-    with CSV_PFAD.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=FELDER, delimiter=";")
-        w.writeheader()
-        w.writerows(zeilen)
+        time.sleep(PAUSE)
+    if zeilen:
+        speichern(zeilen)
     print(f"BA-Berufe: {neu} Monate neu, {fehlend} nicht verfuegbar, "
           f"{len({z['monat'] for z in zeilen})} Monate gesamt.")
 
