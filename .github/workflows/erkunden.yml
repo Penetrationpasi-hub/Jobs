@@ -1,0 +1,39 @@
+# Manuelle Diagnose: listet GENESIS-Tabellen und BA-Downloadlinks im Log.
+name: Datenquellen erkunden
+
+on:
+  workflow_dispatch:
+    inputs:
+      katalog:
+        description: "GENESIS-Tabellenmuster (Leerzeichen-getrennt)"
+        default: "13111* 13211* 13311*"
+      urls:
+        description: "Seiten, deren Links gelistet werden (Leerzeichen-getrennt)"
+        default: "https://statistik.arbeitsagentur.de/DE/Navigation/Statistiken/Fachstatistiken/Arbeitsmarkt-nach-Berufen/Arbeitsmarkt-nach-Berufen-Nav.html"
+      filter:
+        description: "Regex fuer Links (leer = alle)"
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  erkunden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: GENESIS-Katalog
+        env:
+          GENESIS_USER: ${{ secrets.GENESIS_USER }}
+          GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
+          MUSTER: ${{ inputs.katalog }}
+        run: python -u tools/erkunden.py katalog $MUSTER
+      - name: Links
+        env:
+          URLS: ${{ inputs.urls }}
+          FILTER: ${{ inputs.filter }}
+        run: |
+          for u in $URLS; do python -u tools/erkunden.py links "$u" "$FILTER"; done
