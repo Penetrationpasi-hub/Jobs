@@ -60,6 +60,12 @@ KREISE = {
 
 # key -> (Tabellencode, Beschreibung, Merkmals-Praefixe die als
 # Dimension erhalten bleiben statt auf "Insgesamt" gefiltert zu werden)
+# Merkmale, die in Gliederungstabellen nur als "Insgesamt" interessieren
+# ("!" = Dimension muss Insgesamt sein). Labels als Rueckfall, falls die
+# Merkmalscodes anders heissen.
+NUR_INSGESAMT = {"männlich", "weiblich", "Deutsche", "Ausländer"}
+OHNE_GES_NAT = ("!GES", "!NAT", "")
+
 TABELLEN = {
     "arbeitslose": (
         os.environ.get("TAB_ALO", "13211-02-05-4"),
@@ -70,14 +76,24 @@ TABELLEN = {
     "bevoelkerung": (
         os.environ.get("TAB_BEV", "12411-04-02-4"),
         "Bevoelkerung nach Altersgruppen je Kreis", ("ALT",)),
+    "besch_branchen": (
+        os.environ.get("TAB_BRANCHE", "13111-07-05-4"),
+        "SV-Beschaeftigte nach Wirtschaftszweigen je Kreis", OHNE_GES_NAT),
+    "besch_alter": (
+        os.environ.get("TAB_ALTER", "13111-05-03-4"),
+        "SV-Beschaeftigte nach Altersgruppen je Kreis", OHNE_GES_NAT),
     "prognose": (
         os.environ.get("TAB_PROG", "12421-01-01-4"),
         "Bevoelkerungsvorausberechnung je Kreis", ("ALT", "VAR", "BEVP")),
 }
 
-# Zusaetzliche Gliederungstabellen: key -> (Code, Beschreibung, keep)
-# werden wie TABELLEN geholt und als eigenes Blatt dargestellt.
-GLIEDERUNGEN = []      # (key, Blattname, Titel)
+# Zusaetzliche Gliederungstabellen (stehen auch in TABELLEN)
+GLIEDERUNGEN = [  # (key, Blattname, Titel)
+    ("besch_branchen", "SVB Branchen",
+     "SV-Beschaeftigte am Arbeitsort nach Wirtschaftszweigen"),
+    ("besch_alter", "SVB Altersgruppen",
+     "SV-Beschaeftigte am Arbeitsort nach Altersgruppen"),
+]
 
 ARIAL = "Arial"
 HEAD_FONT = Font(name=ARIAL, bold=True, color="FFFFFF")
@@ -206,7 +222,14 @@ def parse_ffcsv_neu(text: str, keep_praefixe: tuple):
                 monat = MONAT_NUM.get(acode)
             elif alabel == "Insgesamt" or not alabel:
                 continue
-            elif any(mcode.startswith(p) for p in keep_praefixe):
+            elif any(p.startswith("!") and mcode.startswith(p[1:])
+                     for p in keep_praefixe) or (
+                    alabel in NUR_INSGESAMT
+                    and any(p.startswith("!") for p in keep_praefixe)):
+                ok = False
+                break
+            elif any(not p.startswith("!") and mcode.startswith(p)
+                     for p in keep_praefixe):
                 extra.append(alabel)
             else:
                 ok = False
@@ -267,7 +290,14 @@ def parse_ffcsv(text: str, keep_praefixe: tuple):
                 monat = MONAT_NUM.get(acode)
             elif alabel == "Insgesamt" or not alabel:
                 continue
-            elif any(mcode.startswith(p) for p in keep_praefixe):
+            elif any(p.startswith("!") and mcode.startswith(p[1:])
+                     for p in keep_praefixe) or (
+                    alabel in NUR_INSGESAMT
+                    and any(p.startswith("!") for p in keep_praefixe)):
+                ok = False
+                break
+            elif any(not p.startswith("!") and mcode.startswith(p)
+                     for p in keep_praefixe):
                 extra.append(alabel)
             else:
                 ok = False
