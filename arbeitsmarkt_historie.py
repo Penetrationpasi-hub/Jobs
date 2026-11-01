@@ -60,8 +60,8 @@ KREISE = {
 # Dimension erhalten bleiben statt auf "Insgesamt" gefiltert zu werden)
 TABELLEN = {
     "arbeitslose": (
-        os.environ.get("TAB_ALO", "13211-01-03-4-B"),
-        "Arbeitslose je Kreis, Monatswerte", ()),
+        os.environ.get("TAB_ALO", "13211-02-05-4"),
+        "Arbeitslose und Quoten je Kreis, Jahresdurchschnitt ab 2009", ()),
     "beschaeftigte": (
         os.environ.get("TAB_BESCH", "13111-01-03-4"),
         "SV-Beschaeftigte je Kreis, Stichtage", ()),
@@ -143,11 +143,70 @@ def parse_zahl(s):
 def jahr_aus_zeit(s: str):
     """Zeit-Spalte kann Jahr (2020) oder Stichtag (31.12.2020) sein."""
     s = (s or "").strip()
+    if "-" in s and s[:4].isdigit():      # ISO: 2020-12-31
+        return int(s[:4])
     teil = s.split(".")[-1]
     try:
         return int(teil)
     except ValueError:
         return None
+
+
+def parse_ffcsv_neu(text: str, keep_praefixe: tuple):
+    """Flatfile-CSV im Format seit November 2024 (Langformat).
+
+    Spalten u.a.: time, N_variable_code, N_variable_attribute_code,
+    N_variable_attribute_label, value_variable_label, value.
+    Gibt None zurueck, wenn der Text nicht in diesem Format ist.
+    """
+    reader = csv.DictReader(text.splitlines(), delimiter=";")
+    felder = [f.strip() for f in (reader.fieldnames or [])]
+    if "value" not in felder:
+        return None
+    reader.fieldnames = felder
+    dims = []
+    n = 1
+    while f"{n}_variable_code" in felder:
+        dims.append(n)
+        n += 1
+    zeilen = []
+    for row in reader:
+        jahr = jahr_aus_zeit(row.get("time") or row.get("time_label") or "")
+        if jahr is None:
+            continue
+        monat = None
+        ags = None
+        extra = []
+        ok = True
+        for d in dims:
+            mcode = (row.get(f"{d}_variable_code") or "").strip()
+            acode = (row.get(f"{d}_variable_attribute_code") or "").strip()
+            alabel = (row.get(f"{d}_variable_attribute_label") or "").strip()
+            if acode in KREISE:
+                ags = acode
+            elif mcode == "MONAT" or acode in MONAT_NUM:
+                monat = MONAT_NUM.get(acode)
+            elif alabel == "Insgesamt" or not alabel:
+                continue
+            elif any(mcode.startswith(p) for p in keep_praefixe):
+                extra.append(alabel)
+            else:
+                ok = False
+                break
+        if not ok or ags is None:
+            continue
+        wert = parse_zahl(row.get("value", ""))
+        if wert is None:
+            continue
+        label = (row.get("value_variable_label")
+                 or row.get("value_variable_code") or "Wert").strip()
+        zeilen.append({
+            "jahr": jahr, "monat": monat, "ags": ags,
+            "kreis": KREISE[ags],
+            "dim": " | ".join(extra) if extra else "Insgesamt",
+            "merkmal": label, "wert": wert,
+        })
+    return zeilen
 
 
 def parse_ffcsv(text: str, keep_praefixe: tuple):
@@ -159,6 +218,9 @@ def parse_ffcsv(text: str, keep_praefixe: tuple):
     Auspraegung "Insgesamt" ist oder der Merkmal-Code mit einem der
     keep_praefixe beginnt (dann landet das Label in "dim").
     """
+    neu = parse_ffcsv_neu(text, keep_praefixe)
+    if neu is not None:
+        return neu
     reader = csv.DictReader(text.splitlines(), delimiter=";")
     felder = reader.fieldnames or []
     wertspalten = [f for f in felder if "__" in f]
@@ -265,7 +327,10 @@ def fetch_all():
             continue
         zeilen = parse_ffcsv(text, keep)
         if not zeilen:
-            print(f"{key}: keine verwertbaren Zeilen.", file=sys.stderr)
+            print(f"{key}: keine verwertbaren Zeilen. Anfang der Antwort:",
+                  file=sys.stderr)
+            for z in text.splitlines()[:4]:
+                print(f"  | {z[:400]}", file=sys.stderr)
             continue
         pfad = DATA / f"{key}.csv"
         with pfad.open("w", newline="", encoding="utf-8") as f:
@@ -302,7 +367,17 @@ def lade(key):
 # ---------------- Hilfen fuer die Auswertung --------------------------
 
 def merkmal_wahl(rows, *begriffe):
-    """Erstes Merkmal-Label finden, das alle Begriffe enthaelt."""
+    """Merkmal-Label waehlen: exakter Treffer, sonst kuerzestes Label,
+    das alle Begriffe enthaelt (vermeidet z.B. Quote statt Anzahl)."""
+    if len(begriffe) == 1:
+        for r in rows:
+            if r["merkmal"].strip().lower() == begriffe[0].lower():
+                return r["merkmal"]
+    treffer = sorted({r["merkmal"] for r in rows
+                      if all(b.lower() in r["merkmal"].lower()
+                             for b in begriffe)}, key=len)
+    if treffer:
+        return treffer[0]
     for r in rows:
         low = r["merkmal"].lower()
         if all(b.lower() in low for b in begriffe):
@@ -399,21 +474,30 @@ def build_excel():
     if alo:
         m_alo = merkmal_wahl(alo, "arbeitslos")
         ab = wb.create_sheet("Arbeitslose")
-        ab.append(["Monat"] + [KREISE[a] for a in ags_liste])
-        werte = {(r["jahr"], r["monat"], r["ags"]): r["wert"]
+        monatlich = any(r["monat"] for r in alo)
+        ab.append(["Monat" if monatlich else "Jahr"]
+                  + [KREISE[a] for a in ags_liste])
+        werte = {(r["jahr"], r["monat"] or 1, r["ags"]): r["wert"]
                  for r in alo if r["merkmal"] == m_alo
-                 and r["dim"] == "Insgesamt" and r["monat"]}
+                 and r["dim"] == "Insgesamt"
+                 and (r["monat"] or not monatlich)}
         monate = sorted({(j, m) for (j, m, _) in werte})
         for i, (j, m) in enumerate(monate, start=2):
-            ab.cell(row=i, column=1,
-                    value=date(j, m, 1)).number_format = "MM.YYYY"
+            if monatlich:
+                ab.cell(row=i, column=1,
+                        value=date(j, m, 1)).number_format = "MM.YYYY"
+            else:
+                ab.cell(row=i, column=1, value=j)
             for k, a in enumerate(ags_liste):
                 ab.cell(row=i, column=2 + k,
                         value=werte.get((j, m, a))).number_format = "#,##0"
         style_header(ab, 1 + len(ags_liste))
         nz = len(monate) + 1
-        ch = flaeche3d(f"Arbeitslose je Kreis ab {STARTYEAR} (Monatswerte)")
-        ch.x_axis.number_format = "YYYY"
+        ab_jahr = monate[0][0] if monate else STARTYEAR
+        ch = flaeche3d(f"Arbeitslose je Kreis ab {ab_jahr} "
+                       f"({'Monatswerte' if monatlich else 'Jahresdurchschnitt'})")
+        if monatlich:
+            ch.x_axis.number_format = "YYYY"
         ch.add_data(Reference(ab, min_col=2, max_col=1 + len(ags_liste),
                               min_row=1, max_row=nz), titles_from_data=True)
         ch.set_categories(Reference(ab, min_col=1, min_row=2, max_row=nz))
@@ -510,16 +594,18 @@ def build_excel():
 
     if alo:
         m_alo = merkmal_wahl(alo, "arbeitslos")
+        monatlich = any(r["monat"] for r in alo)
         reihen = {}
         for r in alo:
             if (r["merkmal"] == m_alo and r["dim"] == "Insgesamt"
-                    and r["monat"]):
+                    and (r["monat"] or not monatlich)):
                 reihen.setdefault(r["ags"], []).append(
-                    ((r["jahr"], r["monat"]), r["wert"]))
+                    ((r["jahr"], r["monat"] or 0), r["wert"]))
         d12, dvor = {}, {}
         for a, punkte in reihen.items():
             punkte.sort()
-            letzte = [w for _, w in punkte[-12:] if w is not None]
+            letzte = [w for _, w in punkte[-(12 if monatlich else 1):]
+                      if w is not None]
             basis = [w for (j, _), w in punkte
                      if 2010 <= j <= 2019 and w is not None]
             if letzte:
@@ -527,7 +613,8 @@ def build_excel():
             if letzte and basis:
                 dvor[a] = (sum(letzte) / len(letzte)) \
                     / (sum(basis) / len(basis)) - 1
-        schreib("Arbeitslose, Mittel letzte 12 Monate", d12)
+        schreib("Arbeitslose, Mittel letzte 12 Monate" if monatlich
+                else "Arbeitslose, letzter Jahresdurchschnitt", d12)
         schreib("dito vs. Mittel 2010-2019", dvor, "+0.0%;-0.0%")
 
     if bes:
