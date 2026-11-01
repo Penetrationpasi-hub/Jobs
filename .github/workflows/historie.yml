@@ -32,10 +32,11 @@ jobs:
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
         run: |
-          if [ -n "$GENESIS_TOKEN" ]; then U="$GENESIS_TOKEN"; P=""
-          elif [ -n "$GENESIS_USER" ] && [ -n "$GENESIS_PASS" ]; then U="$GENESIS_USER"; P="$GENESIS_PASS"
+          # Regionaldatenbank braucht Nutzername + Passwort, Token nur destatis
+          if [ -n "$GENESIS_USER" ] && [ -n "$GENESIS_PASS" ]; then U="$GENESIS_USER"; P="$GENESIS_PASS"
+          elif [ -n "$GENESIS_TOKEN" ]; then U="$GENESIS_TOKEN"; P=""
           else
-            echo "::error::Secret GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) fehlt: Repo > Settings > Secrets and variables > Actions"
+            echo "::error::Secrets GENESIS_USER/GENESIS_PASS (oder GENESIS_TOKEN) fehlen: Repo > Settings > Secrets and variables > Actions"
             exit 1
           fi
           # Zeigt, bei welcher GENESIS-Datenbank der Zugang gilt
