@@ -476,6 +476,7 @@ import statistics
 from datetime import date, datetime
 
 from openpyxl import Workbook
+from branchen import SONSTIGE, branche_von_beruf
 from openpyxl.chart import BarChart, LineChart, Reference
 from openpyxl.chart.axis import ChartLines
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -729,6 +730,128 @@ def build_excel():
         for j, b in enumerate(bz_berufe, start=2):
             bz.cell(row=i, column=j, value=bges.get((d, b)))
     style_header(bz, len(bz_berufe) + 1)
+
+    # ---------------- Branchen (Berufe -> Branche, siehe branchen.py)
+    # Basis sind die beiden Kreis-Suchgebiete, die ueber die gesamte Zeit
+    # erhoben wurden und sich nicht ueberschneiden. Wurden an einem Tag
+    # weniger Stellen im Detail geladen als es gibt (API-Limit), wird auf
+    # die Gesamtzahl hochgerechnet, sonst saehe man Sprunge im Juli.
+    geladen = {(r["datum"], r["region"]): int(r["stellen_geladen"] or 0)
+               for r in snaps}
+    basis = [r for r in ("rems-murr-kreis", "ostalbkreis") if r in alle_reg] \
+        or aktiv
+    bran_reg = {}        # (datum, region, branche) -> hochgerechnete Stellen
+    for (d, rg, b), n in brb.items():
+        if rg not in basis:
+            continue
+        ges, gel = snap_map.get((d, rg)), geladen.get((d, rg))
+        faktor = ges / gel if ges and gel and gel < ges else 1.0
+        k = (d, rg, branche_von_beruf(b))
+        bran_reg[k] = bran_reg.get(k, 0) + n * faktor
+    bran = {}            # (datum, branche) -> Summe ueber die Basisgebiete
+    for (d, _rg, br), n in bran_reg.items():
+        bran[(d, br)] = bran.get((d, br), 0) + n
+    br_namen = sorted({br for (_d, br) in bran},
+                      key=lambda x: (x == SONSTIGE, -bran.get((stand, x), 0), x))
+    ges_tag = {d: sum(bran.get((d, br), 0) for br in br_namen) for d in daten}
+
+    def anteil(d, br):
+        return bran.get((d, br), 0) / ges_tag[d] if ges_tag.get(d) else None
+
+    bn = wb.create_sheet("Branchen")
+    bn["A1"] = ("Entwicklung der Branchen (Stellenangebote, "
+                + " + ".join(reg_name(r) for r in basis) + ")")
+    bn["A1"].font = Font(name=ARIAL, bold=True, size=14)
+    bn["A2"] = (f"Stand {as_date(stand):%d.%m.%Y}. Die Branche wird aus der "
+                "Berufsbezeichnung abgeleitet (branchen.py), die API liefert "
+                "keine Branche. Stellenzahlen sind auf die Gesamtzahl "
+                "hochgerechnet, wenn nicht alle Stellen geladen wurden.")
+    kopf = ["Branche", "Stellen aktuell", "Anteil", "Δ 7 Tage", "Δ 7 Tage %",
+            "Δ 30 Tage", "Δ 30 Tage %", "Anteil vor 30 Tagen",
+            "Δ Anteil (Prozentpunkte)"] + [reg_name(r) for r in basis]
+    for c, t in enumerate(kopf, start=1):
+        bn.cell(row=4, column=c, value=t)
+    style_header(bn, len(kopf), row=4)
+    bn.freeze_panes = "B5"
+    for i, br in enumerate(br_namen, start=5):
+        akt = round(bran.get((stand, br), 0))
+        bn.cell(row=i, column=1, value=br)
+        bn.cell(row=i, column=2, value=akt).number_format = "#,##0"
+        a = anteil(stand, br)
+        bn.cell(row=i, column=3, value=a).number_format = "0.0%"
+        for (dx, c_abs, c_pct) in ((d7, 4, 5), (d30, 6, 7)):
+            if dx is None:
+                continue
+            alt = round(bran.get((dx, br), 0))
+            bn.cell(row=i, column=c_abs, value=akt - alt).number_format = \
+                "+#,##0;-#,##0;0"
+            if alt:
+                bn.cell(row=i, column=c_pct, value=akt / alt - 1
+                        ).number_format = "+0.0%;-0.0%;0.0%"
+        if d30 is not None:
+            a30 = anteil(d30, br)
+            bn.cell(row=i, column=8, value=a30).number_format = "0.0%"
+            if a is not None and a30 is not None:
+                bn.cell(row=i, column=9, value=round((a - a30) * 100, 2)
+                        ).number_format = "+0.0;-0.0;0.0"
+        for j, rg in enumerate(basis, start=10):
+            bn.cell(row=i, column=j,
+                    value=round(bran_reg.get((stand, rg, br), 0))
+                    ).number_format = "#,##0"
+    z_sum = 5 + len(br_namen)
+    bn.cell(row=z_sum, column=1, value="Summe").font = Font(name=ARIAL, bold=True)
+    bn.cell(row=z_sum, column=2, value=round(ges_tag[stand])
+            ).number_format = "#,##0"
+    if d7 is not None:
+        bn.cell(row=z_sum, column=4,
+                value=round(ges_tag[stand]) - round(ges_tag[d7])
+                ).number_format = "+#,##0;-#,##0;0"
+    if d30 is not None:
+        bn.cell(row=z_sum, column=6,
+                value=round(ges_tag[stand]) - round(ges_tag[d30])
+                ).number_format = "+#,##0;-#,##0;0"
+    bc = balken_chart("Offene Stellen nach Branche (aktuell)", "Stellen",
+                      len(br_namen))
+    bc.add_data(Reference(bn, min_col=2, min_row=4, max_row=z_sum - 1),
+                titles_from_data=True)
+    bc.set_categories(Reference(bn, min_col=1, min_row=5, max_row=z_sum - 1))
+    bc.legend = None
+    bn.add_chart(bc, f"A{z_sum + 3}")
+
+    # Zeitreihe je Branche (Stellen), eine Spalte je Branche; rechts
+    # daneben dieselbe Reihe als Anteil, damit Verschiebungen sichtbar werden
+    bt = wb.create_sheet("Branchen-Zeitreihe")
+    bt.append(["Datum"] + br_namen + ["Summe"]
+              + [f"Anteil {br}" for br in br_namen])
+    for i, d in enumerate(daten, start=2):
+        bt.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
+        for j, br in enumerate(br_namen, start=2):
+            bt.cell(row=i, column=j, value=round(bran.get((d, br), 0))
+                    ).number_format = "#,##0"
+        bt.cell(row=i, column=len(br_namen) + 2, value=round(ges_tag[d])
+                ).number_format = "#,##0"
+        for j, br in enumerate(br_namen, start=len(br_namen) + 3):
+            bt.cell(row=i, column=j, value=anteil(d, br)
+                    ).number_format = "0.0%"
+    style_header(bt, 2 * len(br_namen) + 2)
+    lc = linien_chart("Offene Stellen je Branche", "Datum", "Stellen",
+                      "DD.MM.", len(daten), hoehe=12)
+    lc.add_data(Reference(bt, min_col=2, max_col=len(br_namen) + 1,
+                          min_row=1, max_row=len(daten) + 1),
+                titles_from_data=True)
+    lc.set_categories(Reference(bt, min_col=1, min_row=2,
+                                max_row=len(daten) + 1))
+    bt.add_chart(lc, f"A{len(daten) + 4}")
+
+    # Transparenz: welcher Beruf wurde welcher Branche zugeordnet
+    bzu = wb.create_sheet("Branchen-Zuordnung")
+    bzu.append(["Beruf", "Branche", "Stellen aktuell (alle Gebiete)"])
+    for i, b in enumerate(top_akt, start=2):
+        bzu.cell(row=i, column=1, value=b)
+        bzu.cell(row=i, column=2, value=branche_von_beruf(b))
+        bzu.cell(row=i, column=3, value=bges.get((stand, b), 0))
+    style_header(bzu, 3)
+    bzu.auto_filter.ref = f"A1:C{len(top_akt) + 1}"
 
     # ---------------- Aktuell (alle Berufe des Stichtags)
     ak = wb.create_sheet("Aktuell")
