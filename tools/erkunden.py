@@ -63,7 +63,7 @@ def links(url, filt=""):
             print(voll)
 
 
-def xlsx(url, zeilen=25):
+def xlsx(url, zeilen=None, blatt=None):
     """Excel laden und je Blatt die ersten Zeilen ausgeben."""
     import io
     from openpyxl import load_workbook
@@ -75,21 +75,35 @@ def xlsx(url, zeilen=25):
     except Exception as e:
         print(f"Fehler: {e}")
         return
+    zeilen = zeilen or int(os.environ.get("ZEILEN", "25"))
+    blatt = blatt or os.environ.get("BLATT", "")
     wb = load_workbook(io.BytesIO(daten), read_only=True, data_only=True)
     for ws in wb.worksheets:
+        if blatt and ws.title != blatt:
+            continue
         print(f"\n--- Blatt '{ws.title}' ({ws.max_row} x {ws.max_column})")
         for i, row in enumerate(ws.iter_rows(values_only=True)):
             if i >= zeilen:
                 break
-            werte = [str(v)[:40] for v in row if v not in (None, "")]
+            werte = [str(v)[:int(os.environ.get("BREITE", "40"))]
+                     for v in row if v not in (None, "")]
             if werte:
-                print(f"{i + 1:3}: " + " | ".join(werte[:14]))
+                print(f"{i + 1:3}: " + " | ".join(werte[:16]))
 
 
 if __name__ == "__main__":
     modus, *rest = sys.argv[1:] or ["katalog"]
     if modus == "katalog":
         katalog(rest or ["13111*", "13211*"])
+    elif modus == "pruefe":
+        # welche URLs existieren (HEAD/GET-Status)
+        for u in rest:
+            try:
+                req = urllib.request.Request(u, headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    print(f"{r.status} {u}")
+            except Exception as e:
+                print(f"FEHLT ({e}) {u}")
     elif modus == "xlsx":
         for u in rest:
             xlsx(u)

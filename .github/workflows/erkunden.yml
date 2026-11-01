@@ -16,6 +16,15 @@ on:
       xlsx:
         description: "Excel-URLs, deren Blaetter angezeigt werden"
         default: ""
+      blatt:
+        description: "nur dieses Blatt zeigen (leer = alle)"
+        default: ""
+      zeilen:
+        description: "Zeilen je Blatt"
+        default: "25"
+      pruefe:
+        description: "URLs, deren Existenz geprueft wird"
+        default: ""
 
 permissions:
   contents: read
@@ -46,6 +55,14 @@ jobs:
         if: ${{ inputs.xlsx != '' }}
         env:
           XLSX: ${{ inputs.xlsx }}
+          BLATT: ${{ inputs.blatt }}
+          ZEILEN: ${{ inputs.zeilen }}
+          BREITE: "60"
         run: |
           pip install -q openpyxl
           python -u tools/erkunden.py xlsx $XLSX
+      - name: URLs pruefen
+        if: ${{ inputs.pruefe != '' }}
+        env:
+          PRUEFE: ${{ inputs.pruefe }}
+        run: python -u tools/erkunden.py pruefe $PRUEFE
