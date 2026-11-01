@@ -24,11 +24,13 @@ Outputs:
 """
 
 import csv
+import io
 import json
 import os
 import sys
 import urllib.parse
 import urllib.request
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -150,6 +152,18 @@ def jahr_aus_zeit(s: str):
         return int(teil)
     except ValueError:
         return None
+
+
+def entpacke(raw: bytes) -> bytes:
+    """Die Regionaldatenbank liefert tablefile trotz compress=false als
+    ZIP mit einer CSV darin; dann die (groesste) CSV auspacken."""
+    if not raw.startswith(b"PK"):
+        return raw
+    with zipfile.ZipFile(io.BytesIO(raw)) as zf:
+        namen = [n for n in zf.namelist() if n.lower().endswith(".csv")] \
+            or zf.namelist()
+        name = max(namen, key=lambda n: zf.getinfo(n).file_size)
+        return zf.read(name)
 
 
 def parse_ffcsv_neu(text: str, keep_praefixe: tuple):
@@ -319,6 +333,7 @@ def fetch_all():
                   file=sys.stderr)
             katalog_hinweis(code.split("-")[0] + "*")
             continue
+        raw = entpacke(raw)
         text = raw.decode("utf-8-sig", errors="replace")
         if text.lstrip().startswith("{"):
             print(f"{key}: GENESIS-Fehlerantwort: {text[:300]}",
