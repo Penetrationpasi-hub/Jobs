@@ -10,8 +10,10 @@ on:
 permissions:
   contents: write
 
+# Gleiche Gruppe wie collect.yml: beide pushen auf main und sollen
+# nicht gleichzeitig laufen.
 concurrency:
-  group: repo-push
+  group: datenlauf
   cancel-in-progress: false
 
 jobs:
@@ -24,13 +26,38 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Zugangsdaten pruefen
+        env:
+          GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
+          GENESIS_USER: ${{ secrets.GENESIS_USER }}
+          GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
+        run: |
+          if [ -n "$GENESIS_TOKEN" ]; then U="$GENESIS_TOKEN"; P=""
+          elif [ -n "$GENESIS_USER" ] && [ -n "$GENESIS_PASS" ]; then U="$GENESIS_USER"; P="$GENESIS_PASS"
+          else
+            echo "::error::Secret GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) fehlt: Repo > Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          # Zeigt, bei welcher GENESIS-Datenbank der Zugang gilt
+          for B in https://www.regionalstatistik.de/genesisWS/rest/2020 \
+                   https://www-genesis.destatis.de/genesisWS/rest/2020; do
+            echo "== $B"
+            curl -sS -m 60 -X POST "$B/helloworld/logincheck" \
+              -H "username: $U" -H "password: $P" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "language=de" | head -c 400 || true
+            echo
+          done
+
       - name: Abhaengigkeiten
         run: pip install openpyxl
 
       - name: Daten holen und Excel bauen
         env:
+          GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
+          GENESIS_BASE: ${{ vars.GENESIS_BASE }}
           # optional: Tabellencodes ueberschreiben, falls das Log es verlangt
           # TAB_ALO: 13211-01-03-4-B
           # TAB_BESCH: 13111-01-03-4
@@ -43,7 +70,12 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add -A data_historie arbeitsmarkt_historie.xlsx || echo "nichts zu adden"
-          git commit -m "Historiendaten aktualisiert ($(date -u +%F))" || echo "keine Aenderungen"
-          git pull --rebase origin ${GITHUB_REF_NAME}
+          for p in data_historie arbeitsmarkt_historie.xlsx; do
+            [ -e "$p" ] && git add -A "$p"
+          done
+          if git diff --cached --quiet; then
+            echo "keine Aenderungen"; exit 0
+          fi
+          git commit -m "Historiendaten aktualisiert ($(date -u +%F))"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
           git push

@@ -66,7 +66,11 @@ DATA_DIR = Path(__file__).parent / "data"
 # Monatliche Arbeitslose und Arbeitslosenquoten auf Kreisebene.
 # Kostenloses Konto auf regionalstatistik.de noetig, Zugangsdaten als
 # GitHub Secrets GENESIS_USER / GENESIS_PASS. Nur POST, GET ist abgeschaltet.
-GENESIS_BASE = "https://www.regionalstatistik.de/genesisWS/rest/2020"
+# Per env umstellbar, z.B. auf GENESIS-Online (destatis):
+# https://www-genesis.destatis.de/genesisWS/rest/2020
+GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
+                or "https://www.regionalstatistik.de/genesisWS/rest/2020"
+                ).rstrip("/")
 # Kreistabelle Arbeitslose/Quoten, Monatswerte. Falls der Code nicht passt,
 # listet fetch_arbeitslose() den Katalog und man setzt env AL_TABLE.
 AL_TABLE = os.environ.get("AL_TABLE", "13211-01-03-4-B")
@@ -87,6 +91,13 @@ AL_CSV = DATA_DIR / "arbeitslose.csv"
 
 
 def genesis_creds() -> tuple[str, str] | None:
+    """API-Token (GENESIS_TOKEN) oder Nutzername/Passwort.
+
+    Beim Token wird er als Nutzername gesendet, Passwort bleibt leer
+    (so beschreibt es die GENESIS-Webservice-Doku)."""
+    token = os.environ.get("GENESIS_TOKEN", "").strip()
+    if token:
+        return token, ""
     user = os.environ.get("GENESIS_USER", "").strip()
     pw = os.environ.get("GENESIS_PASS", "").strip()
     if not user or not pw:
@@ -132,7 +143,7 @@ def fetch_arbeitslose():
     dann den letzten Stand der CSV.
     """
     if genesis_creds() is None:
-        print("GENESIS_USER/GENESIS_PASS nicht gesetzt, "
+        print("GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) nicht gesetzt, "
               "Arbeitslosen-Abruf uebersprungen.", file=sys.stderr)
         return
     jahr = date.today().year
@@ -956,7 +967,7 @@ def build_excel():
     else:
         al.cell(row=start, column=1, value=(
             "Kreisdaten fehlen: data/arbeitslose.csv ist (noch) leer. "
-            "GENESIS_USER/GENESIS_PASS als GitHub-Secrets setzen "
+            "GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) als GitHub-Secrets setzen "
             "(kostenloses Konto auf regionalstatistik.de), dann fuellen "
             "sich das Blatt Arbeitslose und dieser Block automatisch."))
 
