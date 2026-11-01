@@ -35,7 +35,7 @@ from datetime import date
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.chart import AreaChart3D, LineChart, Reference
+from openpyxl.chart import AreaChart3D, BarChart, LineChart, Reference
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
@@ -489,6 +489,115 @@ def flaeche3d(titel, hoehe=9, breite=18):
 FOKUS_AGS = "08119"     # Rems-Murr-Kreis (Raum Waiblingen) bekommt das Diagramm
 
 
+def ba_berufe_blatt(wb):
+    """Arbeitslose und gemeldete Stellen nach Berufssegmenten,
+    Agentur fuer Arbeit Waiblingen (aus tools/ba_berufe.py)."""
+    pfad = DATA / "ba_berufe.csv"
+    if not pfad.exists():
+        return None
+    with pfad.open(newline="", encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f, delimiter=";")]
+    if not rows:
+        return None
+    AL, ST = "Arbeitslose", "Gemeldete Arbeitsstellen"
+    werte = {(r["monat"], r["art"], r["segment"]): float(r["anzahl"])
+             for r in rows}
+    monate = sorted({r["monat"] for r in rows})
+    letzt = monate[-1]
+    j, m = map(int, letzt.split("-"))
+    vorjahr = f"{j - 1:04d}-{m:02d}"
+    segmente = sorted({r["segment"] for r in rows
+                       if r["segment"] not in ("Insgesamt",)},
+                      key=lambda sg: -werte.get((letzt, AL, sg), 0))
+
+    ws = wb.create_sheet("BA Berufe Waiblingen")
+    ws["A1"] = ("Arbeitslose und gemeldete Arbeitsstellen nach "
+                "Berufssegmenten - Agentur fuer Arbeit Waiblingen")
+    ws["A1"].font = Font(name=ARIAL, bold=True, size=13)
+    ws["A2"] = (f"Quelle: BA-Statistik, Arbeitsmarktreport (Blatt Berufe), "
+                f"{monate[0]} bis {letzt}")
+
+    # Block 1: aktueller Monat
+    kopf = 4
+    spalten = ["Berufssegment", f"Arbeitslose {letzt}",
+               f"Gemeldete Stellen {letzt}", "Arbeitslose je Stelle",
+               f"Arbeitslose {vorjahr}", "Veraenderung zum Vorjahr"]
+    for k, t in enumerate(spalten, start=1):
+        ws.cell(row=kopf, column=k, value=t)
+    style_header(ws, len(spalten), row=kopf)
+    z = kopf + 1
+    for sg in segmente + ["Insgesamt"]:
+        al = werte.get((letzt, AL, sg))
+        st = werte.get((letzt, ST, sg))
+        alv = werte.get((vorjahr, AL, sg))
+        ws.cell(row=z, column=1, value=sg)
+        ws.cell(row=z, column=2, value=al).number_format = "#,##0"
+        ws.cell(row=z, column=3, value=st).number_format = "#,##0"
+        if al is not None and st:
+            ws.cell(row=z, column=4, value=round(al / st, 1))
+        ws.cell(row=z, column=5, value=alv).number_format = "#,##0"
+        if al is not None and alv:
+            ws.cell(row=z, column=6,
+                    value=al / alv - 1).number_format = "+0.0%;-0.0%"
+        z += 1
+    ende1 = z - 1
+    bc = BarChart()
+    bc.type = "bar"
+    bc.title = f"Arbeitslose und gemeldete Stellen nach Beruf ({letzt})"
+    bc.height, bc.width = 11, 22
+    # Insgesamt (letzte Zeile) bleibt aus dem Diagramm
+    bc.add_data(Reference(ws, min_col=2, max_col=3, min_row=kopf,
+                          max_row=ende1 - 1), titles_from_data=True)
+    bc.set_categories(Reference(ws, min_col=1, min_row=kopf + 1,
+                                max_row=ende1 - 1))
+    ws.add_chart(bc, "H4")
+
+    # Block 2/3: Jahresdurchschnitte je Segment
+    def jahresblock(start, art, titel):
+        jahre = sorted({int(mo[:4]) for mo in monate})
+        ws.cell(row=start, column=1, value=titel).font = \
+            Font(name=ARIAL, bold=True)
+        k0 = start + 1
+        ws.cell(row=k0, column=1, value="Jahr")
+        for k, sg in enumerate(segmente):
+            ws.cell(row=k0, column=2 + k, value=sg)
+        style_header(ws, 1 + len(segmente), row=k0)
+        for i, jahr in enumerate(jahre, start=k0 + 1):
+            ws.cell(row=i, column=1, value=jahr)
+            for k, sg in enumerate(segmente):
+                v = [werte[(mo, art, sg)] for mo in monate
+                     if mo.startswith(str(jahr)) and (mo, art, sg) in werte]
+                if v:
+                    ws.cell(row=i, column=2 + k,
+                            value=round(sum(v) / len(v))).number_format = \
+                        "#,##0"
+        ende = k0 + len(jahre)
+        ch = LineChart()
+        ch.title = f"{titel} (Jahresdurchschnitt)"
+        ch.height, ch.width = 11, 22
+        ch.y_axis.number_format = "#,##0"
+        ch.x_axis.delete = False
+        ch.y_axis.delete = False
+        ch.legend.position = "b"
+        ch.add_data(Reference(ws, min_col=2, max_col=1 + len(segmente),
+                              min_row=k0, max_row=ende),
+                    titles_from_data=True)
+        ch.set_categories(Reference(ws, min_col=1, min_row=k0 + 1,
+                                    max_row=ende))
+        ws.add_chart(ch, f"H{start}")
+        return ende
+
+    # Abstand >= Diagrammhoehe (~22 Zeilen), damit nichts ueberlappt
+    e2 = jahresblock(max(ende1, 4 + 22) + 3, AL,
+                     "Arbeitslose nach Berufssegment")
+    jahresblock(max(e2, max(ende1, 26) + 25) + 3, ST,
+                "Gemeldete Arbeitsstellen nach Berufssegment")
+    ws.column_dimensions["A"].width = 46
+    for k in range(2, 2 + len(segmente)):
+        ws.column_dimensions[get_column_letter(k)].width = 14
+    return ws
+
+
 def gliederungs_blatt(wb, name, rows, merkmal, titel, max_spalten=25):
     """Je Kreis ein Block: Zeilen = Jahre, Spalten = Auspraegungen der
     Zusatzdimension (dim). Liniendiagramm fuer den Fokus-Kreis."""
@@ -694,6 +803,8 @@ def build_excel():
         if rows:
             gliederungs_blatt(wb, blatt, rows, merkmal_wahl(rows, "besch"),
                               titel)
+
+    ba_berufe_blatt(wb)
 
     # ---------------- Perspektive (Kennzahlen statt Kaffeesatz)
     pe = wb.create_sheet("Perspektive")
