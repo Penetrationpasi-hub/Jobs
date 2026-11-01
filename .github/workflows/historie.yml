@@ -39,8 +39,8 @@ jobs:
             exit 1
           fi
           # Zeigt, bei welcher GENESIS-Datenbank der Zugang gilt
-          for B in https://genesis.destatis.de/genesisWS/rest/2020 \
-                   https://www.regionalstatistik.de/genesisWS/rest/2020; do
+          for B in https://www.regionalstatistik.de/genesisws/rest/2020 \
+                   https://genesis.destatis.de/genesisWS/rest/2020; do
             echo "== $B"
             curl -sSL -m 60 -X POST "$B/helloworld/logincheck" \
               -H "username: $U" -H "password: $P" \

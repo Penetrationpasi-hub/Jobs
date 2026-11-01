@@ -66,11 +66,12 @@ DATA_DIR = Path(__file__).parent / "data"
 # Monatliche Arbeitslose und Arbeitslosenquoten auf Kreisebene.
 # Kostenloses Konto auf regionalstatistik.de noetig, Zugangsdaten als
 # GitHub Secrets GENESIS_USER / GENESIS_PASS. Nur POST, GET ist abgeschaltet.
-# Die Regionaldatenbank (frueher regionalstatistik.de) laeuft inzwischen
-# als "GENESIS-Online regional" unter genesis.destatis.de; die alte
-# REST-Adresse liefert nur noch HTML/404. Per env GENESIS_BASE umstellbar.
+# Regionaldatenbank Deutschland: Pfad klein geschrieben ("genesisws"),
+# anders als bei GENESIS-Online (genesis.destatis.de/genesisWS), das nur
+# Bund/Laender hat. Per env GENESIS_BASE umstellbar.
 GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
-                or "https://genesis.destatis.de/genesisWS/rest/2020").rstrip("/")
+                or "https://www.regionalstatistik.de/genesisws/rest/2020"
+                ).rstrip("/")
 # Kreistabelle Arbeitslose/Quoten, Monatswerte. Falls der Code nicht passt,
 # listet fetch_arbeitslose() den Katalog und man setzt env AL_TABLE.
 AL_TABLE = os.environ.get("AL_TABLE", "13211-01-03-4-B")

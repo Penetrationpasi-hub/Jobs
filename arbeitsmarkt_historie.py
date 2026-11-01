@@ -41,11 +41,12 @@ BASE = Path(__file__).parent
 DATA = BASE / "data_historie"
 OUT = BASE / "arbeitsmarkt_historie.xlsx"
 
-# Die Regionaldatenbank (frueher regionalstatistik.de) laeuft inzwischen
-# als "GENESIS-Online regional" unter genesis.destatis.de; die alte
-# REST-Adresse liefert nur noch HTML/404. Per env GENESIS_BASE umstellbar.
+# Regionaldatenbank Deutschland: Pfad klein geschrieben ("genesisws"),
+# anders als bei GENESIS-Online (genesis.destatis.de/genesisWS), das nur
+# Bund/Laender hat. Per env GENESIS_BASE umstellbar.
 GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
-                or "https://genesis.destatis.de/genesisWS/rest/2020").rstrip("/")
+                or "https://www.regionalstatistik.de/genesisws/rest/2020"
+                ).rstrip("/")
 STARTYEAR = int(os.environ.get("STARTYEAR", "2008"))
 USER_AGENT = "arbeitsmarkt-historie/1.0 (privates Arbeitsmarkt-Monitoring)"
 
