@@ -30,8 +30,10 @@ jobs:
 
       - name: Sammeln und auswerten
         env:
+          GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
+          GENESIS_BASE: ${{ vars.GENESIS_BASE }}
         run: python collect_jobs.py
 
       - name: Ergebnisse committen

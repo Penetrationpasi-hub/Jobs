@@ -41,7 +41,11 @@ BASE = Path(__file__).parent
 DATA = BASE / "data_historie"
 OUT = BASE / "arbeitsmarkt_historie.xlsx"
 
-GENESIS_BASE = "https://www.regionalstatistik.de/genesisWS/rest/2020"
+# Per env umstellbar, z.B. auf GENESIS-Online (destatis):
+# https://www-genesis.destatis.de/genesisWS/rest/2020
+GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
+                or "https://www.regionalstatistik.de/genesisWS/rest/2020"
+                ).rstrip("/")
 STARTYEAR = int(os.environ.get("STARTYEAR", "2008"))
 USER_AGENT = "arbeitsmarkt-historie/1.0 (privates Arbeitsmarkt-Monitoring)"
 
@@ -77,6 +81,13 @@ MONAT_NUM = {f"MONAT{m:02d}": m for m in range(1, 13)}
 # ---------------- GENESIS-Zugriff -------------------------------------
 
 def creds():
+    """API-Token (GENESIS_TOKEN) oder Nutzername/Passwort.
+
+    Beim Token wird er als Nutzername gesendet, Passwort bleibt leer
+    (so beschreibt es die GENESIS-Webservice-Doku)."""
+    token = os.environ.get("GENESIS_TOKEN", "").strip()
+    if token:
+        return token, ""
     user = os.environ.get("GENESIS_USER", "").strip()
     pw = os.environ.get("GENESIS_PASS", "").strip()
     if not user or not pw:
@@ -201,7 +212,7 @@ def parse_ffcsv(text: str, keep_praefixe: tuple):
 
 def fetch_all():
     if creds() is None:
-        print("GENESIS_USER/GENESIS_PASS nicht gesetzt, Abruf "
+        print("GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) nicht gesetzt, Abruf "
               "uebersprungen, Excel nutzt vorhandene CSVs.",
               file=sys.stderr)
         return
