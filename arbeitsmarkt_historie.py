@@ -217,6 +217,17 @@ def fetch_all():
               "uebersprungen, Excel nutzt vorhandene CSVs.",
               file=sys.stderr)
         return None
+    # Erst Login pruefen: bei falschen Zugangsdaten sofort abbrechen statt
+    # jede Tabelle samt Katalog minutenlang durchzuprobieren.
+    try:
+        antwort = genesis_post("helloworld/logincheck", {"language": "de"})
+        status = json.loads(antwort.decode("utf-8", "replace")).get("Status", "")
+    except Exception as e:
+        status = f"Login-Pruefung fehlgeschlagen: {e}"
+    if "erfolgreich" not in status:
+        print(f"Anmeldung bei {GENESIS_BASE} gescheitert: {status}",
+              file=sys.stderr)
+        return 0
     DATA.mkdir(exist_ok=True)
     ok = 0
     jahr = date.today().year
