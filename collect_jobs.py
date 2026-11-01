@@ -66,10 +66,11 @@ DATA_DIR = Path(__file__).parent / "data"
 # Monatliche Arbeitslose und Arbeitslosenquoten auf Kreisebene.
 # Kostenloses Konto auf regionalstatistik.de noetig, Zugangsdaten als
 # GitHub Secrets GENESIS_USER / GENESIS_PASS. Nur POST, GET ist abgeschaltet.
-# Per env umstellbar, z.B. auf GENESIS-Online (destatis):
-# https://www-genesis.destatis.de/genesisWS/rest/2020
+# Regionaldatenbank Deutschland: Pfad klein geschrieben ("genesisws"),
+# anders als bei GENESIS-Online (genesis.destatis.de/genesisWS), das nur
+# Bund/Laender hat. Per env GENESIS_BASE umstellbar.
 GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
-                or "https://www.regionalstatistik.de/genesisWS/rest/2020"
+                or "https://www.regionalstatistik.de/genesisws/rest/2020"
                 ).rstrip("/")
 # Kreistabelle Arbeitslose/Quoten, Monatswerte. Falls der Code nicht passt,
 # listet fetch_arbeitslose() den Katalog und man setzt env AL_TABLE.
@@ -91,18 +92,18 @@ AL_CSV = DATA_DIR / "arbeitslose.csv"
 
 
 def genesis_creds() -> tuple[str, str] | None:
-    """API-Token (GENESIS_TOKEN) oder Nutzername/Passwort.
+    """Nutzername/Passwort (GENESIS_USER/GENESIS_PASS), sonst API-Token.
 
-    Beim Token wird er als Nutzername gesendet, Passwort bleibt leer
-    (so beschreibt es die GENESIS-Webservice-Doku)."""
+    Die Regionaldatenbank verlangt ein Passwort; der Token (als Nutzername
+    mit leerem Passwort) reicht nur bei GENESIS-Online (destatis)."""
+    user = os.environ.get("GENESIS_USER", "").strip()
+    pw = os.environ.get("GENESIS_PASS", "").strip()
+    if user and pw:
+        return user, pw
     token = os.environ.get("GENESIS_TOKEN", "").strip()
     if token:
         return token, ""
-    user = os.environ.get("GENESIS_USER", "").strip()
-    pw = os.environ.get("GENESIS_PASS", "").strip()
-    if not user or not pw:
-        return None
-    return user, pw
+    return None
 
 
 def genesis_post(endpoint: str, params: dict) -> bytes:
@@ -143,7 +144,7 @@ def fetch_arbeitslose():
     dann den letzten Stand der CSV.
     """
     if genesis_creds() is None:
-        print("GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) nicht gesetzt, "
+        print("GENESIS_USER/GENESIS_PASS (oder GENESIS_TOKEN) nicht gesetzt, "
               "Arbeitslosen-Abruf uebersprungen.", file=sys.stderr)
         return
     jahr = date.today().year
@@ -967,7 +968,7 @@ def build_excel():
     else:
         al.cell(row=start, column=1, value=(
             "Kreisdaten fehlen: data/arbeitslose.csv ist (noch) leer. "
-            "GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) als GitHub-Secrets setzen "
+            "GENESIS_USER/GENESIS_PASS (oder GENESIS_TOKEN) als GitHub-Secrets setzen "
             "(kostenloses Konto auf regionalstatistik.de), dann fuellen "
             "sich das Blatt Arbeitslose und dieser Block automatisch."))
 

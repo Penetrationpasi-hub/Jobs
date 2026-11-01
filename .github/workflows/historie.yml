@@ -32,17 +32,18 @@ jobs:
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
         run: |
-          if [ -n "$GENESIS_TOKEN" ]; then U="$GENESIS_TOKEN"; P=""
-          elif [ -n "$GENESIS_USER" ] && [ -n "$GENESIS_PASS" ]; then U="$GENESIS_USER"; P="$GENESIS_PASS"
+          # Regionaldatenbank braucht Nutzername + Passwort, Token nur destatis
+          if [ -n "$GENESIS_USER" ] && [ -n "$GENESIS_PASS" ]; then U="$GENESIS_USER"; P="$GENESIS_PASS"
+          elif [ -n "$GENESIS_TOKEN" ]; then U="$GENESIS_TOKEN"; P=""
           else
-            echo "::error::Secret GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) fehlt: Repo > Settings > Secrets and variables > Actions"
+            echo "::error::Secrets GENESIS_USER/GENESIS_PASS (oder GENESIS_TOKEN) fehlen: Repo > Settings > Secrets and variables > Actions"
             exit 1
           fi
           # Zeigt, bei welcher GENESIS-Datenbank der Zugang gilt
-          for B in https://www.regionalstatistik.de/genesisWS/rest/2020 \
-                   https://www-genesis.destatis.de/genesisWS/rest/2020; do
+          for B in https://www.regionalstatistik.de/genesisws/rest/2020 \
+                   https://genesis.destatis.de/genesisWS/rest/2020; do
             echo "== $B"
-            curl -sS -m 60 -X POST "$B/helloworld/logincheck" \
+            curl -sSL -m 60 -X POST "$B/helloworld/logincheck" \
               -H "username: $U" -H "password: $P" \
               -H "Content-Type: application/x-www-form-urlencoded" \
               -d "language=de" | head -c 400 || true
@@ -64,7 +65,7 @@ jobs:
           # TAB_BEV: 12411-04-02-4
           # TAB_PROG: 12421-01-01-4
           # STARTYEAR: "2008"
-        run: python arbeitsmarkt_historie.py
+        run: python -u arbeitsmarkt_historie.py
 
       - name: Ergebnisse committen
         run: |
