@@ -35,7 +35,7 @@ from datetime import date
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.chart import AreaChart3D, Reference
+from openpyxl.chart import AreaChart3D, LineChart, Reference
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
@@ -60,20 +60,40 @@ KREISE = {
 
 # key -> (Tabellencode, Beschreibung, Merkmals-Praefixe die als
 # Dimension erhalten bleiben statt auf "Insgesamt" gefiltert zu werden)
+# Merkmale, die in Gliederungstabellen nur als "Insgesamt" interessieren
+# ("!" = Dimension muss Insgesamt sein). Labels als Rueckfall, falls die
+# Merkmalscodes anders heissen.
+NUR_INSGESAMT = {"männlich", "weiblich", "Deutsche", "Ausländer"}
+OHNE_GES_NAT = ("!GES", "!NAT", "")
+
 TABELLEN = {
     "arbeitslose": (
         os.environ.get("TAB_ALO", "13211-02-05-4"),
-        "Arbeitslose und Quoten je Kreis, Jahresdurchschnitt ab 2009", ()),
+        "Arbeitslose und Quoten je Kreis, Jahresdurchschnitt ab 2009", ("",)),
     "beschaeftigte": (
         os.environ.get("TAB_BESCH", "13111-01-03-4"),
         "SV-Beschaeftigte je Kreis, Stichtage", ()),
     "bevoelkerung": (
         os.environ.get("TAB_BEV", "12411-04-02-4"),
         "Bevoelkerung nach Altersgruppen je Kreis", ("ALT",)),
+    "besch_branchen": (
+        os.environ.get("TAB_BRANCHE", "13111-07-05-4"),
+        "SV-Beschaeftigte nach Wirtschaftszweigen je Kreis", OHNE_GES_NAT),
+    "besch_alter": (
+        os.environ.get("TAB_ALTER", "13111-05-03-4"),
+        "SV-Beschaeftigte nach Altersgruppen je Kreis", OHNE_GES_NAT),
     "prognose": (
         os.environ.get("TAB_PROG", "12421-01-01-4"),
         "Bevoelkerungsvorausberechnung je Kreis", ("ALT", "VAR", "BEVP")),
 }
+
+# Zusaetzliche Gliederungstabellen (stehen auch in TABELLEN)
+GLIEDERUNGEN = [  # (key, Blattname, Titel)
+    ("besch_branchen", "SVB Branchen",
+     "SV-Beschaeftigte am Arbeitsort nach Wirtschaftszweigen"),
+    ("besch_alter", "SVB Altersgruppen",
+     "SV-Beschaeftigte am Arbeitsort nach Altersgruppen"),
+]
 
 ARIAL = "Arial"
 HEAD_FONT = Font(name=ARIAL, bold=True, color="FFFFFF")
@@ -202,7 +222,14 @@ def parse_ffcsv_neu(text: str, keep_praefixe: tuple):
                 monat = MONAT_NUM.get(acode)
             elif alabel == "Insgesamt" or not alabel:
                 continue
-            elif any(mcode.startswith(p) for p in keep_praefixe):
+            elif any(p.startswith("!") and mcode.startswith(p[1:])
+                     for p in keep_praefixe) or (
+                    alabel in NUR_INSGESAMT
+                    and any(p.startswith("!") for p in keep_praefixe)):
+                ok = False
+                break
+            elif any(not p.startswith("!") and mcode.startswith(p)
+                     for p in keep_praefixe):
                 extra.append(alabel)
             else:
                 ok = False
@@ -263,7 +290,14 @@ def parse_ffcsv(text: str, keep_praefixe: tuple):
                 monat = MONAT_NUM.get(acode)
             elif alabel == "Insgesamt" or not alabel:
                 continue
-            elif any(mcode.startswith(p) for p in keep_praefixe):
+            elif any(p.startswith("!") and mcode.startswith(p[1:])
+                     for p in keep_praefixe) or (
+                    alabel in NUR_INSGESAMT
+                    and any(p.startswith("!") for p in keep_praefixe)):
+                ok = False
+                break
+            elif any(not p.startswith("!") and mcode.startswith(p)
+                     for p in keep_praefixe):
                 extra.append(alabel)
             else:
                 ok = False
@@ -452,6 +486,63 @@ def flaeche3d(titel, hoehe=9, breite=18):
 
 # ---------------- Excel -----------------------------------------------
 
+FOKUS_AGS = "08119"     # Rems-Murr-Kreis (Raum Waiblingen) bekommt das Diagramm
+
+
+def gliederungs_blatt(wb, name, rows, merkmal, titel, max_spalten=25):
+    """Je Kreis ein Block: Zeilen = Jahre, Spalten = Auspraegungen der
+    Zusatzdimension (dim). Liniendiagramm fuer den Fokus-Kreis."""
+    rows = [r for r in rows if r["merkmal"] == merkmal
+            and r["dim"] != "Insgesamt" and not r["monat"]]
+    if not rows:
+        return None
+    dims = sorted({r["dim"] for r in rows})[:max_spalten]
+    werte = {(r["ags"], r["jahr"], r["dim"]): r["wert"] for r in rows}
+    ws = wb.create_sheet(name)
+    ws["A1"] = titel
+    ws["A1"].font = Font(name=ARIAL, bold=True, size=13)
+    zeile = 3
+    fokus = None
+    for ags in KREISE:
+        jahre = sorted({j for (a, j, _) in werte if a == ags})
+        if not jahre:
+            continue
+        ws.cell(row=zeile, column=1, value=KREISE[ags]).font = \
+            Font(name=ARIAL, bold=True)
+        kopf = zeile + 1
+        ws.cell(row=kopf, column=1, value="Jahr")
+        for k, d in enumerate(dims):
+            ws.cell(row=kopf, column=2 + k, value=d)
+        style_header(ws, 1 + len(dims), row=kopf)
+        for i, j in enumerate(jahre, start=kopf + 1):
+            ws.cell(row=i, column=1, value=j)
+            for k, d in enumerate(dims):
+                ws.cell(row=i, column=2 + k,
+                        value=werte.get((ags, j, d))).number_format = "#,##0"
+        if ags == FOKUS_AGS or fokus is None:
+            fokus = (kopf, kopf + len(jahre), KREISE[ags])
+        zeile = kopf + len(jahre) + 2
+    if fokus:
+        kopf, ende, kreis = fokus
+        ch = LineChart()
+        ch.title = f"{titel} - {kreis}"
+        ch.height, ch.width = 10, 22
+        ch.y_axis.number_format = "#,##0"
+        ch.x_axis.delete = False
+        ch.y_axis.delete = False
+        ch.legend.position = "b"
+        ch.add_data(Reference(ws, min_col=2, max_col=1 + len(dims),
+                              min_row=kopf, max_row=ende),
+                    titles_from_data=True)
+        ch.set_categories(Reference(ws, min_col=1, min_row=kopf + 1,
+                                    max_row=ende))
+        ws.add_chart(ch, f"{get_column_letter(len(dims) + 3)}3")
+    ws.column_dimensions["A"].width = 18
+    for k in range(len(dims)):
+        ws.column_dimensions[get_column_letter(2 + k)].width = 16
+    return ws
+
+
 def build_excel():
     alo = lade("arbeitslose")
     bes = lade("beschaeftigte")
@@ -592,6 +683,17 @@ def build_excel():
                               min_row=1, max_row=nz), titles_from_data=True)
         ch.set_categories(Reference(vp, min_col=1, min_row=2, max_row=nz))
         vp.add_chart(ch, f"A{nz + 3}")
+
+    # ---------------- Gliederungen (Personengruppen, Branchen, Alter)
+    if alo:
+        gliederungs_blatt(wb, "AL Personengruppen", alo,
+                          merkmal_wahl(alo, "arbeitslose"),
+                          "Arbeitslose nach Personengruppen")
+    for key, blatt, titel in GLIEDERUNGEN:
+        rows = lade(key)
+        if rows:
+            gliederungs_blatt(wb, blatt, rows, merkmal_wahl(rows, "besch"),
+                              titel)
 
     # ---------------- Perspektive (Kennzahlen statt Kaffeesatz)
     pe = wb.create_sheet("Perspektive")

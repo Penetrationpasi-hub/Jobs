@@ -13,6 +13,9 @@ on:
       filter:
         description: "Regex fuer Links (leer = alle)"
         default: ""
+      xlsx:
+        description: "Excel-URLs, deren Blaetter angezeigt werden"
+        default: ""
 
 permissions:
   contents: read
@@ -26,14 +29,23 @@ jobs:
         with:
           python-version: "3.12"
       - name: GENESIS-Katalog
+        if: ${{ inputs.katalog != '' }}
         env:
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
           MUSTER: ${{ inputs.katalog }}
         run: python -u tools/erkunden.py katalog $MUSTER
       - name: Links
+        if: ${{ inputs.urls != '' }}
         env:
           URLS: ${{ inputs.urls }}
           FILTER: ${{ inputs.filter }}
         run: |
           for u in $URLS; do python -u tools/erkunden.py links "$u" "$FILTER"; done
+      - name: Excel ansehen
+        if: ${{ inputs.xlsx != '' }}
+        env:
+          XLSX: ${{ inputs.xlsx }}
+        run: |
+          pip install -q openpyxl
+          python -u tools/erkunden.py xlsx $XLSX
