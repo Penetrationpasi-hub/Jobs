@@ -63,9 +63,35 @@ def links(url, filt=""):
             print(voll)
 
 
+def xlsx(url, zeilen=25):
+    """Excel laden und je Blatt die ersten Zeilen ausgeben."""
+    import io
+    from openpyxl import load_workbook
+    print(f"\n===== XLSX {url}")
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            daten = r.read()
+    except Exception as e:
+        print(f"Fehler: {e}")
+        return
+    wb = load_workbook(io.BytesIO(daten), read_only=True, data_only=True)
+    for ws in wb.worksheets:
+        print(f"\n--- Blatt '{ws.title}' ({ws.max_row} x {ws.max_column})")
+        for i, row in enumerate(ws.iter_rows(values_only=True)):
+            if i >= zeilen:
+                break
+            werte = [str(v)[:40] for v in row if v not in (None, "")]
+            if werte:
+                print(f"{i + 1:3}: " + " | ".join(werte[:14]))
+
+
 if __name__ == "__main__":
     modus, *rest = sys.argv[1:] or ["katalog"]
     if modus == "katalog":
         katalog(rest or ["13111*", "13211*"])
+    elif modus == "xlsx":
+        for u in rest:
+            xlsx(u)
     elif modus == "links":
         links(rest[0], rest[1] if len(rest) > 1 else "")
