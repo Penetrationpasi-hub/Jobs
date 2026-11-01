@@ -39,10 +39,10 @@ jobs:
             exit 1
           fi
           # Zeigt, bei welcher GENESIS-Datenbank der Zugang gilt
-          for B in https://www.regionalstatistik.de/genesisWS/rest/2020 \
-                   https://www-genesis.destatis.de/genesisWS/rest/2020; do
+          for B in https://genesis.destatis.de/genesisWS/rest/2020 \
+                   https://www.regionalstatistik.de/genesisWS/rest/2020; do
             echo "== $B"
-            curl -sS -m 60 -X POST "$B/helloworld/logincheck" \
+            curl -sSL -m 60 -X POST "$B/helloworld/logincheck" \
               -H "username: $U" -H "password: $P" \
               -H "Content-Type: application/x-www-form-urlencoded" \
               -d "language=de" | head -c 400 || true
@@ -64,7 +64,7 @@ jobs:
           # TAB_BEV: 12411-04-02-4
           # TAB_PROG: 12421-01-01-4
           # STARTYEAR: "2008"
-        run: python arbeitsmarkt_historie.py
+        run: python -u arbeitsmarkt_historie.py
 
       - name: Ergebnisse committen
         run: |

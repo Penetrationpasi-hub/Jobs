@@ -41,11 +41,11 @@ BASE = Path(__file__).parent
 DATA = BASE / "data_historie"
 OUT = BASE / "arbeitsmarkt_historie.xlsx"
 
-# Per env umstellbar, z.B. auf GENESIS-Online (destatis):
-# https://www-genesis.destatis.de/genesisWS/rest/2020
+# Die Regionaldatenbank (frueher regionalstatistik.de) laeuft inzwischen
+# als "GENESIS-Online regional" unter genesis.destatis.de; die alte
+# REST-Adresse liefert nur noch HTML/404. Per env GENESIS_BASE umstellbar.
 GENESIS_BASE = (os.environ.get("GENESIS_BASE", "").strip()
-                or "https://www.regionalstatistik.de/genesisWS/rest/2020"
-                ).rstrip("/")
+                or "https://genesis.destatis.de/genesisWS/rest/2020").rstrip("/")
 STARTYEAR = int(os.environ.get("STARTYEAR", "2008"))
 USER_AGENT = "arbeitsmarkt-historie/1.0 (privates Arbeitsmarkt-Monitoring)"
 
@@ -215,8 +215,9 @@ def fetch_all():
         print("GENESIS_TOKEN (oder GENESIS_USER/GENESIS_PASS) nicht gesetzt, Abruf "
               "uebersprungen, Excel nutzt vorhandene CSVs.",
               file=sys.stderr)
-        return
+        return None
     DATA.mkdir(exist_ok=True)
+    ok = 0
     jahr = date.today().year
     for key, (code, beschr, keep) in TABELLEN.items():
         params = {
@@ -234,7 +235,14 @@ def fetch_all():
         try:
             raw = genesis_post("data/tablefile", params)
         except Exception as e:
-            print(f"{key}: Abruf fehlgeschlagen: {e}", file=sys.stderr)
+            detail = ""
+            if hasattr(e, "read"):
+                try:
+                    detail = " | " + e.read().decode("utf-8", "replace")[:300]
+                except Exception:
+                    pass
+            print(f"{key}: Abruf fehlgeschlagen: {e}{detail}",
+                  file=sys.stderr)
             katalog_hinweis(code.split("-")[0] + "*")
             continue
         text = raw.decode("utf-8-sig", errors="replace")
@@ -258,6 +266,8 @@ def fetch_all():
                 w.writerow([z["jahr"], z["monat"] or "", z["ags"],
                             z["kreis"], z["dim"], z["merkmal"], z["wert"]])
         print(f"{key}: {len(zeilen)} Zeilen -> {pfad.name}")
+        ok += 1
+    return ok
 
 
 def lade(key):
@@ -610,5 +620,10 @@ def build_excel():
 
 
 if __name__ == "__main__":
-    fetch_all()
-    raise SystemExit(build_excel())
+    geholt = fetch_all()
+    rc = build_excel()
+    if geholt == 0:
+        print(f"Keine einzige Tabelle von {GENESIS_BASE} erhalten, "
+              "Lauf wird als fehlgeschlagen markiert.", file=sys.stderr)
+        raise SystemExit(1)
+    raise SystemExit(rc)
