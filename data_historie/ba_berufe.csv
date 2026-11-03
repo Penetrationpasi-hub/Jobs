@@ -1,4 +1,548 @@
 monat;art;segment;anzahl
+2024-12;Arbeitslose;Bau- und Ausbauberufe;582
+2024-12;Arbeitslose;Berufe in Unternehmensführung und -organisation;914
+2024-12;Arbeitslose;Fertigungsberufe;1069
+2024-12;Arbeitslose;Fertigungstechnische Berufe;981
+2024-12;Arbeitslose;Handelsberufe;1242
+2024-12;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;290
+2024-12;Arbeitslose;Insgesamt;10564
+2024-12;Arbeitslose;Keine Angabe;404
+2024-12;Arbeitslose;Land-, Forst- und Gartenbauberufe;198
+2024-12;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;803
+2024-12;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;447
+2024-12;Arbeitslose;Reinigungsberufe;927
+2024-12;Arbeitslose;Sicherheitsberufe;344
+2024-12;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;568
+2024-12;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;319
+2024-12;Arbeitslose;Verkehrs- und Logistikberufe;1476
+2024-12;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;213
+2024-12;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;137
+2024-12;Gemeldete Arbeitsstellen;Fertigungsberufe;320
+2024-12;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;422
+2024-12;Gemeldete Arbeitsstellen;Handelsberufe;254
+2024-12;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;71
+2024-12;Gemeldete Arbeitsstellen;Insgesamt;2426
+2024-12;Gemeldete Arbeitsstellen;Keine Angabe;0
+2024-12;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;32
+2024-12;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;104
+2024-12;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;294
+2024-12;Gemeldete Arbeitsstellen;Reinigungsberufe;65
+2024-12;Gemeldete Arbeitsstellen;Sicherheitsberufe;41
+2024-12;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;147
+2024-12;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;118
+2024-12;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;208
+2025-01;Arbeitslose;Bau- und Ausbauberufe;624
+2025-01;Arbeitslose;Berufe in Unternehmensführung und -organisation;968
+2025-01;Arbeitslose;Fertigungsberufe;1161
+2025-01;Arbeitslose;Fertigungstechnische Berufe;1098
+2025-01;Arbeitslose;Handelsberufe;1286
+2025-01;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;300
+2025-01;Arbeitslose;Insgesamt;11317
+2025-01;Arbeitslose;Keine Angabe;531
+2025-01;Arbeitslose;Land-, Forst- und Gartenbauberufe;227
+2025-01;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;850
+2025-01;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;476
+2025-01;Arbeitslose;Reinigungsberufe;954
+2025-01;Arbeitslose;Sicherheitsberufe;349
+2025-01;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;576
+2025-01;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;360
+2025-01;Arbeitslose;Verkehrs- und Logistikberufe;1557
+2025-01;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;213
+2025-01;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;125
+2025-01;Gemeldete Arbeitsstellen;Fertigungsberufe;317
+2025-01;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;413
+2025-01;Gemeldete Arbeitsstellen;Handelsberufe;259
+2025-01;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;76
+2025-01;Gemeldete Arbeitsstellen;Insgesamt;2398
+2025-01;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-01;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;65
+2025-01;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;97
+2025-01;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;280
+2025-01;Gemeldete Arbeitsstellen;Reinigungsberufe;61
+2025-01;Gemeldete Arbeitsstellen;Sicherheitsberufe;38
+2025-01;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;137
+2025-01;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;106
+2025-01;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;211
+2025-02;Arbeitslose;Bau- und Ausbauberufe;608
+2025-02;Arbeitslose;Berufe in Unternehmensführung und -organisation;992
+2025-02;Arbeitslose;Fertigungsberufe;1129
+2025-02;Arbeitslose;Fertigungstechnische Berufe;1088
+2025-02;Arbeitslose;Handelsberufe;1277
+2025-02;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;300
+2025-02;Arbeitslose;Insgesamt;11114
+2025-02;Arbeitslose;Keine Angabe;494
+2025-02;Arbeitslose;Land-, Forst- und Gartenbauberufe;235
+2025-02;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;822
+2025-02;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;474
+2025-02;Arbeitslose;Reinigungsberufe;922
+2025-02;Arbeitslose;Sicherheitsberufe;329
+2025-02;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;551
+2025-02;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;354
+2025-02;Arbeitslose;Verkehrs- und Logistikberufe;1539
+2025-02;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;209
+2025-02;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;137
+2025-02;Gemeldete Arbeitsstellen;Fertigungsberufe;322
+2025-02;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;388
+2025-02;Gemeldete Arbeitsstellen;Handelsberufe;257
+2025-02;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;71
+2025-02;Gemeldete Arbeitsstellen;Insgesamt;2446
+2025-02;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-02;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;68
+2025-02;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;100
+2025-02;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;299
+2025-02;Gemeldete Arbeitsstellen;Reinigungsberufe;62
+2025-02;Gemeldete Arbeitsstellen;Sicherheitsberufe;33
+2025-02;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;148
+2025-02;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;126
+2025-02;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;226
+2025-03;Arbeitslose;Bau- und Ausbauberufe;608
+2025-03;Arbeitslose;Berufe in Unternehmensführung und -organisation;975
+2025-03;Arbeitslose;Fertigungsberufe;1151
+2025-03;Arbeitslose;Fertigungstechnische Berufe;1102
+2025-03;Arbeitslose;Handelsberufe;1292
+2025-03;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;310
+2025-03;Arbeitslose;Insgesamt;11156
+2025-03;Arbeitslose;Keine Angabe;508
+2025-03;Arbeitslose;Land-, Forst- und Gartenbauberufe;228
+2025-03;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;819
+2025-03;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;470
+2025-03;Arbeitslose;Reinigungsberufe;923
+2025-03;Arbeitslose;Sicherheitsberufe;344
+2025-03;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;529
+2025-03;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;334
+2025-03;Arbeitslose;Verkehrs- und Logistikberufe;1563
+2025-03;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;211
+2025-03;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;154
+2025-03;Gemeldete Arbeitsstellen;Fertigungsberufe;349
+2025-03;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;350
+2025-03;Gemeldete Arbeitsstellen;Handelsberufe;247
+2025-03;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;74
+2025-03;Gemeldete Arbeitsstellen;Insgesamt;2494
+2025-03;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-03;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;66
+2025-03;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;101
+2025-03;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;314
+2025-03;Gemeldete Arbeitsstellen;Reinigungsberufe;56
+2025-03;Gemeldete Arbeitsstellen;Sicherheitsberufe;26
+2025-03;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;146
+2025-03;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;118
+2025-03;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;282
+2025-04;Arbeitslose;Bau- und Ausbauberufe;602
+2025-04;Arbeitslose;Berufe in Unternehmensführung und -organisation;945
+2025-04;Arbeitslose;Fertigungsberufe;1176
+2025-04;Arbeitslose;Fertigungstechnische Berufe;1084
+2025-04;Arbeitslose;Handelsberufe;1302
+2025-04;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;308
+2025-04;Arbeitslose;Insgesamt;11050
+2025-04;Arbeitslose;Keine Angabe;477
+2025-04;Arbeitslose;Land-, Forst- und Gartenbauberufe;208
+2025-04;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;827
+2025-04;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;472
+2025-04;Arbeitslose;Reinigungsberufe;898
+2025-04;Arbeitslose;Sicherheitsberufe;336
+2025-04;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;529
+2025-04;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;355
+2025-04;Arbeitslose;Verkehrs- und Logistikberufe;1531
+2025-04;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;218
+2025-04;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;127
+2025-04;Gemeldete Arbeitsstellen;Fertigungsberufe;368
+2025-04;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;370
+2025-04;Gemeldete Arbeitsstellen;Handelsberufe;278
+2025-04;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;65
+2025-04;Gemeldete Arbeitsstellen;Insgesamt;2499
+2025-04;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-04;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;65
+2025-04;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;96
+2025-04;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;284
+2025-04;Gemeldete Arbeitsstellen;Reinigungsberufe;54
+2025-04;Gemeldete Arbeitsstellen;Sicherheitsberufe;11
+2025-04;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;145
+2025-04;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;109
+2025-04;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;309
+2025-05;Arbeitslose;Bau- und Ausbauberufe;615
+2025-05;Arbeitslose;Berufe in Unternehmensführung und -organisation;937
+2025-05;Arbeitslose;Fertigungsberufe;1173
+2025-05;Arbeitslose;Fertigungstechnische Berufe;1078
+2025-05;Arbeitslose;Handelsberufe;1306
+2025-05;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;317
+2025-05;Arbeitslose;Insgesamt;11096
+2025-05;Arbeitslose;Keine Angabe;496
+2025-05;Arbeitslose;Land-, Forst- und Gartenbauberufe;197
+2025-05;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;822
+2025-05;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;446
+2025-05;Arbeitslose;Reinigungsberufe;905
+2025-05;Arbeitslose;Sicherheitsberufe;348
+2025-05;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;553
+2025-05;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;359
+2025-05;Arbeitslose;Verkehrs- und Logistikberufe;1544
+2025-05;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;211
+2025-05;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;121
+2025-05;Gemeldete Arbeitsstellen;Fertigungsberufe;357
+2025-05;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;368
+2025-05;Gemeldete Arbeitsstellen;Handelsberufe;243
+2025-05;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;72
+2025-05;Gemeldete Arbeitsstellen;Insgesamt;2512
+2025-05;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-05;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;64
+2025-05;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;100
+2025-05;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;274
+2025-05;Gemeldete Arbeitsstellen;Reinigungsberufe;69
+2025-05;Gemeldete Arbeitsstellen;Sicherheitsberufe;81
+2025-05;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;125
+2025-05;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;111
+2025-05;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;316
+2025-06;Arbeitslose;Bau- und Ausbauberufe;608
+2025-06;Arbeitslose;Berufe in Unternehmensführung und -organisation;938
+2025-06;Arbeitslose;Fertigungsberufe;1168
+2025-06;Arbeitslose;Fertigungstechnische Berufe;1092
+2025-06;Arbeitslose;Handelsberufe;1329
+2025-06;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;314
+2025-06;Arbeitslose;Insgesamt;11179
+2025-06;Arbeitslose;Keine Angabe;498
+2025-06;Arbeitslose;Land-, Forst- und Gartenbauberufe;202
+2025-06;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;825
+2025-06;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;474
+2025-06;Arbeitslose;Reinigungsberufe;892
+2025-06;Arbeitslose;Sicherheitsberufe;354
+2025-06;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;557
+2025-06;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;370
+2025-06;Arbeitslose;Verkehrs- und Logistikberufe;1558
+2025-06;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;199
+2025-06;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;126
+2025-06;Gemeldete Arbeitsstellen;Fertigungsberufe;372
+2025-06;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;374
+2025-06;Gemeldete Arbeitsstellen;Handelsberufe;222
+2025-06;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;72
+2025-06;Gemeldete Arbeitsstellen;Insgesamt;2451
+2025-06;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-06;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;60
+2025-06;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;98
+2025-06;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;285
+2025-06;Gemeldete Arbeitsstellen;Reinigungsberufe;62
+2025-06;Gemeldete Arbeitsstellen;Sicherheitsberufe;85
+2025-06;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;114
+2025-06;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;89
+2025-06;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;293
+2025-07;Arbeitslose;Bau- und Ausbauberufe;618
+2025-07;Arbeitslose;Berufe in Unternehmensführung und -organisation;1014
+2025-07;Arbeitslose;Fertigungsberufe;1163
+2025-07;Arbeitslose;Fertigungstechnische Berufe;1061
+2025-07;Arbeitslose;Handelsberufe;1359
+2025-07;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;324
+2025-07;Arbeitslose;Insgesamt;11435
+2025-07;Arbeitslose;Keine Angabe;564
+2025-07;Arbeitslose;Land-, Forst- und Gartenbauberufe;193
+2025-07;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;816
+2025-07;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;502
+2025-07;Arbeitslose;Reinigungsberufe;891
+2025-07;Arbeitslose;Sicherheitsberufe;341
+2025-07;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;582
+2025-07;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;407
+2025-07;Arbeitslose;Verkehrs- und Logistikberufe;1600
+2025-07;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;194
+2025-07;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;128
+2025-07;Gemeldete Arbeitsstellen;Fertigungsberufe;399
+2025-07;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;398
+2025-07;Gemeldete Arbeitsstellen;Handelsberufe;214
+2025-07;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;73
+2025-07;Gemeldete Arbeitsstellen;Insgesamt;2486
+2025-07;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-07;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;62
+2025-07;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;95
+2025-07;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;294
+2025-07;Gemeldete Arbeitsstellen;Reinigungsberufe;59
+2025-07;Gemeldete Arbeitsstellen;Sicherheitsberufe;87
+2025-07;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;100
+2025-07;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;92
+2025-07;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;291
+2025-08;Arbeitslose;Bau- und Ausbauberufe;636
+2025-08;Arbeitslose;Berufe in Unternehmensführung und -organisation;1020
+2025-08;Arbeitslose;Fertigungsberufe;1154
+2025-08;Arbeitslose;Fertigungstechnische Berufe;1094
+2025-08;Arbeitslose;Handelsberufe;1401
+2025-08;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;332
+2025-08;Arbeitslose;Insgesamt;11798
+2025-08;Arbeitslose;Keine Angabe;672
+2025-08;Arbeitslose;Land-, Forst- und Gartenbauberufe;199
+2025-08;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;862
+2025-08;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;528
+2025-08;Arbeitslose;Reinigungsberufe;901
+2025-08;Arbeitslose;Sicherheitsberufe;350
+2025-08;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;635
+2025-08;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;418
+2025-08;Arbeitslose;Verkehrs- und Logistikberufe;1596
+2025-08;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;214
+2025-08;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;120
+2025-08;Gemeldete Arbeitsstellen;Fertigungsberufe;442
+2025-08;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;401
+2025-08;Gemeldete Arbeitsstellen;Handelsberufe;217
+2025-08;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;69
+2025-08;Gemeldete Arbeitsstellen;Insgesamt;2556
+2025-08;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-08;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;27
+2025-08;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;93
+2025-08;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;297
+2025-08;Gemeldete Arbeitsstellen;Reinigungsberufe;69
+2025-08;Gemeldete Arbeitsstellen;Sicherheitsberufe;84
+2025-08;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;98
+2025-08;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;100
+2025-08;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;325
+2025-09;Arbeitslose;Bau- und Ausbauberufe;618
+2025-09;Arbeitslose;Berufe in Unternehmensführung und -organisation;1017
+2025-09;Arbeitslose;Fertigungsberufe;1099
+2025-09;Arbeitslose;Fertigungstechnische Berufe;1101
+2025-09;Arbeitslose;Handelsberufe;1384
+2025-09;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;319
+2025-09;Arbeitslose;Insgesamt;11664
+2025-09;Arbeitslose;Keine Angabe;679
+2025-09;Arbeitslose;Land-, Forst- und Gartenbauberufe;195
+2025-09;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;840
+2025-09;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;534
+2025-09;Arbeitslose;Reinigungsberufe;880
+2025-09;Arbeitslose;Sicherheitsberufe;339
+2025-09;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;671
+2025-09;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;395
+2025-09;Arbeitslose;Verkehrs- und Logistikberufe;1593
+2025-09;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;202
+2025-09;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;110
+2025-09;Gemeldete Arbeitsstellen;Fertigungsberufe;407
+2025-09;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;417
+2025-09;Gemeldete Arbeitsstellen;Handelsberufe;192
+2025-09;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;64
+2025-09;Gemeldete Arbeitsstellen;Insgesamt;2451
+2025-09;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-09;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;29
+2025-09;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;99
+2025-09;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;298
+2025-09;Gemeldete Arbeitsstellen;Reinigungsberufe;72
+2025-09;Gemeldete Arbeitsstellen;Sicherheitsberufe;84
+2025-09;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;84
+2025-09;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;92
+2025-09;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;301
+2025-10;Arbeitslose;Bau- und Ausbauberufe;598
+2025-10;Arbeitslose;Berufe in Unternehmensführung und -organisation;1001
+2025-10;Arbeitslose;Fertigungsberufe;1054
+2025-10;Arbeitslose;Fertigungstechnische Berufe;1042
+2025-10;Arbeitslose;Handelsberufe;1331
+2025-10;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;321
+2025-10;Arbeitslose;Insgesamt;11232
+2025-10;Arbeitslose;Keine Angabe;620
+2025-10;Arbeitslose;Land-, Forst- und Gartenbauberufe;183
+2025-10;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;812
+2025-10;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;494
+2025-10;Arbeitslose;Reinigungsberufe;865
+2025-10;Arbeitslose;Sicherheitsberufe;337
+2025-10;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;642
+2025-10;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;371
+2025-10;Arbeitslose;Verkehrs- und Logistikberufe;1561
+2025-10;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;216
+2025-10;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;117
+2025-10;Gemeldete Arbeitsstellen;Fertigungsberufe;392
+2025-10;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;434
+2025-10;Gemeldete Arbeitsstellen;Handelsberufe;188
+2025-10;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;60
+2025-10;Gemeldete Arbeitsstellen;Insgesamt;2507
+2025-10;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-10;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;33
+2025-10;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;107
+2025-10;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;304
+2025-10;Gemeldete Arbeitsstellen;Reinigungsberufe;73
+2025-10;Gemeldete Arbeitsstellen;Sicherheitsberufe;85
+2025-10;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;106
+2025-10;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;104
+2025-10;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;288
+2025-11;Arbeitslose;Bau- und Ausbauberufe;612
+2025-11;Arbeitslose;Berufe in Unternehmensführung und -organisation;1036
+2025-11;Arbeitslose;Fertigungsberufe;1047
+2025-11;Arbeitslose;Fertigungstechnische Berufe;1046
+2025-11;Arbeitslose;Handelsberufe;1338
+2025-11;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;315
+2025-11;Arbeitslose;Insgesamt;11128
+2025-11;Arbeitslose;Keine Angabe;555
+2025-11;Arbeitslose;Land-, Forst- und Gartenbauberufe;183
+2025-11;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;791
+2025-11;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;468
+2025-11;Arbeitslose;Reinigungsberufe;866
+2025-11;Arbeitslose;Sicherheitsberufe;347
+2025-11;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;632
+2025-11;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;373
+2025-11;Arbeitslose;Verkehrs- und Logistikberufe;1519
+2025-11;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;240
+2025-11;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;106
+2025-11;Gemeldete Arbeitsstellen;Fertigungsberufe;404
+2025-11;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;452
+2025-11;Gemeldete Arbeitsstellen;Handelsberufe;224
+2025-11;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;72
+2025-11;Gemeldete Arbeitsstellen;Insgesamt;2513
+2025-11;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-11;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;29
+2025-11;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;116
+2025-11;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;298
+2025-11;Gemeldete Arbeitsstellen;Reinigungsberufe;48
+2025-11;Gemeldete Arbeitsstellen;Sicherheitsberufe;16
+2025-11;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;88
+2025-11;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;108
+2025-11;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;312
+2025-12;Arbeitslose;Bau- und Ausbauberufe;637
+2025-12;Arbeitslose;Berufe in Unternehmensführung und -organisation;1006
+2025-12;Arbeitslose;Fertigungsberufe;1079
+2025-12;Arbeitslose;Fertigungstechnische Berufe;1026
+2025-12;Arbeitslose;Handelsberufe;1341
+2025-12;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;320
+2025-12;Arbeitslose;Insgesamt;11100
+2025-12;Arbeitslose;Keine Angabe;469
+2025-12;Arbeitslose;Land-, Forst- und Gartenbauberufe;191
+2025-12;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;822
+2025-12;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;487
+2025-12;Arbeitslose;Reinigungsberufe;853
+2025-12;Arbeitslose;Sicherheitsberufe;346
+2025-12;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;615
+2025-12;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;370
+2025-12;Arbeitslose;Verkehrs- und Logistikberufe;1538
+2025-12;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;223
+2025-12;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;115
+2025-12;Gemeldete Arbeitsstellen;Fertigungsberufe;391
+2025-12;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;423
+2025-12;Gemeldete Arbeitsstellen;Handelsberufe;295
+2025-12;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;73
+2025-12;Gemeldete Arbeitsstellen;Insgesamt;2567
+2025-12;Gemeldete Arbeitsstellen;Keine Angabe;0
+2025-12;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;36
+2025-12;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;118
+2025-12;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;285
+2025-12;Gemeldete Arbeitsstellen;Reinigungsberufe;72
+2025-12;Gemeldete Arbeitsstellen;Sicherheitsberufe;19
+2025-12;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;91
+2025-12;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;115
+2025-12;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;311
+2026-01;Arbeitslose;Bau- und Ausbauberufe;674
+2026-01;Arbeitslose;Berufe in Unternehmensführung und -organisation;1071
+2026-01;Arbeitslose;Fertigungsberufe;1172
+2026-01;Arbeitslose;Fertigungstechnische Berufe;1120
+2026-01;Arbeitslose;Handelsberufe;1383
+2026-01;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;336
+2026-01;Arbeitslose;Insgesamt;11825
+2026-01;Arbeitslose;Keine Angabe;622
+2026-01;Arbeitslose;Land-, Forst- und Gartenbauberufe;227
+2026-01;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;855
+2026-01;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;503
+2026-01;Arbeitslose;Reinigungsberufe;882
+2026-01;Arbeitslose;Sicherheitsberufe;363
+2026-01;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;628
+2026-01;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;417
+2026-01;Arbeitslose;Verkehrs- und Logistikberufe;1572
+2026-01;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;233
+2026-01;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;109
+2026-01;Gemeldete Arbeitsstellen;Fertigungsberufe;368
+2026-01;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;410
+2026-01;Gemeldete Arbeitsstellen;Handelsberufe;307
+2026-01;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;85
+2026-01;Gemeldete Arbeitsstellen;Insgesamt;2491
+2026-01;Gemeldete Arbeitsstellen;Keine Angabe;0
+2026-01;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;32
+2026-01;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;103
+2026-01;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;283
+2026-01;Gemeldete Arbeitsstellen;Reinigungsberufe;64
+2026-01;Gemeldete Arbeitsstellen;Sicherheitsberufe;16
+2026-01;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;81
+2026-01;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;112
+2026-01;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;288
+2026-02;Arbeitslose;Bau- und Ausbauberufe;679
+2026-02;Arbeitslose;Berufe in Unternehmensführung und -organisation;1072
+2026-02;Arbeitslose;Fertigungsberufe;1136
+2026-02;Arbeitslose;Fertigungstechnische Berufe;1098
+2026-02;Arbeitslose;Handelsberufe;1395
+2026-02;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;340
+2026-02;Arbeitslose;Insgesamt;11658
+2026-02;Arbeitslose;Keine Angabe;476
+2026-02;Arbeitslose;Land-, Forst- und Gartenbauberufe;218
+2026-02;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;850
+2026-02;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;520
+2026-02;Arbeitslose;Reinigungsberufe;872
+2026-02;Arbeitslose;Sicherheitsberufe;358
+2026-02;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;621
+2026-02;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;410
+2026-02;Arbeitslose;Verkehrs- und Logistikberufe;1613
+2026-02;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;221
+2026-02;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;117
+2026-02;Gemeldete Arbeitsstellen;Fertigungsberufe;398
+2026-02;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;402
+2026-02;Gemeldete Arbeitsstellen;Handelsberufe;298
+2026-02;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;81
+2026-02;Gemeldete Arbeitsstellen;Insgesamt;2529
+2026-02;Gemeldete Arbeitsstellen;Keine Angabe;0
+2026-02;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;48
+2026-02;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;97
+2026-02;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;296
+2026-02;Gemeldete Arbeitsstellen;Reinigungsberufe;64
+2026-02;Gemeldete Arbeitsstellen;Sicherheitsberufe;24
+2026-02;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;94
+2026-02;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;115
+2026-02;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;274
+2026-03;Arbeitslose;Bau- und Ausbauberufe;663
+2026-03;Arbeitslose;Berufe in Unternehmensführung und -organisation;1067
+2026-03;Arbeitslose;Fertigungsberufe;1141
+2026-03;Arbeitslose;Fertigungstechnische Berufe;1105
+2026-03;Arbeitslose;Handelsberufe;1356
+2026-03;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;357
+2026-03;Arbeitslose;Insgesamt;11522
+2026-03;Arbeitslose;Keine Angabe;449
+2026-03;Arbeitslose;Land-, Forst- und Gartenbauberufe;226
+2026-03;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;839
+2026-03;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;517
+2026-03;Arbeitslose;Reinigungsberufe;861
+2026-03;Arbeitslose;Sicherheitsberufe;340
+2026-03;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;587
+2026-03;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;412
+2026-03;Arbeitslose;Verkehrs- und Logistikberufe;1602
+2026-03;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;215
+2026-03;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;123
+2026-03;Gemeldete Arbeitsstellen;Fertigungsberufe;420
+2026-03;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;436
+2026-03;Gemeldete Arbeitsstellen;Handelsberufe;276
+2026-03;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;74
+2026-03;Gemeldete Arbeitsstellen;Insgesamt;2553
+2026-03;Gemeldete Arbeitsstellen;Keine Angabe;0
+2026-03;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;59
+2026-03;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;96
+2026-03;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;260
+2026-03;Gemeldete Arbeitsstellen;Reinigungsberufe;74
+2026-03;Gemeldete Arbeitsstellen;Sicherheitsberufe;23
+2026-03;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;108
+2026-03;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;110
+2026-03;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;279
+2026-04;Arbeitslose;Bau- und Ausbauberufe;659
+2026-04;Arbeitslose;Berufe in Unternehmensführung und -organisation;1113
+2026-04;Arbeitslose;Fertigungsberufe;1160
+2026-04;Arbeitslose;Fertigungstechnische Berufe;1129
+2026-04;Arbeitslose;Handelsberufe;1377
+2026-04;Arbeitslose;IT- und naturwissenschaftliche Dienstleistungsberufe;352
+2026-04;Arbeitslose;Insgesamt;11623
+2026-04;Arbeitslose;Keine Angabe;438
+2026-04;Arbeitslose;Land-, Forst- und Gartenbauberufe;220
+2026-04;Arbeitslose;Lebensmittel- und Gastgewerbeberufe;816
+2026-04;Arbeitslose;Medizinische u. nicht-medizinische Gesundheitsberufe;534
+2026-04;Arbeitslose;Reinigungsberufe;868
+2026-04;Arbeitslose;Sicherheitsberufe;336
+2026-04;Arbeitslose;Soziale und kulturelle Dienstleistungsberufe;590
+2026-04;Arbeitslose;Unternehmensbezogene Dienstleistungsberufe;431
+2026-04;Arbeitslose;Verkehrs- und Logistikberufe;1600
+2026-04;Gemeldete Arbeitsstellen;Bau- und Ausbauberufe;253
+2026-04;Gemeldete Arbeitsstellen;Berufe in Unternehmensführung und -organisation;129
+2026-04;Gemeldete Arbeitsstellen;Fertigungsberufe;457
+2026-04;Gemeldete Arbeitsstellen;Fertigungstechnische Berufe;468
+2026-04;Gemeldete Arbeitsstellen;Handelsberufe;258
+2026-04;Gemeldete Arbeitsstellen;IT- und naturwissenschaftliche Dienstleistungsberufe;70
+2026-04;Gemeldete Arbeitsstellen;Insgesamt;2639
+2026-04;Gemeldete Arbeitsstellen;Keine Angabe;0
+2026-04;Gemeldete Arbeitsstellen;Land-, Forst- und Gartenbauberufe;49
+2026-04;Gemeldete Arbeitsstellen;Lebensmittel- und Gastgewerbeberufe;89
+2026-04;Gemeldete Arbeitsstellen;Medizinische u. nicht-medizinische Gesundheitsberufe;247
+2026-04;Gemeldete Arbeitsstellen;Reinigungsberufe;70
+2026-04;Gemeldete Arbeitsstellen;Sicherheitsberufe;28
+2026-04;Gemeldete Arbeitsstellen;Soziale und kulturelle Dienstleistungsberufe;113
+2026-04;Gemeldete Arbeitsstellen;Unternehmensbezogene Dienstleistungsberufe;113
+2026-04;Gemeldete Arbeitsstellen;Verkehrs- und Logistikberufe;295
 2026-05;Arbeitslose;Bau- und Ausbauberufe;651
 2026-05;Arbeitslose;Berufe in Unternehmensführung und -organisation;1080
 2026-05;Arbeitslose;Fertigungsberufe;1133
