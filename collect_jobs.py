@@ -543,7 +543,7 @@ import statistics
 from datetime import date, datetime
 
 from openpyxl import Workbook
-from branchen import SONSTIGE, branche_von_beruf
+from branchen import SONSTIGE, branche_von_beruf, branche_von_stelle
 from openpyxl.chart import BarChart, LineChart, Reference
 from openpyxl.chart.axis import ChartLines
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -819,6 +819,32 @@ def build_excel():
             bz.cell(row=i, column=j, value=bges.get((d, b)))
     style_header(bz, len(bz_berufe) + 1)
 
+    # ---------------- ScrapJobs vorbereiten (Karriereseiten, siehe Blaetter
+    # ScrapJobs / ScrapJobs-Abgleich). Fuer die Branchenauswertung zaehlen nur
+    # aktuell offene Stellen, die NICHT schon in den BA-Daten stehen.
+    sj = read_csv("scrapjobs_log.csv")
+    sj_offen = [r for r in sj if r["last_seen"] == stand]
+    ba_titel = {}
+    for r in log:
+        if r["last_seen"] == stand:
+            ba_titel.setdefault(norm_ag(r["arbeitgeber"]), set()).add(
+                norm_titel(r["titel"]))
+    ba_keys = list(ba_titel)
+
+    def ba_ag_keys(name):
+        k = norm_ag(name)
+        return [b for b in ba_keys if ag_passt(k, b)]
+
+    def in_ba(r):
+        t = norm_titel(r["titel"])
+        return any(t in ba_titel[b] for b in ba_ag_keys(r["arbeitgeber"]))
+
+    sj_nur = [r for r in sj_offen if not in_ba(r)]
+    sj_bran = {}         # Branche -> Stellen nur auf Karriereseite
+    for r in sj_nur:
+        br = branche_von_stelle(r["titel"], r["arbeitgeber"])
+        sj_bran[br] = sj_bran.get(br, 0) + 1
+
     # ---------------- Branchen (Berufe -> Branche, siehe branchen.py)
     # Basis sind die beiden Kreis-Suchgebiete, die ueber die gesamte Zeit
     # erhoben wurden und sich nicht ueberschneiden. Wurden an einem Tag
@@ -839,7 +865,7 @@ def build_excel():
     bran = {}            # (datum, branche) -> Summe ueber die Basisgebiete
     for (d, _rg, br), n in bran_reg.items():
         bran[(d, br)] = bran.get((d, br), 0) + n
-    br_namen = sorted({br for (_d, br) in bran},
+    br_namen = sorted({br for (_d, br) in bran} | set(sj_bran),
                       key=lambda x: (x == SONSTIGE, -bran.get((stand, x), 0), x))
     ges_tag = {d: sum(bran.get((d, br), 0) for br in br_namen) for d in daten}
 
@@ -853,10 +879,19 @@ def build_excel():
     bn["A2"] = (f"Stand {as_date(stand):%d.%m.%Y}. Die Branche wird aus der "
                 "Berufsbezeichnung abgeleitet (branchen.py), die API liefert "
                 "keine Branche. Stellenzahlen sind auf die Gesamtzahl "
-                "hochgerechnet, wenn nicht alle Stellen geladen wurden.")
+                "hochgerechnet, wenn nicht alle Stellen geladen wurden. "
+                "Rechts: offene Stellen von Arbeitgeber-Karriereseiten "
+                "(ScrapJobs), die nicht in den BA-Daten stehen; die Branche "
+                "kommt aus dem Titel, sonst vom Arbeitgeber. Die Zeitreihe "
+                "bleibt reine BA-Zahl (ScrapJobs gibt es erst seit kurzem).")
     kopf = ["Branche", "Stellen aktuell", "Anteil", "Δ 7 Tage", "Δ 7 Tage %",
             "Δ 30 Tage", "Δ 30 Tage %", "Anteil vor 30 Tagen",
-            "Δ Anteil (Prozentpunkte)"] + [reg_name(r) for r in basis]
+            "Δ Anteil (Prozentpunkte)"] + [reg_name(r) for r in basis] \
+        + ["Nur Karriereseite (ScrapJobs)", "Gesamt inkl. Karriereseite",
+           "Anteil gesamt"]
+    c_sj = 10 + len(basis)          # Spalte "Nur Karriereseite"
+    sj_summe = sum(sj_bran.values())
+    gesamt_alle = round(ges_tag[stand]) + sj_summe
     for c, t in enumerate(kopf, start=1):
         bn.cell(row=4, column=c, value=t)
     style_header(bn, len(kopf), row=4)
@@ -886,6 +921,13 @@ def build_excel():
             bn.cell(row=i, column=j,
                     value=round(bran_reg.get((stand, rg, br), 0))
                     ).number_format = "#,##0"
+        nur = sj_bran.get(br, 0)
+        bn.cell(row=i, column=c_sj, value=nur).number_format = "#,##0"
+        bn.cell(row=i, column=c_sj + 1, value=akt + nur
+                ).number_format = "#,##0"
+        if gesamt_alle:
+            bn.cell(row=i, column=c_sj + 2, value=(akt + nur) / gesamt_alle
+                    ).number_format = "0.0%"
     z_sum = 5 + len(br_namen)
     bn.cell(row=z_sum, column=1, value="Summe").font = Font(name=ARIAL, bold=True)
     bn.cell(row=z_sum, column=2, value=round(ges_tag[stand])
@@ -898,12 +940,15 @@ def build_excel():
         bn.cell(row=z_sum, column=6,
                 value=round(ges_tag[stand]) - round(ges_tag[d30])
                 ).number_format = "+#,##0;-#,##0;0"
-    bc = balken_chart("Offene Stellen nach Branche (aktuell)", "Stellen",
-                      len(br_namen))
-    bc.add_data(Reference(bn, min_col=2, min_row=4, max_row=z_sum - 1),
-                titles_from_data=True)
+    bn.cell(row=z_sum, column=c_sj, value=sj_summe).number_format = "#,##0"
+    bn.cell(row=z_sum, column=c_sj + 1, value=gesamt_alle
+            ).number_format = "#,##0"
+    bc = balken_chart("Offene Stellen nach Branche (BA + Karriereseiten)",
+                      "Stellen", len(br_namen))
+    for col in (2, c_sj):
+        bc.add_data(Reference(bn, min_col=col, min_row=4, max_row=z_sum - 1),
+                    titles_from_data=True)
     bc.set_categories(Reference(bn, min_col=1, min_row=5, max_row=z_sum - 1))
-    bc.legend = None
     bn.add_chart(bc, f"A{z_sum + 3}")
 
     # Zeitreihe je Branche (Stellen), eine Spalte je Branche; rechts
@@ -940,6 +985,24 @@ def build_excel():
         bzu.cell(row=i, column=3, value=bges.get((stand, b), 0))
     style_header(bzu, 3)
     bzu.auto_filter.ref = f"A1:C{len(top_akt) + 1}"
+    # Zuordnung der Karriereseiten-Stellen (nur die, die in die Branchen
+    # zaehlen), damit nachvollziehbar bleibt, wer wohin kam
+    for c, t in enumerate(["Arbeitgeber (Karriereseite)", "Stelle",
+                           "Branche", "Zuordnung nach"], start=5):
+        bzu.cell(row=1, column=c, value=t)
+    style_header(bzu, 8)
+    bzu.freeze_panes = "A2"
+    for i, r in enumerate(sorted(sj_nur, key=lambda r: (
+            branche_von_stelle(r["titel"], r["arbeitgeber"]),
+            r["arbeitgeber"])), start=2):
+        br = branche_von_stelle(r["titel"], r["arbeitgeber"])
+        bzu.cell(row=i, column=5, value=r["arbeitgeber"])
+        bzu.cell(row=i, column=6, value=r["titel"])
+        bzu.cell(row=i, column=7, value=br)
+        bzu.cell(row=i, column=8, value=(
+            "offen" if br == SONSTIGE else
+            "Titel" if branche_von_beruf(r["titel"]) != SONSTIGE
+            else "Arbeitgeber"))
 
     # ---------------- Aktuell (alle Berufe des Stichtags)
     ak = wb.create_sheet("Aktuell")
@@ -1186,25 +1249,7 @@ def build_excel():
 
     # ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
     # Eigene Blaetter, NICHT in den BA-Zahlen oben enthalten.
-    sj = read_csv("scrapjobs_log.csv")
     if sj:
-        sj_offen = [r for r in sj if r["last_seen"] == stand]
-        # BA-Index: normalisierter Arbeitgeber -> Titelmenge (nur offene BA-Stellen)
-        ba_titel = {}
-        for r in log:
-            if r["last_seen"] == stand:
-                ba_titel.setdefault(norm_ag(r["arbeitgeber"]), set()).add(
-                    norm_titel(r["titel"]))
-        ba_keys = list(ba_titel)
-
-        def ba_ag_keys(name):
-            k = norm_ag(name)
-            return [b for b in ba_keys if ag_passt(k, b)]
-
-        def in_ba(r):
-            t = norm_titel(r["titel"])
-            return any(t in ba_titel[b] for b in ba_ag_keys(r["arbeitgeber"]))
-
         sl = wb.create_sheet("ScrapJobs")
         sl.append(["Arbeitgeber", "Stelle", "Ort", "Quelle", "Link",
                    "Veröffentlicht", "Erstmals gesehen", "Zuletzt gesehen",

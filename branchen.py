@@ -18,7 +18,7 @@ REGELN = [
         "pflege", "kranken", "arzt", "ärztin", "medizin", "zahn", "therapeut",
         "physio", "ergo", "logopäd", "apothek", "pharma", "hebamme",
         "rettungs", "sanitäter", "heilpraktiker", "optiker", "orthopädie",
-        "radiolog", "labor", "psycholog", "betreuungskraft", "alltagsbegleiter",
+        "radiolog", "labor", "psycholog", "betreuungskraft", "alltagsbegleiter", "ärztlich",
         "operationstechn", "anästhesie", "diätassist", "tierarzt", "tiermedizin",
         "podolog", "masseur", "krankenhaus", "hygieniker", "hörakustik", "kodier", "dental"]),
     ("Soziales & Bildung", [
@@ -117,3 +117,36 @@ def branche_von_beruf(beruf: str) -> str:
             break
     _cache[beruf] = erg
     return erg
+
+
+# Fallback fuer Karriereseiten-Stellen (ScrapJobs), deren Titel keine Branche
+# verraet (Praktika, Leitungsstellen, ...): Branche des Arbeitgebers.
+# Teilstrings des kleingeschriebenen Arbeitgebernamens, erste Regel gewinnt.
+# Zeitarbeitsfirmen stehen bewusst nicht drin (Branche haengt vom Einsatz ab).
+ARBEITGEBER_REGELN = [
+    ("Gesundheit & Pflege", ["klinik"]),
+    ("Soziales & Bildung", ["paulinenpflege", "waldorf", "kirche", "diakon"]),
+    ("Büro, Verwaltung & Finanzen", [
+        "landratsamt", "stadt schorndorf", "gemeinde", "sparkasse",
+        "volksbank", "statistisches landesamt"]),
+    ("Elektro & Energie", ["stadtwerke", "murrelektronik"]),
+    ("Gastronomie & Tourismus", ["bäckerei"]),
+    ("Handel & Verkauf", ["autohaus", "burger schloz"]),
+    ("Reinigung & Sicherheit", ["abfallwirtschaft"]),
+    ("Industrie & Produktion", [
+        "harro", "stoba", "swoboda", "techtronic", "judo", "fessmann",
+        "föhl", "elanders", "benz", "riani", "remsgold", "extdeco",
+        "klöpfer", "müller jorberg"]),
+]
+
+
+def branche_von_stelle(titel: str, arbeitgeber: str) -> str:
+    """Branche einer Stelle: erst aus dem Titel, sonst vom Arbeitgeber."""
+    b = branche_von_beruf(titel)
+    if b != SONSTIGE:
+        return b
+    ag = (arbeitgeber or "").lower()
+    for branche, teile in ARBEITGEBER_REGELN:
+        if any(t in ag for t in teile):
+            return branche
+    return SONSTIGE
