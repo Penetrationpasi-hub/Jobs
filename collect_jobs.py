@@ -380,6 +380,71 @@ def update_jobs_log(path: Path, today: str, seen: dict[str, dict]):
     return existing
 
 
+# ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
+# Das Schwester-Repo Penetrationpasi-hub/ScrapJobs liest taeglich die
+# Karriereseiten ausgewaehlter Arbeitgeber und legt stellen.json ab.
+# Die Stellen kommen NICHT in die BA-Zahlen (Zeitreihe, Berufe,
+# Branchen), sondern in eigene Blaetter: sonst Doppelzaehlung, und die
+# Daten haben kein Berufsfeld. Ein Ausfall bricht den Lauf nicht ab.
+SCRAPJOBS_URL = (os.environ.get("SCRAPJOBS_URL", "").strip()
+                 or "https://raw.githubusercontent.com/"
+                    "Penetrationpasi-hub/ScrapJobs/main/stellen.json")
+SCRAPJOBS_FIELDS = ["id", "quelle", "arbeitgeber", "titel", "ort", "url",
+                    "veroeffentlicht", "first_seen", "last_seen"]
+
+
+def lade_scrapjobs_json():
+    """stellen.json holen; SCRAPJOBS_URL darf auch ein lokaler Pfad sein."""
+    if not SCRAPJOBS_URL.startswith("http"):
+        with open(SCRAPJOBS_URL, encoding="utf-8") as f:
+            return json.load(f)
+    req = urllib.request.Request(SCRAPJOBS_URL, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def update_scrapjobs(today: str):
+    """data/scrapjobs_log.csv fortschreiben (id -> first_seen/last_seen)."""
+    path = DATA_DIR / "scrapjobs_log.csv"
+    try:
+        doc = lade_scrapjobs_json()
+        stellen = doc["stellen"]
+    except Exception as e:
+        print(f"[scrapjobs] Abruf fehlgeschlagen, uebersprungen: {e}",
+              file=sys.stderr)
+        return
+    existing: dict[str, dict] = {}
+    if path.exists():
+        with path.open(newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                existing[row["id"]] = row
+    for s in stellen:
+        sid = s.get("id") or s.get("url")
+        if not sid:
+            continue
+        if sid in existing:
+            existing[sid]["last_seen"] = today
+            continue
+        existing[sid] = {
+            "id": sid,
+            "quelle": s.get("sourceLabel") or s.get("source") or "",
+            "arbeitgeber": (s.get("company") or "").strip()[:150],
+            "titel": (s.get("title") or "").strip()[:200],
+            "ort": (s.get("location") or "").strip()[:100],
+            "url": s.get("url") or "",
+            "veroeffentlicht": s.get("posted") or "",
+            # frueheres Erstsehen aus ScrapJobs uebernehmen, falls aelter
+            "first_seen": min(today, s.get("erstmalsGesehen") or today),
+            "last_seen": today,
+        }
+    with path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=SCRAPJOBS_FIELDS)
+        w.writeheader()
+        w.writerows(existing.values())
+    print(f"[scrapjobs] {len(stellen)} Stellen abgerufen, "
+          f"{len(existing)} im Log")
+
+
 def main():
     DATA_DIR.mkdir(exist_ok=True)
     today = date.today().isoformat()
@@ -451,6 +516,7 @@ def main():
     log = update_jobs_log(DATA_DIR / "jobs_log.csv", today, seen_jobs)
 
     fetch_arbeitslose()
+    update_scrapjobs(today)
 
     if not snapshot_rows:
         # Kein einziges Suchgebiet geladen: rot werden statt still eine
@@ -472,6 +538,7 @@ def main():
 
 import csv
 import os
+import re
 import statistics
 from datetime import date, datetime
 
@@ -511,6 +578,27 @@ HEAD_FONT = Font(name=ARIAL, bold=True, color="FFFFFF")
 HEAD_FILL = PatternFill("solid", start_color="1D3C6E")
 INPUT_FONT = Font(name=ARIAL, color="0000FF")
 DATUM_FMT = "DD.MM.YYYY"
+
+
+_RECHTSFORM = re.compile(
+    r"\b(gmbh|mbh|co|kg|ag|se|ohg|ug|gg?mbh|e\.?\s?v|a[oö]r|eg|srl|b\.?v)\b")
+_GENDER = re.compile(r"\(?\b[mwdfix](?:\s*/\s*[mwdfix]){1,2}\)?", re.I)
+
+
+def norm_ag(x):
+    """Arbeitgebername ohne Rechtsform/Sonderzeichen (Abgleich BA <-> Karriereseite)."""
+    x = _RECHTSFORM.sub(" ", (x or "").lower().replace("&", " "))
+    return re.sub(r"[^a-zäöüß0-9]", "", x)
+
+
+def norm_titel(x):
+    x = _GENDER.sub(" ", (x or "").lower())
+    return re.sub(r"[^a-zäöüß0-9]", "", x)
+
+
+def ag_passt(a, b):
+    """Gleicher Arbeitgeber, wenn ein Name im anderen enthalten ist (min. 6 Zeichen)."""
+    return len(a) >= 6 and len(b) >= 6 and (a in b or b in a)
 
 
 def read_csv(name):
@@ -1094,6 +1182,99 @@ def build_excel():
             "GENESIS_USER/GENESIS_PASS (oder GENESIS_TOKEN) als GitHub-Secrets setzen "
             "(kostenloses Konto auf regionalstatistik.de), dann fuellen "
             "sich das Blatt Arbeitslose und dieser Block automatisch."))
+
+
+    # ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
+    # Eigene Blaetter, NICHT in den BA-Zahlen oben enthalten.
+    sj = read_csv("scrapjobs_log.csv")
+    if sj:
+        sj_offen = [r for r in sj if r["last_seen"] == stand]
+        # BA-Index: normalisierter Arbeitgeber -> Titelmenge (nur offene BA-Stellen)
+        ba_titel = {}
+        for r in log:
+            if r["last_seen"] == stand:
+                ba_titel.setdefault(norm_ag(r["arbeitgeber"]), set()).add(
+                    norm_titel(r["titel"]))
+        ba_keys = list(ba_titel)
+
+        def ba_ag_keys(name):
+            k = norm_ag(name)
+            return [b for b in ba_keys if ag_passt(k, b)]
+
+        def in_ba(r):
+            t = norm_titel(r["titel"])
+            return any(t in ba_titel[b] for b in ba_ag_keys(r["arbeitgeber"]))
+
+        sl = wb.create_sheet("ScrapJobs")
+        sl.append(["Arbeitgeber", "Stelle", "Ort", "Quelle", "Link",
+                   "Veröffentlicht", "Erstmals gesehen", "Zuletzt gesehen",
+                   "Aktuell offen", "Standzeit (Tage)", "Auch in BA-Daten"])
+        for i, r in enumerate(sorted(
+                sj, key=lambda r: (r["last_seen"] != stand,
+                                   r["arbeitgeber"], r["titel"])), start=2):
+            sl.cell(row=i, column=1, value=r["arbeitgeber"])
+            sl.cell(row=i, column=2, value=r["titel"])
+            sl.cell(row=i, column=3, value=r["ort"])
+            sl.cell(row=i, column=4, value=r["quelle"])
+            sl.cell(row=i, column=5, value=r["url"])
+            sl.cell(row=i, column=6, value=r["veroeffentlicht"] or None)
+            sl.cell(row=i, column=7, value=as_date(r["first_seen"])
+                    ).number_format = DATUM_FMT
+            sl.cell(row=i, column=8, value=as_date(r["last_seen"])
+                    ).number_format = DATUM_FMT
+            offen = r["last_seen"] == stand
+            sl.cell(row=i, column=9, value="ja" if offen else "nein")
+            sl.cell(row=i, column=10, value=standzeit_tage(r))
+            sl.cell(row=i, column=11,
+                    value=("ja" if in_ba(r) else "nein") if offen else None)
+        style_header(sl, 11)
+
+        # Abgleich je Arbeitgeber (nur aktuell offene Karriereseiten-Stellen)
+        sj_ag = {}
+        for r in sj_offen:
+            sj_ag.setdefault(r["arbeitgeber"], []).append(r)
+        ba_offen_je_key = {}
+        for r in log:
+            if r["last_seen"] == stand:
+                k = norm_ag(r["arbeitgeber"])
+                ba_offen_je_key[k] = ba_offen_je_key.get(k, 0) + 1
+        sa = wb.create_sheet("ScrapJobs-Abgleich")
+        sa.append(["Arbeitgeber", "Offen (Karriereseite)",
+                   "davon auch in BA", "Nur auf Karriereseite",
+                   "Offen in BA-Daten (Arbeitgeber)", "Abdeckung BA"])
+        zeilen = []
+        for a, rs in sj_ag.items():
+            auch = sum(1 for r in rs if in_ba(r))
+            ba_n = sum(ba_offen_je_key[k] for k in ba_ag_keys(a))
+            zeilen.append((a, len(rs), auch, len(rs) - auch, ba_n))
+        zeilen.sort(key=lambda z: (-z[3], -z[1], z[0]))
+        for i, (a, n, auch, nur, ba_n) in enumerate(zeilen, start=2):
+            sa.cell(row=i, column=1, value=a)
+            sa.cell(row=i, column=2, value=n)
+            sa.cell(row=i, column=3, value=auch)
+            sa.cell(row=i, column=4, value=nur)
+            sa.cell(row=i, column=5, value=ba_n)
+            sa.cell(row=i, column=6, value=auch / n).number_format = "0%"
+        style_header(sa, 6)
+        gn = sum(z[1] for z in zeilen)
+        gauch = sum(z[2] for z in zeilen)
+        sa.cell(row=len(zeilen) + 3, column=1, value="Gesamt").font = Font(
+            name=ARIAL, bold=True)
+        sa.cell(row=len(zeilen) + 3, column=2, value=gn)
+        sa.cell(row=len(zeilen) + 3, column=3, value=gauch)
+        sa.cell(row=len(zeilen) + 3, column=4, value=gn - gauch)
+        sa.cell(row=len(zeilen) + 5, column=1, value=(
+            "Abgleich: gleicher Arbeitgeber (Name ohne Rechtsform, "
+            "ineinander enthalten) UND gleicher Stellentitel (ohne m/w/d) "
+            "unter den aktuell offenen BA-Stellen. 'Nur auf Karriereseite' "
+            "ist der Mehrwert gegenueber der BA-Auswertung. Die BA-Zahlen "
+            "in den uebrigen Blaettern enthalten diese Stellen nicht "
+            "zusaetzlich (keine Doppelzaehlung)."))
+        zs["A6"] = "Karriereseiten (ScrapJobs)"
+        zs["B6"] = (f"{gn} offene Stellen bei {len(zeilen)} Arbeitgebern, "
+                    f"davon {gn - gauch} nicht in den BA-Daten "
+                    "(Blaetter ScrapJobs, ScrapJobs-Abgleich)")
+        zs["A6"].font = Font(name=ARIAL, bold=True)
 
     # verbleibende Formeln (Relation zur blauen Spalte) beim Oeffnen
     # in Excel/LibreOffice sicher durchrechnen lassen
