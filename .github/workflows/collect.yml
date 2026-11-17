@@ -2,7 +2,9 @@ name: Daten sammeln
 
 on:
   schedule:
-    - cron: "0 6 * * *"
+    # 08:17 UTC: nach dem ScrapJobs-Lauf (06:05 Berlin, bis zu 2 h),
+    # damit stellen.json vom selben Tag gelesen wird
+    - cron: "17 8 * * *"
   workflow_dispatch:
 
 permissions:
