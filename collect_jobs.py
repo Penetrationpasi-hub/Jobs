@@ -15,6 +15,9 @@ Outputs (im Ordner data/):
                     Regionaldatenbank Deutschland (GENESIS, EVAS 13211).
                     Benoetigt env GENESIS_USER / GENESIS_PASS
                     (kostenloses Konto auf regionalstatistik.de).
+  scrapjobs_log.csv - Stellen von Karriereseiten (Repo ScrapJobs)
+  stellen_alle.csv  - BA + Karriereseiten im gemeinsamen Format, jede
+                      Stelle einmal (siehe README)
 """
 
 import csv
@@ -390,7 +393,11 @@ SCRAPJOBS_URL = (os.environ.get("SCRAPJOBS_URL", "").strip()
                  or "https://raw.githubusercontent.com/"
                     "Penetrationpasi-hub/ScrapJobs/main/stellen.json")
 SCRAPJOBS_FIELDS = ["id", "quelle", "arbeitgeber", "titel", "ort", "url",
-                    "veroeffentlicht", "first_seen", "last_seen"]
+                    "veroeffentlicht", "first_seen", "last_seen", "aktiv"]
+# Stand der zuletzt gelesenen stellen.json (fuer die Zusammenfassung)
+SCRAPJOBS_STAND = "scrapjobs_stand.json"
+# aelter als das: Warnung im Actions-Log (ScrapJobs-Lauf ausgefallen?)
+SCRAPJOBS_MAX_ALTER_TAGE = 2
 
 
 def lade_scrapjobs_json():
@@ -404,7 +411,13 @@ def lade_scrapjobs_json():
 
 
 def update_scrapjobs(today: str):
-    """data/scrapjobs_log.csv fortschreiben (id -> first_seen/last_seen)."""
+    """data/scrapjobs_log.csv fortschreiben (id -> first_seen/last_seen).
+
+    first_seen/last_seen kommen aus ScrapJobs selbst (erstmalsGesehen,
+    zuletztGesehen), nicht vom Abrufdatum: ist stellen.json veraltet, weil
+    der ScrapJobs-Lauf ausfiel, gilt eine Stelle sonst faelschlich als
+    'heute gesehen'. aktiv = steht in der aktuellen stellen.json.
+    """
     path = DATA_DIR / "scrapjobs_log.csv"
     try:
         doc = lade_scrapjobs_json()
@@ -413,35 +426,53 @@ def update_scrapjobs(today: str):
         print(f"[scrapjobs] Abruf fehlgeschlagen, uebersprungen: {e}",
               file=sys.stderr)
         return
+    stand = (doc.get("aktualisiert") or "")[:10] or today
+    quellen = doc.get("quellen") or []
+    alter = (date.fromisoformat(today) - date.fromisoformat(stand)).days
+    if alter > SCRAPJOBS_MAX_ALTER_TAGE:
+        print(f"::warning::ScrapJobs-Daten sind {alter} Tage alt (Stand "
+              f"{stand}) - Lauf im Repo ScrapJobs pruefen.", file=sys.stderr)
+
     existing: dict[str, dict] = {}
     if path.exists():
         with path.open(newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
+                row["aktiv"] = "nein"
+                # Reparatur: last_seen kann nie juenger als die Quelle sein
+                # (alte Laeufe schrieben hier das Abrufdatum hinein)
+                row["last_seen"] = min(row["last_seen"], stand)
+                row["first_seen"] = min(row["first_seen"], row["last_seen"])
                 existing[row["id"]] = row
     for s in stellen:
         sid = s.get("id") or s.get("url")
         if not sid:
             continue
-        if sid in existing:
-            existing[sid]["last_seen"] = today
-            continue
-        existing[sid] = {
-            "id": sid,
+        erst = s.get("erstmalsGesehen") or stand
+        zuletzt = s.get("zuletztGesehen") or stand
+        row = existing.setdefault(sid, {"id": sid, "first_seen": erst})
+        row.update({
             "quelle": s.get("sourceLabel") or s.get("source") or "",
             "arbeitgeber": (s.get("company") or "").strip()[:150],
             "titel": (s.get("title") or "").strip()[:200],
             "ort": (s.get("location") or "").strip()[:100],
             "url": s.get("url") or "",
             "veroeffentlicht": s.get("posted") or "",
-            # frueheres Erstsehen aus ScrapJobs uebernehmen, falls aelter
-            "first_seen": min(today, s.get("erstmalsGesehen") or today),
-            "last_seen": today,
-        }
+            "first_seen": min(row["first_seen"], erst),
+            "last_seen": zuletzt,
+            "aktiv": "ja",
+        })
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=SCRAPJOBS_FIELDS)
         w.writeheader()
         w.writerows(existing.values())
-    print(f"[scrapjobs] {len(stellen)} Stellen abgerufen, "
+    (DATA_DIR / SCRAPJOBS_STAND).write_text(json.dumps({
+        "aktualisiert": doc.get("aktualisiert"),
+        "abgerufen": today,
+        "quellen_gesamt": len(quellen),
+        "quellen_ok": sum(1 for q in quellen if q.get("status") == "done"),
+        "stellen": len(stellen),
+    }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"[scrapjobs] {len(stellen)} Stellen abgerufen (Stand {stand}), "
           f"{len(existing)} im Log")
 
 
@@ -544,6 +575,7 @@ from datetime import date, datetime
 
 from openpyxl import Workbook
 from branchen import SONSTIGE, branche_von_beruf
+from orte import kreis_von
 from openpyxl.chart import BarChart, LineChart, Reference
 from openpyxl.chart.axis import ChartLines
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -616,6 +648,140 @@ def as_date(s):
 def standzeit_tage(r):
     """Standzeit einer Log-Zeile in Tagen (erster Tag zaehlt mit)."""
     return (as_date(r["last_seen"]) - as_date(r["first_seen"])).days + 1
+
+
+# ---------------- Gemeinsames Format BA + Karriereseiten (ScrapJobs)
+ALLE_FIELDS = ["stellen_id", "herkunft", "ba_refnr", "scrapjobs_id",
+               "titel", "arbeitgeber", "ort", "kreis", "ba_suchgebiet",
+               "beruf", "beruf_quelle", "branche", "branche_quelle",
+               "url", "first_seen", "last_seen", "offen", "standzeit_tage"]
+HERKUNFT_BA = "BA"
+HERKUNFT_SJ = "Karriereseite"
+HERKUNFT_BEIDE = "beide"
+# Eine Karriereseiten-Stelle gilt als dieselbe wie eine BA-Stelle, wenn
+# Arbeitgeber und Titel passen und sich die Zeitraeume bis auf so viele
+# Tage beruehren (sonst wuerde eine laengst beendete BA-Anzeige mit
+# gleichem Titel eine neue Karriereseiten-Anzeige "schlucken").
+ABGLEICH_TOLERANZ_TAGE = 14
+
+
+def baue_stellen_alle(log, sj, ba_stand):
+    """BA-Log und ScrapJobs-Log in ein gemeinsames Format bringen.
+
+    Jede Stelle genau eine Zeile; dieselbe Stelle bei BA und auf der
+    Karriereseite wird zu einer Zeile mit herkunft='beide'. Karriereseiten-
+    Stellen bekommen Beruf (ueber gleichen Titel in den BA-Daten) und
+    Branche, alle Stellen einen Kreis (orte.kreis_von). Ergebnis wird
+    nach data/stellen_alle.csv geschrieben und zurueckgegeben.
+    """
+    # BA-Index: Arbeitgeber-Schluessel -> Titel-Schluessel -> BA-Zeilen
+    ba_idx = {}
+    titel_beruf = {}
+    ag_branche = {}
+    for r in log:
+        k = norm_ag(r["arbeitgeber"])
+        t = norm_titel(r["titel"])
+        ba_idx.setdefault(k, {}).setdefault(t, []).append(r)
+        if r["beruf"] and r["beruf"] != "unbekannt":
+            titel_beruf.setdefault(t, Counter())[r["beruf"]] += 1
+        ag_branche.setdefault(k, Counter())[branche_von_beruf(r["beruf"])] += 1
+    ba_keys = [k for k in ba_idx if len(k) >= 6]
+    key_cache = {}
+
+    def passende_keys(name):
+        k = norm_ag(name)
+        if k not in key_cache:
+            key_cache[k] = [b for b in ba_keys if ag_passt(k, b)]
+        return key_cache[k]
+
+    verbraucht = set()
+    partner = {}        # scrapjobs id -> BA-Zeile
+    for r in sorted(sj, key=lambda r: r["first_seen"]):
+        t = norm_titel(r["titel"])
+        if not t:
+            continue
+        sj_von = as_date(r["first_seen"])
+        sj_bis = as_date(r["last_seen"])
+        kandidaten = []
+        for k in passende_keys(r["arbeitgeber"]):
+            for b in ba_idx[k].get(t, ()):
+                if b["refnr"] in verbraucht:
+                    continue
+                luecke = max((sj_von - as_date(b["last_seen"])).days,
+                             (as_date(b["first_seen"]) - sj_bis).days, 0)
+                if luecke <= ABGLEICH_TOLERANZ_TAGE:
+                    kandidaten.append((luecke, b["last_seen"] != ba_stand,
+                                       b["refnr"], b))
+        if kandidaten:
+            b = min(kandidaten, key=lambda x: x[:3])[3]
+            verbraucht.add(b["refnr"])
+            partner[r["id"]] = b
+
+    def zeile(ba=None, s=None):
+        quelle = ba or s
+        first = min(x["first_seen"] for x in (ba, s) if x)
+        last = max(x["last_seen"] for x in (ba, s) if x)
+        offen = bool((ba and ba["last_seen"] == ba_stand)
+                     or (s and s.get("aktiv", "ja") == "ja"))
+        if ba:
+            beruf, beruf_q = ba["beruf"], HERKUNFT_BA
+        else:
+            c = titel_beruf.get(norm_titel(s["titel"]))
+            beruf, beruf_q = ((c.most_common(1)[0][0], "Titel-Abgleich")
+                              if c else ("", "offen"))
+        if beruf and beruf != "unbekannt":
+            branche, branche_q = branche_von_beruf(beruf), "Beruf"
+        else:
+            branche, branche_q = SONSTIGE, "offen"
+        if branche == SONSTIGE and s:
+            b = branche_von_beruf(s["titel"])
+            if b != SONSTIGE:
+                branche, branche_q = b, "Titel"
+            else:
+                c = Counter()
+                for k in passende_keys(s["arbeitgeber"]):
+                    c.update(ag_branche[k])
+                c.pop(SONSTIGE, None)
+                if c:
+                    branche, branche_q = c.most_common(1)[0][0], "Arbeitgeber"
+        ort = (ba or {}).get("ort") or (s or {}).get("ort") or ""
+        return {
+            "stellen_id": f"BA:{ba['refnr']}" if ba else f"SJ:{s['id']}",
+            "herkunft": (HERKUNFT_BEIDE if ba and s else
+                         HERKUNFT_BA if ba else HERKUNFT_SJ),
+            "ba_refnr": ba["refnr"] if ba else "",
+            "scrapjobs_id": s["id"] if s else "",
+            "titel": quelle["titel"],
+            "arbeitgeber": quelle["arbeitgeber"],
+            "ort": ort,
+            "kreis": kreis_von(ort),
+            "ba_suchgebiet": ba["region"] if ba else "",
+            "beruf": beruf,
+            "beruf_quelle": beruf_q,
+            "branche": branche,
+            "branche_quelle": branche_q,
+            "url": (s or {}).get("url") or "",
+            "first_seen": first,
+            "last_seen": last,
+            "offen": "ja" if offen else "nein",
+            "standzeit_tage": (as_date(last) - as_date(first)).days + 1,
+        }
+
+    sj_zu_ba = {b["refnr"]: sid for sid, b in partner.items()}
+    sj_map = {r["id"]: r for r in sj}
+    alle = []
+    for b in log:
+        sid = sj_zu_ba.get(b["refnr"])
+        alle.append(zeile(b, sj_map[sid] if sid else None))
+    for r in sj:
+        if r["id"] not in partner:
+            alle.append(zeile(None, r))
+    with open(os.path.join(DATA, "stellen_alle.csv"), "w",
+              newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=ALLE_FIELDS)
+        w.writeheader()
+        w.writerows(alle)
+    return alle
 
 
 def style_header(ws, ncols, row=1):
@@ -1184,60 +1350,126 @@ def build_excel():
             "sich das Blatt Arbeitslose und dieser Block automatisch."))
 
 
-    # ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
-    # Eigene Blaetter, NICHT in den BA-Zahlen oben enthalten.
+    # ---------------- Alle Quellen gemeinsam (BA + Karriereseiten)
+    # Die BA-Blaetter oben bleiben reine BA-Zahlen (Zeitreihen bleiben
+    # vergleichbar). Hier: gemeinsames Format, jede Stelle einmal.
     sj = read_csv("scrapjobs_log.csv")
-    if sj:
-        sj_offen = [r for r in sj if r["last_seen"] == stand]
-        # BA-Index: normalisierter Arbeitgeber -> Titelmenge (nur offene BA-Stellen)
-        ba_titel = {}
-        for r in log:
-            if r["last_seen"] == stand:
-                ba_titel.setdefault(norm_ag(r["arbeitgeber"]), set()).add(
-                    norm_titel(r["titel"]))
-        ba_keys = list(ba_titel)
+    alle = baue_stellen_alle(log, sj, stand)
+    alle_offen = [r for r in alle if r["offen"] == "ja"]
+    herk = [HERKUNFT_BA, HERKUNFT_BEIDE, HERKUNFT_SJ]
 
-        def ba_ag_keys(name):
-            k = norm_ag(name)
-            return [b for b in ba_keys if ag_passt(k, b)]
+    gs = wb.create_sheet("Gesamt-Übersicht")
+    gs["A1"] = "Offene Stellen aus allen Quellen (jede Stelle einmal gezählt)"
+    gs["A1"].font = Font(name=ARIAL, bold=True, size=12)
+    zeile_nr = 3
+
+    def kreuz(titel, schluessel, limit=None):
+        nonlocal zeile_nr
+        zaehl = {}
+        for r in alle_offen:
+            z = zaehl.setdefault(r[schluessel], Counter())
+            z[r["herkunft"]] += 1
+        reihen = sorted(zaehl, key=lambda x: -sum(zaehl[x].values()))
+        if limit:
+            reihen = reihen[:limit]
+        kopf = [titel, "Gesamt", "nur BA", "BA + Karriereseite",
+                "nur Karriereseite", "Anteil nur Karriereseite"]
+        for j, v in enumerate(kopf, start=1):
+            gs.cell(row=zeile_nr, column=j, value=v)
+        style_header(gs, len(kopf), row=zeile_nr)
+        for x in reihen:
+            zeile_nr += 1
+            z = zaehl[x]
+            ges = sum(z.values())
+            werte = [x, ges] + [z[h] for h in herk] + [z[HERKUNFT_SJ] / ges]
+            for j, v in enumerate(werte, start=1):
+                gs.cell(row=zeile_nr, column=j, value=v)
+            gs.cell(row=zeile_nr, column=6).number_format = "0%"
+        zeile_nr += 3
+
+    kreuz("Kreis", "kreis")
+    kreuz("Branche", "branche")
+    kreuz("Arbeitgeber (Top 50)", "arbeitgeber", limit=50)
+    gs.cell(row=zeile_nr, column=1, value=(
+        "Kreis: aus dem Arbeitsort (orte.py), überschneidungsfrei - anders "
+        "als die BA-Suchgebiete. Branche: aus dem BA-Beruf; bei reinen "
+        "Karriereseiten-Stellen über gleichen Titel in den BA-Daten, "
+        "Stichwörter im Titel oder die übliche Branche des Arbeitgebers "
+        "(Spalte branche_quelle im Blatt Alle Stellen)."))
+
+    # Blatt nur mit offenen Stellen (sonst wird die Excel ~3x so gross);
+    # der komplette Bestand inkl. beendeter Stellen steht in
+    # data/stellen_alle.csv
+    al_ws = wb.create_sheet("Alle Stellen")
+    kopf_alle = ["Herkunft", "Arbeitgeber", "Stelle", "Ort", "Kreis",
+                 "BA-Suchgebiet", "Beruf", "Beruf-Quelle", "Branche",
+                 "Branche-Quelle", "Erstmals gesehen", "Zuletzt gesehen",
+                 "Offen", "Standzeit bisher (Tage)", "Link", "Stellen-ID"]
+    al_ws.append(kopf_alle)
+    for i, r in enumerate(sorted(
+            alle_offen, key=lambda r: (r["arbeitgeber"], r["titel"])),
+            start=2):
+        url = r["url"] or (
+            "https://www.arbeitsagentur.de/jobsuche/jobdetail/" + r["ba_refnr"])
+        werte = [r["herkunft"], r["arbeitgeber"], r["titel"], r["ort"],
+                 r["kreis"], reg_name(r["ba_suchgebiet"]) if r["ba_suchgebiet"]
+                 else None, r["beruf"] or None, r["beruf_quelle"],
+                 r["branche"], r["branche_quelle"], as_date(r["first_seen"]),
+                 as_date(r["last_seen"]), r["offen"], r["standzeit_tage"],
+                 url, r["stellen_id"]]
+        for j, v in enumerate(werte, start=1):
+            al_ws.cell(row=i, column=j, value=v)
+        al_ws.cell(row=i, column=11).number_format = DATUM_FMT
+        al_ws.cell(row=i, column=12).number_format = DATUM_FMT
+    style_header(al_ws, len(kopf_alle))
+    al_ws.auto_filter.ref = f"A1:{get_column_letter(len(kopf_alle))}{len(alle_offen) + 1}"
+    al_ws.freeze_panes = "A2"
+
+    n_her = Counter(r["herkunft"] for r in alle_offen)
+    zs["A11"] = "Alle Quellen (offen)"
+    zs["B11"] = (f"{len(alle_offen)} Stellen: {n_her[HERKUNFT_BA]} nur BA, "
+                 f"{n_her[HERKUNFT_BEIDE]} BA + Karriereseite, "
+                 f"{n_her[HERKUNFT_SJ]} nur Karriereseite "
+                 "(Blätter Gesamt-Übersicht, Alle Stellen = alle offenen; "
+                 "Rohdaten data/stellen_alle.csv)")
+    zs["A11"].font = Font(name=ARIAL, bold=True)
+
+    # ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
+    # Detailblaetter; der Abgleich mit der BA kommt aus baue_stellen_alle.
+    if sj:
+        sj_info = {r["scrapjobs_id"]: r for r in alle if r["scrapjobs_id"]}
+        sj_offen = [r for r in sj if r.get("aktiv", "ja") == "ja"]
 
         def in_ba(r):
-            t = norm_titel(r["titel"])
-            return any(t in ba_titel[b] for b in ba_ag_keys(r["arbeitgeber"]))
+            return sj_info[r["id"]]["herkunft"] == HERKUNFT_BEIDE
 
         sl = wb.create_sheet("ScrapJobs")
-        sl.append(["Arbeitgeber", "Stelle", "Ort", "Quelle", "Link",
+        sl.append(["Arbeitgeber", "Stelle", "Ort", "Kreis", "Quelle", "Link",
                    "Veröffentlicht", "Erstmals gesehen", "Zuletzt gesehen",
-                   "Aktuell offen", "Standzeit (Tage)", "Auch in BA-Daten"])
+                   "Aktuell offen", "Standzeit (Tage)", "Auch in BA-Daten",
+                   "Branche"])
         for i, r in enumerate(sorted(
-                sj, key=lambda r: (r["last_seen"] != stand,
+                sj, key=lambda r: (r.get("aktiv", "ja") != "ja",
                                    r["arbeitgeber"], r["titel"])), start=2):
-            sl.cell(row=i, column=1, value=r["arbeitgeber"])
-            sl.cell(row=i, column=2, value=r["titel"])
-            sl.cell(row=i, column=3, value=r["ort"])
-            sl.cell(row=i, column=4, value=r["quelle"])
-            sl.cell(row=i, column=5, value=r["url"])
-            sl.cell(row=i, column=6, value=r["veroeffentlicht"] or None)
-            sl.cell(row=i, column=7, value=as_date(r["first_seen"])
-                    ).number_format = DATUM_FMT
-            sl.cell(row=i, column=8, value=as_date(r["last_seen"])
-                    ).number_format = DATUM_FMT
-            offen = r["last_seen"] == stand
-            sl.cell(row=i, column=9, value="ja" if offen else "nein")
-            sl.cell(row=i, column=10, value=standzeit_tage(r))
-            sl.cell(row=i, column=11,
-                    value=("ja" if in_ba(r) else "nein") if offen else None)
-        style_header(sl, 11)
+            offen = r.get("aktiv", "ja") == "ja"
+            werte = [r["arbeitgeber"], r["titel"], r["ort"],
+                     kreis_von(r["ort"]), r["quelle"], r["url"],
+                     r["veroeffentlicht"] or None, as_date(r["first_seen"]),
+                     as_date(r["last_seen"]), "ja" if offen else "nein",
+                     standzeit_tage(r), "ja" if in_ba(r) else "nein",
+                     sj_info[r["id"]]["branche"]]
+            for j, v in enumerate(werte, start=1):
+                sl.cell(row=i, column=j, value=v)
+            sl.cell(row=i, column=8).number_format = DATUM_FMT
+            sl.cell(row=i, column=9).number_format = DATUM_FMT
+        style_header(sl, 13)
 
         # Abgleich je Arbeitgeber (nur aktuell offene Karriereseiten-Stellen)
         sj_ag = {}
         for r in sj_offen:
             sj_ag.setdefault(r["arbeitgeber"], []).append(r)
-        ba_offen_je_key = {}
-        for r in log:
-            if r["last_seen"] == stand:
-                k = norm_ag(r["arbeitgeber"])
-                ba_offen_je_key[k] = ba_offen_je_key.get(k, 0) + 1
+        ba_offen_je_key = Counter(norm_ag(r["arbeitgeber"]) for r in log
+                                  if r["last_seen"] == stand)
         sa = wb.create_sheet("ScrapJobs-Abgleich")
         sa.append(["Arbeitgeber", "Offen (Karriereseite)",
                    "davon auch in BA", "Nur auf Karriereseite",
@@ -1245,7 +1477,8 @@ def build_excel():
         zeilen = []
         for a, rs in sj_ag.items():
             auch = sum(1 for r in rs if in_ba(r))
-            ba_n = sum(ba_offen_je_key[k] for k in ba_ag_keys(a))
+            k = norm_ag(a)
+            ba_n = sum(n for b, n in ba_offen_je_key.items() if ag_passt(k, b))
             zeilen.append((a, len(rs), auch, len(rs) - auch, ba_n))
         zeilen.sort(key=lambda z: (-z[3], -z[1], z[0]))
         for i, (a, n, auch, nur, ba_n) in enumerate(zeilen, start=2):
@@ -1265,15 +1498,25 @@ def build_excel():
         sa.cell(row=len(zeilen) + 3, column=4, value=gn - gauch)
         sa.cell(row=len(zeilen) + 5, column=1, value=(
             "Abgleich: gleicher Arbeitgeber (Name ohne Rechtsform, "
-            "ineinander enthalten) UND gleicher Stellentitel (ohne m/w/d) "
-            "unter den aktuell offenen BA-Stellen. 'Nur auf Karriereseite' "
-            "ist der Mehrwert gegenueber der BA-Auswertung. Die BA-Zahlen "
-            "in den uebrigen Blaettern enthalten diese Stellen nicht "
-            "zusaetzlich (keine Doppelzaehlung)."))
+            "ineinander enthalten), gleicher Stellentitel (ohne m/w/d) und "
+            f"Zeitraum hoechstens {ABGLEICH_TOLERANZ_TAGE} Tage auseinander; "
+            "jede BA-Stelle zaehlt hoechstens einmal. 'Nur auf Karriereseite' "
+            "ist der Mehrwert gegenueber der BA-Auswertung."))
+        stand_sj = {}
+        try:
+            with open(os.path.join(DATA, "scrapjobs_stand.json"),
+                      encoding="utf-8") as fh:
+                stand_sj = json.load(fh)
+        except (OSError, ValueError):
+            pass
         zs["A6"] = "Karriereseiten (ScrapJobs)"
         zs["B6"] = (f"{gn} offene Stellen bei {len(zeilen)} Arbeitgebern, "
-                    f"davon {gn - gauch} nicht in den BA-Daten "
-                    "(Blaetter ScrapJobs, ScrapJobs-Abgleich)")
+                    f"davon {gn - gauch} nicht in den BA-Daten"
+                    + (f"; Datenstand {stand_sj['aktualisiert'][:10]}, "
+                       f"{stand_sj['quellen_ok']} von "
+                       f"{stand_sj['quellen_gesamt']} Quellen gelesen"
+                       if stand_sj.get("aktualisiert") else "")
+                    + " (Blaetter ScrapJobs, ScrapJobs-Abgleich)")
         zs["A6"].font = Font(name=ARIAL, bold=True)
 
     # verbleibende Formeln (Relation zur blauen Spalte) beim Oeffnen
