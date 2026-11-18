@@ -574,9 +574,12 @@ import statistics
 from datetime import date, datetime
 
 from openpyxl import Workbook
-from branchen import SONSTIGE, branche_von_beruf
+from branchen import (HAUPTGRUPPEN, SEGMENT_KURZ, SEGMENTE, SEKTOREN,
+                      SONSTIGE, branche_von_beruf, einordnung)
 from orte import kreis_von
-from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart import AreaChart, BarChart, LineChart, Reference
+from openpyxl.chart.marker import DataPoint
+from openpyxl.formatting.rule import ColorScaleRule, DataBarRule
 from openpyxl.chart.axis import ChartLines
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -654,7 +657,7 @@ def standzeit_tage(r):
 ALLE_FIELDS = ["stellen_id", "herkunft", "ba_refnr", "scrapjobs_id",
                "titel", "arbeitgeber", "ort", "kreis", "ba_suchgebiet",
                "beruf", "beruf_quelle", "branche", "branche_quelle",
-               "url", "first_seen", "last_seen", "offen", "standzeit_tage"]
+               "hauptgruppe", "url", "first_seen", "last_seen", "offen", "standzeit_tage"]
 HERKUNFT_BA = "BA"
 HERKUNFT_SJ = "Karriereseite"
 HERKUNFT_BEIDE = "beide"
@@ -684,7 +687,7 @@ def baue_stellen_alle(log, sj, ba_stand):
         ba_idx.setdefault(k, {}).setdefault(t, []).append(r)
         if r["beruf"] and r["beruf"] != "unbekannt":
             titel_beruf.setdefault(t, Counter())[r["beruf"]] += 1
-        ag_branche.setdefault(k, Counter())[branche_von_beruf(r["beruf"])] += 1
+        ag_branche.setdefault(k, Counter())[einordnung(r["beruf"]).hauptgruppe] += 1
     ba_keys = [k for k in ba_idx if len(k) >= 6]
     key_cache = {}
 
@@ -729,21 +732,25 @@ def baue_stellen_alle(log, sj, ba_stand):
             c = titel_beruf.get(norm_titel(s["titel"]))
             beruf, beruf_q = ((c.most_common(1)[0][0], "Titel-Abgleich")
                               if c else ("", "offen"))
+        # Branche = BA-Berufssegment (branchen.py); Reihenfolge der Quellen:
+        # Beruf -> Stichwoerter im Titel -> uebliche Hauptgruppe des Arbeitgebers
+        hg, branche_q = "", "offen"
         if beruf and beruf != "unbekannt":
-            branche, branche_q = branche_von_beruf(beruf), "Beruf"
-        else:
-            branche, branche_q = SONSTIGE, "offen"
-        if branche == SONSTIGE and s:
-            b = branche_von_beruf(s["titel"])
-            if b != SONSTIGE:
-                branche, branche_q = b, "Titel"
+            hg = einordnung(beruf).hauptgruppe
+            branche_q = "Beruf" if hg else "offen"
+        if not hg and s:
+            hg = einordnung(s["titel"]).hauptgruppe
+            if hg:
+                branche_q = "Titel"
             else:
                 c = Counter()
                 for k in passende_keys(s["arbeitgeber"]):
                     c.update(ag_branche[k])
-                c.pop(SONSTIGE, None)
+                c.pop("", None)
                 if c:
-                    branche, branche_q = c.most_common(1)[0][0], "Arbeitgeber"
+                    hg, branche_q = c.most_common(1)[0][0], "Arbeitgeber"
+        branche = (SEGMENTE[HAUPTGRUPPEN[hg][1]] if hg in HAUPTGRUPPEN
+                   else SONSTIGE)
         ort = (ba or {}).get("ort") or (s or {}).get("ort") or ""
         return {
             "stellen_id": f"BA:{ba['refnr']}" if ba else f"SJ:{s['id']}",
@@ -760,6 +767,7 @@ def baue_stellen_alle(log, sj, ba_stand):
             "beruf_quelle": beruf_q,
             "branche": branche,
             "branche_quelle": branche_q,
+            "hauptgruppe": hg,
             "url": (s or {}).get("url") or "",
             "first_seen": first,
             "last_seen": last,
@@ -985,131 +993,493 @@ def build_excel():
             bz.cell(row=i, column=j, value=bges.get((d, b)))
     style_header(bz, len(bz_berufe) + 1)
 
-    # ---------------- Branchen (Berufe -> Branche, siehe branchen.py)
+    # ---------------- Gemeinsamer Bestand BA + Karriereseiten (wird fuer
+    # die Branchenauswertung und die Blaetter weiter unten gebraucht)
+    sj = read_csv("scrapjobs_log.csv")
+    alle = baue_stellen_alle(log, sj, stand)
+
+    # ---------------- Branchen = offizielle BA-Berufssegmente (KldB 2010)
     # Basis sind die beiden Kreis-Suchgebiete, die ueber die gesamte Zeit
     # erhoben wurden und sich nicht ueberschneiden. Wurden an einem Tag
     # weniger Stellen im Detail geladen als es gibt (API-Limit), wird auf
-    # die Gesamtzahl hochgerechnet, sonst saehe man Sprunge im Juli.
+    # die Gesamtzahl hochgerechnet, sonst saehe man Spruenge im Juli.
     geladen = {(r["datum"], r["region"]): int(r["stellen_geladen"] or 0)
                for r in snaps}
     basis = [r for r in ("rems-murr-kreis", "ostalbkreis") if r in alle_reg] \
         or aktiv
-    bran_reg = {}        # (datum, region, branche) -> hochgerechnete Stellen
+    seg_reg = {}         # (datum, region, segment) -> hochgerechnete Stellen
+    hg_tag = {}          # (datum, hauptgruppe) -> hochgerechnete Stellen
+    quelle_stand = Counter()          # Herkunft der Zuordnung am Stichtag
+    hg_berufe = {}                    # hauptgruppe -> Counter(beruf) Stichtag
     for (d, rg, b), n in brb.items():
         if rg not in basis:
             continue
         ges, gel = snap_map.get((d, rg)), geladen.get((d, rg))
         faktor = ges / gel if ges and gel and gel < ges else 1.0
-        k = (d, rg, branche_von_beruf(b))
-        bran_reg[k] = bran_reg.get(k, 0) + n * faktor
-    bran = {}            # (datum, branche) -> Summe ueber die Basisgebiete
-    for (d, _rg, br), n in bran_reg.items():
-        bran[(d, br)] = bran.get((d, br), 0) + n
-    br_namen = sorted({br for (_d, br) in bran},
-                      key=lambda x: (x == SONSTIGE, -bran.get((stand, x), 0), x))
-    ges_tag = {d: sum(bran.get((d, br), 0) for br in br_namen) for d in daten}
+        e = einordnung(b)
+        k = (d, rg, e.segment)
+        seg_reg[k] = seg_reg.get(k, 0) + n * faktor
+        hg_tag[(d, e.hauptgruppe)] = hg_tag.get((d, e.hauptgruppe), 0) + n * faktor
+        if d == stand:
+            quelle_stand[e.quelle] += n
+            hg_berufe.setdefault(e.hauptgruppe, Counter())[b] += n
+    seg_tag = {}         # (datum, segment) -> Summe ueber die Basisgebiete
+    for (d, _rg, sg), n in seg_reg.items():
+        seg_tag[(d, sg)] = seg_tag.get((d, sg), 0) + n
+    ges_tag = {d: sum(v for (dd, _s), v in seg_tag.items() if dd == d)
+               for d in daten}
+    akt = lambda sg, d=stand: seg_tag.get((d, sg), 0)
+    # Segmente nach aktueller Groesse, "Keine Angabe" (Code "") ans Ende
+    segs = sorted(set(SEGMENTE) | {sg for (_d, sg) in seg_tag},
+                  key=lambda sg: (sg == "", -akt(sg), sg))
+    seg_name = lambda sg: SEGMENTE.get(sg, SONSTIGE)
+    seg_kurz = lambda sg: SEGMENT_KURZ.get(sg, SONSTIGE)
+    hgs = sorted(set(HAUPTGRUPPEN) | {hg for (_d, hg) in hg_tag},
+                 key=lambda hg: (hg == "", -hg_tag.get((stand, hg), 0), hg))
+    hg_name = lambda hg: (f"{hg} {HAUPTGRUPPEN[hg][0]}" if hg in HAUPTGRUPPEN
+                          else SONSTIGE)
 
-    def anteil(d, br):
-        return bran.get((d, br), 0) / ges_tag[d] if ges_tag.get(d) else None
+    def anteil(wert_tag, d, x):
+        return wert_tag.get((d, x), 0) / ges_tag[d] if ges_tag.get(d) else None
 
-    bn = wb.create_sheet("Branchen")
-    bn["A1"] = ("Entwicklung der Branchen (Stellenangebote, "
-                + " + ".join(reg_name(r) for r in basis) + ")")
-    bn["A1"].font = Font(name=ARIAL, bold=True, size=14)
-    bn["A2"] = (f"Stand {as_date(stand):%d.%m.%Y}. Die Branche wird aus der "
-                "Berufsbezeichnung abgeleitet (branchen.py), die API liefert "
-                "keine Branche. Stellenzahlen sind auf die Gesamtzahl "
-                "hochgerechnet, wenn nicht alle Stellen geladen wurden.")
-    # Zeitraum in die Kopfzeilen, damit klar ist, worauf sich H/I beziehen
+    def pp(wert_tag, x, dx):
+        """Veraenderung des Anteils in Prozentpunkten Stand vs. dx."""
+        a, b = anteil(wert_tag, stand, x), anteil(wert_tag, dx, x) if dx else None
+        return round((a - b) * 100, 2) if a is not None and b is not None else None
+
+    # Karriereseiten-Stellen, die NICHT in den BA-Daten stehen, je Segment
+    seg_code_von_name = {v: k for k, v in SEGMENTE.items()}
+    nur_sj = Counter(seg_code_von_name.get(r["branche"], "")
+                     for r in alle if r["offen"] == "ja"
+                     and r["herkunft"] == HERKUNFT_SJ)
+
+    # Engpass: Arbeitslose und gemeldete Stellen je Segment, BA-Statistik,
+    # Agentur fuer Arbeit Waiblingen (= Rems-Murr-Kreis), letzter Monat
+    bab = []
+    bab_pfad = os.path.join(BASE, "data_historie", "ba_berufe.csv")
+    if os.path.exists(bab_pfad):
+        with open(bab_pfad, encoding="utf-8-sig", newline="") as fh:
+            bab = list(csv.DictReader(fh, delimiter=";"))
+    bab_monat = max((r["monat"] for r in bab), default=None)
+    bab_wert = {(r["art"], r["segment"]): float(r["anzahl"] or 0)
+                for r in bab if r["monat"] == bab_monat}
+
+    def engpass(sg):
+        alo = bab_wert.get(("Arbeitslose", seg_name(sg)))
+        gst = bab_wert.get(("Gemeldete Arbeitsstellen", seg_name(sg)))
+        return alo, gst, (round(alo / gst, 1) if alo is not None and gst else None)
+
     fmt = lambda d: f"{as_date(d):%d.%m.%Y}" if d else "n/a"
     zr30 = f"{fmt(d30)} – {fmt(stand)}"
-    kopf = ["Branche", "Stellen aktuell", "Anteil", "Δ 7 Tage", "Δ 7 Tage %",
-            "Δ 30 Tage", "Δ 30 Tage %", f"Anteil am {fmt(d30)}",
-            f"Δ Anteil in Prozentpunkten ({zr30})"] \
-        + [reg_name(r) for r in basis]
+    bab_txt = (f"{bab_monat[5:]}/{bab_monat[:4]}" if bab_monat else "n/a")
+
+    bn = wb.create_sheet("Branchen")
+    bn["A1"] = ("Branchenanalyse: offene Stellen nach Berufssegment (BA, KldB 2010), "
+                + " + ".join(reg_name(r) for r in basis))
+    bn["A1"].font = Font(name=ARIAL, bold=True, size=14)
+    bn["A2"] = (f"Stand {fmt(stand)}. Einteilung nach der offiziellen "
+                "Klassifikation der Berufe (KldB 2010) der Bundesagentur: "
+                "37 Berufshauptgruppen → 14 Berufssegmente → 5 Sektoren, "
+                "dieselbe Gliederung wie die BA-Arbeitsmarktstatistik. "
+                "Stellenzahlen sind auf die Gesamtzahl hochgerechnet, wenn "
+                "nicht alle Stellen geladen wurden. Zuordnung je Beruf: Blatt "
+                "Branchen-Zuordnung.")
+
+    # Kennzahlen-Kopf
+    pp30 = {sg: pp(seg_tag, sg, d30) for sg in segs if sg}
+    pp_ok = {k: v for k, v in pp30.items() if v is not None}
+    gewinner = max(pp_ok, key=pp_ok.get) if pp_ok else None
+    verlierer = min(pp_ok, key=pp_ok.get) if pp_ok else None
+    n_q = sum(quelle_stand.values()) or 1
+    kpis = [
+        ("Offene Stellen (Basis)", round(ges_tag[stand]), "#,##0"),
+        (f"Δ 30 Tage ({zr30})",
+         round(ges_tag[stand] - ges_tag[d30]) if d30 else None,
+         "+#,##0;-#,##0;0"),
+        ("Stärkster Zuwachs (Anteil)",
+         f"{seg_kurz(gewinner)}: {pp_ok[gewinner]:+.2f} Prozentpunkte"
+         if gewinner else "n/a", None),
+        ("Stärkster Rückgang (Anteil)",
+         f"{seg_kurz(verlierer)}: {pp_ok[verlierer]:+.2f} Prozentpunkte"
+         if verlierer else "n/a", None),
+        ("Zuordnung per KldB-Code / Stichwort",
+         f"{(quelle_stand['KldB'] + quelle_stand['Hand']) / n_q:.0%} / "
+         f"{quelle_stand['Stichwort'] / n_q:.0%} der Stellen "
+         f"({quelle_stand['offen'] / n_q:.1%} ohne Zuordnung)", None),
+    ]
+    for i, (lab, wert, nf) in enumerate(kpis, start=4):
+        bn.cell(row=i, column=1, value=lab).font = Font(name=ARIAL, bold=True)
+        c = bn.cell(row=i, column=2, value=wert)
+        c.font = Font(name=ARIAL, bold=True, size=12, color="1D3C6E")
+        if nf:
+            c.number_format = nf
+
+    # ---- Tabelle A: Segmente
+    z0 = 11
+    bn.cell(row=z0 - 1, column=1, value="Berufssegmente").font = Font(
+        name=ARIAL, bold=True, size=12)
+    kopf = (["Berufssegment", "Stellen aktuell", "Anteil", "Δ 7 Tage",
+             "Δ 7 Tage %", "Δ 30 Tage", "Δ 30 Tage %", f"Anteil am {fmt(d30)}",
+             f"Δ Anteil in Prozentpunkten ({zr30})"]
+            + [reg_name(r) for r in basis]
+            + ["Nur Karriereseite (ScrapJobs)", "Gesamt inkl. Karriereseite",
+               "Anteil gesamt", f"Arbeitslose ({bab_txt}, AA Waiblingen)",
+               f"Gemeldete Stellen BA-Statistik ({bab_txt})",
+               "Arbeitslose je gemeldeter Stelle", "Sektor"])
+    c_reg = 10
+    c_sj = c_reg + len(basis)
     for c, t in enumerate(kopf, start=1):
-        bn.cell(row=4, column=c, value=t)
-    style_header(bn, len(kopf), row=4)
-    bn.freeze_panes = "B5"
-    for i, br in enumerate(br_namen, start=5):
-        akt = round(bran.get((stand, br), 0))
-        bn.cell(row=i, column=1, value=br)
-        bn.cell(row=i, column=2, value=akt).number_format = "#,##0"
-        a = anteil(stand, br)
-        bn.cell(row=i, column=3, value=a).number_format = "0.0%"
+        bn.cell(row=z0, column=c, value=t)
+    style_header(bn, len(kopf), row=z0)
+    bn.row_dimensions[z0].height = 45
+    bn.freeze_panes = bn.cell(row=z0 + 1, column=2)
+    sj_summe = sum(nur_sj.values())
+    gesamt_alle = round(ges_tag[stand]) + sj_summe
+    for i, sg in enumerate(segs, start=z0 + 1):
+        a = round(akt(sg))
+        bn.cell(row=i, column=1, value=seg_name(sg))
+        bn.cell(row=i, column=2, value=a).number_format = "#,##0"
+        bn.cell(row=i, column=3, value=anteil(seg_tag, stand, sg)
+                ).number_format = "0.0%"
         for (dx, c_abs, c_pct) in ((d7, 4, 5), (d30, 6, 7)):
             if dx is None:
                 continue
-            alt = round(bran.get((dx, br), 0))
-            bn.cell(row=i, column=c_abs, value=akt - alt).number_format = \
+            alt = round(akt(sg, dx))
+            bn.cell(row=i, column=c_abs, value=a - alt).number_format = \
                 "+#,##0;-#,##0;0"
             if alt:
-                bn.cell(row=i, column=c_pct, value=akt / alt - 1
+                bn.cell(row=i, column=c_pct, value=a / alt - 1
                         ).number_format = "+0.0%;-0.0%;0.0%"
         if d30 is not None:
-            a30 = anteil(d30, br)
-            bn.cell(row=i, column=8, value=a30).number_format = "0.0%"
-            if a is not None and a30 is not None:
-                bn.cell(row=i, column=9, value=round((a - a30) * 100, 2)
-                        ).number_format = "+0.0;-0.0;0.0"
-        for j, rg in enumerate(basis, start=10):
-            bn.cell(row=i, column=j,
-                    value=round(bran_reg.get((stand, rg, br), 0))
+            bn.cell(row=i, column=8, value=anteil(seg_tag, d30, sg)
+                    ).number_format = "0.0%"
+            bn.cell(row=i, column=9, value=pp(seg_tag, sg, d30)
+                    ).number_format = "+0.00;-0.00;0.00"
+        for j, rg in enumerate(basis, start=c_reg):
+            bn.cell(row=i, column=j, value=round(seg_reg.get((stand, rg, sg), 0))
                     ).number_format = "#,##0"
-    z_sum = 5 + len(br_namen)
+        n_sj = nur_sj.get(sg, 0)
+        bn.cell(row=i, column=c_sj, value=n_sj).number_format = "#,##0"
+        bn.cell(row=i, column=c_sj + 1, value=a + n_sj).number_format = "#,##0"
+        if gesamt_alle:
+            bn.cell(row=i, column=c_sj + 2, value=(a + n_sj) / gesamt_alle
+                    ).number_format = "0.0%"
+        alo, gst, quote = engpass(sg)
+        bn.cell(row=i, column=c_sj + 3, value=alo).number_format = "#,##0"
+        bn.cell(row=i, column=c_sj + 4, value=gst).number_format = "#,##0"
+        bn.cell(row=i, column=c_sj + 5, value=quote).number_format = "0.0"
+        bn.cell(row=i, column=c_sj + 6,
+                value=SEKTOREN.get(sg[:2], "") if sg else "")
+    z_sum = z0 + 1 + len(segs)
     bn.cell(row=z_sum, column=1, value="Summe").font = Font(name=ARIAL, bold=True)
-    bn.cell(row=z_sum, column=2, value=round(ges_tag[stand])
-            ).number_format = "#,##0"
-    if d7 is not None:
-        bn.cell(row=z_sum, column=4,
-                value=round(ges_tag[stand]) - round(ges_tag[d7])
-                ).number_format = "+#,##0;-#,##0;0"
-    if d30 is not None:
-        bn.cell(row=z_sum, column=6,
-                value=round(ges_tag[stand]) - round(ges_tag[d30])
-                ).number_format = "+#,##0;-#,##0;0"
-    bc = balken_chart("Offene Stellen nach Branche (aktuell)", "Stellen",
-                      len(br_namen))
-    bc.add_data(Reference(bn, min_col=2, min_row=4, max_row=z_sum - 1),
-                titles_from_data=True)
-    bc.set_categories(Reference(bn, min_col=1, min_row=5, max_row=z_sum - 1))
-    bc.legend = None
-    bn.add_chart(bc, f"A{z_sum + 3}")
+    bn.cell(row=z_sum, column=2, value=round(ges_tag[stand])).number_format = "#,##0"
+    for dx, c_abs in ((d7, 4), (d30, 6)):
+        if dx is not None:
+            bn.cell(row=z_sum, column=c_abs,
+                    value=round(ges_tag[stand]) - round(ges_tag[dx])
+                    ).number_format = "+#,##0;-#,##0;0"
+    for j, rg in enumerate(basis, start=c_reg):
+        bn.cell(row=z_sum, column=j, value=round(sum(
+            seg_reg.get((stand, rg, sg), 0) for sg in segs))).number_format = "#,##0"
+    bn.cell(row=z_sum, column=c_sj, value=sj_summe).number_format = "#,##0"
+    bn.cell(row=z_sum, column=c_sj + 1, value=gesamt_alle).number_format = "#,##0"
+    alo_g = bab_wert.get(("Arbeitslose", "Insgesamt"))
+    gst_g = bab_wert.get(("Gemeldete Arbeitsstellen", "Insgesamt"))
+    bn.cell(row=z_sum, column=c_sj + 3, value=alo_g).number_format = "#,##0"
+    bn.cell(row=z_sum, column=c_sj + 4, value=gst_g).number_format = "#,##0"
+    if alo_g and gst_g:
+        bn.cell(row=z_sum, column=c_sj + 5, value=round(alo_g / gst_g, 1)
+                ).number_format = "0.0"
+    for c in range(1, len(kopf) + 1):
+        bn.cell(row=z_sum, column=c).font = Font(name=ARIAL, bold=True)
 
-    # Zeitreihe je Branche (Stellen), eine Spalte je Branche; rechts
-    # daneben dieselbe Reihe als Anteil, damit Verschiebungen sichtbar werden
+    # bedingte Formatierung: Balken fuer Bestand, Ampel fuer Veraenderungen
+    erste, letzte = z0 + 1, z_sum - 1
+    bn.conditional_formatting.add(
+        f"B{erste}:B{letzte}",
+        DataBarRule(start_type="num", start_value=0, end_type="max",
+                    color="5B8BD0"))
+    ampel = dict(start_type="min", start_color="F8696B", mid_type="num",
+                 mid_value=0, mid_color="FFFFFF", end_type="max",
+                 end_color="63BE7B")
+    for col in ("D", "F", "I"):
+        bn.conditional_formatting.add(f"{col}{erste}:{col}{letzte}",
+                                      ColorScaleRule(**ampel))
+    col_q = get_column_letter(c_sj + 5)
+    bn.conditional_formatting.add(
+        f"{col_q}{erste}:{col_q}{letzte}",
+        ColorScaleRule(start_type="min", start_color="F8696B",
+                       mid_type="percentile", mid_value=50, mid_color="FFEB84",
+                       end_type="max", end_color="63BE7B"))
+
+    # ---- Tabelle: Sektoren
+    zs0 = z_sum + 3
+    bn.cell(row=zs0 - 1, column=1,
+            value=f"Berufssektoren (Veränderung {zr30})").font = Font(
+        name=ARIAL, bold=True, size=12)
+    kopf_s = ["Berufssektor", "Stellen aktuell", "Anteil", "Δ 30 Tage",
+              "Δ Anteil (Pp.)"]
+    for c, t in enumerate(kopf_s, start=1):
+        bn.cell(row=zs0, column=c, value=t)
+    style_header(bn, len(kopf_s), row=zs0)
+    sek_tag = {}
+    for (d, sg), v in seg_tag.items():
+        sek_tag[(d, sg[:2])] = sek_tag.get((d, sg[:2]), 0) + v
+    for i, sk in enumerate(list(SEKTOREN) + [""], start=zs0 + 1):
+        a = round(sek_tag.get((stand, sk), 0))
+        bn.cell(row=i, column=1, value=f"{sk} {SEKTOREN[sk]}" if sk else SONSTIGE)
+        bn.cell(row=i, column=2, value=a).number_format = "#,##0"
+        bn.cell(row=i, column=3, value=anteil(sek_tag, stand, sk)
+                ).number_format = "0.0%"
+        if d30:
+            bn.cell(row=i, column=4, value=a - round(sek_tag.get((d30, sk), 0))
+                    ).number_format = "+#,##0;-#,##0;0"
+            bn.cell(row=i, column=5, value=pp(sek_tag, sk, d30)
+                    ).number_format = "+0.00;-0.00;0.00"
+
+    # ---- Tabelle B: Berufshauptgruppen
+    zh0 = zs0 + len(SEKTOREN) + 4
+    bn.cell(row=zh0 - 1, column=1,
+            value=("Berufshauptgruppen (Unterebene, 2-Steller KldB 2010; "
+                   f"Veränderung {zr30})")
+            ).font = Font(name=ARIAL, bold=True, size=12)
+    kopf_h = ["Berufshauptgruppe", "Stellen aktuell", "Anteil", "Δ 30 Tage",
+              "Δ 30 Tage %", "Δ Anteil (Pp.)", f"Stellen am {fmt(d30)}",
+              f"Anteil am {fmt(d30)}", "Berufssegment",
+              "Häufigste Berufe (Stellen)"]
+    for c, t in enumerate(kopf_h, start=1):
+        bn.cell(row=zh0, column=c, value=t)
+    style_header(bn, len(kopf_h), row=zh0)
+    for i, hg in enumerate(hgs, start=zh0 + 1):
+        a = round(hg_tag.get((stand, hg), 0))
+        bn.cell(row=i, column=1, value=hg_name(hg))
+        bn.cell(row=i, column=2, value=a).number_format = "#,##0"
+        bn.cell(row=i, column=3, value=anteil(hg_tag, stand, hg)
+                ).number_format = "0.0%"
+        if d30:
+            alt = round(hg_tag.get((d30, hg), 0))
+            bn.cell(row=i, column=4, value=a - alt).number_format = \
+                "+#,##0;-#,##0;0"
+            if alt:
+                bn.cell(row=i, column=5, value=a / alt - 1
+                        ).number_format = "+0.0%;-0.0%;0.0%"
+            bn.cell(row=i, column=6, value=pp(hg_tag, hg, d30)
+                    ).number_format = "+0.00;-0.00;0.00"
+            bn.cell(row=i, column=7, value=alt).number_format = "#,##0"
+            bn.cell(row=i, column=8, value=anteil(hg_tag, d30, hg)
+                    ).number_format = "0.0%"
+        sg = HAUPTGRUPPEN[hg][1] if hg in HAUPTGRUPPEN else ""
+        bn.cell(row=i, column=9, value=seg_kurz(sg))
+        top = hg_berufe.get(hg, Counter()).most_common(3)
+        bn.cell(row=i, column=10, value="; ".join(f"{b} ({n})" for b, n in top))
+    zh_end = zh0 + len(hgs)
+    bn.conditional_formatting.add(
+        f"B{zh0 + 1}:B{zh_end}",
+        DataBarRule(start_type="num", start_value=0, end_type="max",
+                    color="5B8BD0"))
+    for col in ("D", "F"):
+        bn.conditional_formatting.add(f"{col}{zh0 + 1}:{col}{zh_end}",
+                                      ColorScaleRule(**ampel))
+
+    # ---- Diagrammdaten (sortiert je Diagramm), unterhalb der Tabellen
+    zd = zh_end + 4
+    bn.cell(row=zd - 1, column=1, value=(
+        "Diagrammdaten (automatisch erzeugt, sortiert je Diagramm)")
+            ).font = Font(name=ARIAL, bold=True, italic=True, color="808080")
+    segs_d = [sg for sg in segs if sg]
+    blk = {}
+
+    def block(spalte, titel, kopfzeile, zeilen, formate):
+        for j, t in enumerate(kopfzeile):
+            bn.cell(row=zd, column=spalte + j, value=t)
+        for c in range(spalte, spalte + len(kopfzeile)):
+            bn.cell(row=zd, column=c).font = Font(name=ARIAL, bold=True)
+        for i, werte in enumerate(zeilen, start=zd + 1):
+            for j, v in enumerate(werte):
+                cell = bn.cell(row=i, column=spalte + j, value=v)
+                if formate[j]:
+                    cell.number_format = formate[j]
+        blk[titel] = (spalte, len(zeilen))
+
+    block(1, "ranking", ["Segment", "BA (hochgerechnet)", "Nur Karriereseite"],
+          [(seg_kurz(sg), round(akt(sg)), nur_sj.get(sg, 0)) for sg in segs_d],
+          [None, "#,##0", "#,##0"])
+    pp_sort = sorted((sg for sg in segs_d if pp30.get(sg) is not None),
+                     key=lambda sg: -pp30[sg])
+    block(5, "pp", ["Segment", f"Δ Prozentpunkte ({zr30})"],
+          [(seg_kurz(sg), pp30[sg]) for sg in pp_sort], [None, "+0.00;-0.00"])
+    eng = sorted(((sg, engpass(sg)[2]) for sg in segs_d
+                  if engpass(sg)[2] is not None), key=lambda t: -t[1])
+    block(8, "engpass", ["Segment", "Arbeitslose je gemeldeter Stelle"],
+          [(seg_kurz(sg), q) for sg, q in eng], [None, "0.0"])
+    hg_top = [hg for hg in hgs if hg][:15]
+    block(11, "hg", ["Berufshauptgruppe", "Stellen aktuell"],
+          [((hg_name(hg)[:45] + "…") if len(hg_name(hg)) > 46 else hg_name(hg),
+            round(hg_tag.get((stand, hg), 0))) for hg in hg_top],
+          [None, "#,##0"])
+
+    def ref(titel, spalte_off, mit_kopf=True):
+        sp, n = blk[titel]
+        return Reference(bn, min_col=sp + spalte_off,
+                         min_row=zd if mit_kopf else zd + 1, max_row=zd + n)
+
+    # ---- Diagramme rechts neben den Tabellen
+    anker_spalte = get_column_letter(len(kopf) + 2)
+    zeile_anker = 3
+
+    def setze(ch, hoehe_zeilen):
+        nonlocal zeile_anker
+        bn.add_chart(ch, f"{anker_spalte}{zeile_anker}")
+        zeile_anker += hoehe_zeilen
+
+    n_seg = blk["ranking"][1]
+    c1 = balken_chart("1  Offene Stellen je Berufssegment (BA + nur Karriereseite)",
+                      "Stellen", n_seg, hoehe=11, breite=20)
+    c1.grouping = "stacked"
+    c1.overlap = 100
+    c1.add_data(ref("ranking", 1), titles_from_data=True)
+    c1.add_data(ref("ranking", 2), titles_from_data=True)
+    c1.set_categories(ref("ranking", 0, False))
+    setze(c1, 23)
+
+    if blk["pp"][1]:
+        c2 = balken_chart(f"2  Gewinner und Verlierer: Δ Anteil in Prozentpunkten "
+                          f"({zr30})", "Prozentpunkte", blk["pp"][1],
+                          hoehe=11, breite=20)
+        c2.add_data(ref("pp", 1), titles_from_data=True)
+        c2.set_categories(ref("pp", 0, False))
+        c2.legend = None
+        c2.y_axis.number_format = "+0.0;-0.0;0"
+        # Beschriftung links aussen statt an der Nulllinie (sonst liegen die
+        # Namen auf den negativen Balken)
+        c2.x_axis.tickLblPos = "low"
+        ser = c2.series[0]
+        ser.invertIfNegative = False
+        ser.graphicalProperties.solidFill = "63BE7B"
+        # negative Balken rot: je Datenpunkt einfaerben
+        for idx, sg in enumerate(pp_sort):
+            if pp30[sg] < 0:
+                dp = DataPoint(idx=idx)
+                dp.graphicalProperties.solidFill = "F8696B"
+                ser.dPt.append(dp)
+        setze(c2, 23)
+
+    if blk["engpass"][1]:
+        c4 = balken_chart(f"3  Engpass: Arbeitslose je gemeldeter Stelle "
+                          f"({bab_txt}, Rems-Murr) – niedrig = Fachkräfte knapp",
+                          "Arbeitslose je Stelle", blk["engpass"][1],
+                          hoehe=11, breite=20)
+        c4.add_data(ref("engpass", 1), titles_from_data=True)
+        c4.set_categories(ref("engpass", 0, False))
+        c4.legend = None
+        c4.y_axis.number_format = "0.0"
+        setze(c4, 23)
+
+    c6 = balken_chart("4  Top 15 Berufshauptgruppen (aktuell)", "Stellen",
+                      blk["hg"][1], hoehe=12, breite=20)
+    c6.add_data(ref("hg", 1), titles_from_data=True)
+    c6.set_categories(ref("hg", 0, False))
+    c6.legend = None
+    setze(c6, 25)
+
+    # ---- Branchen-Zeitreihe: Segmente, Anteile, Index, Hauptgruppen
     bt = wb.create_sheet("Branchen-Zeitreihe")
-    bt.append(["Datum"] + br_namen + ["Summe"]
-              + [f"Anteil {br}" for br in br_namen])
+    kopf_t = (["Datum"] + [seg_kurz(sg) for sg in segs] + ["Summe"]
+              + [f"Anteil {seg_kurz(sg)}" for sg in segs])
+    top6 = segs_d[:6]
+    basis_idx = d30 if d30 else daten[0]
+    kopf_t += [f"Index {seg_kurz(sg)}" for sg in top6]
+    kopf_t += [hg_name(hg) for hg in hgs]
+    bt.append(kopf_t)
+    n_s = len(segs)
+    c_anteil = n_s + 3
+    c_index = c_anteil + n_s
+    c_hg = c_index + len(top6)
     for i, d in enumerate(daten, start=2):
         bt.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
-        for j, br in enumerate(br_namen, start=2):
-            bt.cell(row=i, column=j, value=round(bran.get((d, br), 0))
-                    ).number_format = "#,##0"
-        bt.cell(row=i, column=len(br_namen) + 2, value=round(ges_tag[d])
-                ).number_format = "#,##0"
-        for j, br in enumerate(br_namen, start=len(br_namen) + 3):
-            bt.cell(row=i, column=j, value=anteil(d, br)
+        for j, sg in enumerate(segs, start=2):
+            bt.cell(row=i, column=j, value=round(akt(sg, d))).number_format = "#,##0"
+        bt.cell(row=i, column=n_s + 2, value=round(ges_tag[d])).number_format = "#,##0"
+        for j, sg in enumerate(segs, start=c_anteil):
+            bt.cell(row=i, column=j, value=anteil(seg_tag, d, sg)
                     ).number_format = "0.0%"
-    style_header(bt, 2 * len(br_namen) + 2)
-    lc = linien_chart("Offene Stellen je Branche", "Datum", "Stellen",
-                      "DD.MM.", len(daten), hoehe=12)
-    lc.add_data(Reference(bt, min_col=2, max_col=len(br_namen) + 1,
-                          min_row=1, max_row=len(daten) + 1),
-                titles_from_data=True)
-    lc.set_categories(Reference(bt, min_col=1, min_row=2,
-                                max_row=len(daten) + 1))
-    bt.add_chart(lc, f"A{len(daten) + 4}")
+        for j, sg in enumerate(top6, start=c_index):
+            b0 = akt(sg, basis_idx)
+            bt.cell(row=i, column=j,
+                    value=round(akt(sg, d) / b0 * 100, 1) if b0 else None
+                    ).number_format = "0.0"
+        for j, hg in enumerate(hgs, start=c_hg):
+            bt.cell(row=i, column=j, value=round(hg_tag.get((d, hg), 0))
+                    ).number_format = "#,##0"
+    style_header(bt, len(kopf_t))
+    bt.row_dimensions[1].height = 60
+    n_d = len(daten)
 
-    # Transparenz: welcher Beruf wurde welcher Branche zugeordnet
+    # 5: Anteile im Zeitverlauf (100-%-gestapelte Flaeche, 2D)
+    c3 = AreaChart()
+    c3.grouping = "percentStacked"
+    c3.title = "5  Branchenmix im Zeitverlauf (Anteile der Segmente)"
+    c3.height, c3.width = 12, 20
+    _achsen_sichtbar(c3, None, "Anteil", "DD.MM.", "0%")
+    c3.x_axis.tickLblSkip = c3.x_axis.tickMarkSkip = max(1, n_d // 12)
+    c3.add_data(Reference(bt, min_col=2, max_col=n_s + 1, min_row=1,
+                          max_row=n_d + 1), titles_from_data=True)
+    c3.set_categories(Reference(bt, min_col=1, min_row=2, max_row=n_d + 1))
+    c3.legend.position = "r"
+    setze(c3, 25)
+
+    # 6: Index der 6 groessten Segmente
+    c5 = linien_chart(f"6  Entwicklung der 6 größten Segmente "
+                      f"(Index, {fmt(basis_idx)} = 100)", None, "Index",
+                      "DD.MM.", n_d, hoehe=11, breite=20)
+    c5.y_axis.number_format = "0"
+    idx_werte = [akt(sg, d) / akt(sg, basis_idx) * 100 for sg in top6
+                 for d in daten if akt(sg, basis_idx)]
+    if idx_werte:
+        c5.y_axis.scaling.min = max(0, (int(min(idx_werte)) // 10) * 10)
+        c5.y_axis.scaling.max = (int(max(idx_werte)) // 10 + 1) * 10
+    c5.add_data(Reference(bt, min_col=c_index, max_col=c_index + len(top6) - 1,
+                          min_row=1, max_row=n_d + 1), titles_from_data=True)
+    c5.set_categories(Reference(bt, min_col=1, min_row=2, max_row=n_d + 1))
+    setze(c5, 23)
+
+    # absolute Zeitreihe weiterhin auf dem Zeitreihen-Blatt
+    lc = linien_chart("Offene Stellen je Berufssegment", "Datum", "Stellen",
+                      "DD.MM.", n_d, hoehe=13)
+    lc.add_data(Reference(bt, min_col=2, max_col=n_s + 1, min_row=1,
+                          max_row=n_d + 1), titles_from_data=True)
+    lc.set_categories(Reference(bt, min_col=1, min_row=2, max_row=n_d + 1))
+    bt.add_chart(lc, f"A{n_d + 4}")
+
+    # ---- Branchen-Zuordnung: Transparenz je Beruf (filterbar)
     bzu = wb.create_sheet("Branchen-Zuordnung")
-    bzu.append(["Beruf", "Branche", "Stellen aktuell (alle Gebiete)"])
+    bzu.append(["Beruf", "KldB-Code", "Berufshauptgruppe", "Berufssegment",
+                "Berufssektor", "Zuordnung über", "Stellen aktuell (alle Gebiete)"])
     for i, b in enumerate(top_akt, start=2):
-        bzu.cell(row=i, column=1, value=b)
-        bzu.cell(row=i, column=2, value=branche_von_beruf(b))
-        bzu.cell(row=i, column=3, value=bges.get((stand, b), 0))
-    style_header(bzu, 3)
-    bzu.auto_filter.ref = f"A1:C{len(top_akt) + 1}"
+        e = einordnung(b)
+        werte = [b, e.kldb or None, hg_name(e.hauptgruppe) if e.hauptgruppe
+                 else SONSTIGE, e.segment_name,
+                 SEKTOREN.get(e.sektor, SONSTIGE), e.quelle,
+                 bges.get((stand, b), 0)]
+        for j, v in enumerate(werte, start=1):
+            bzu.cell(row=i, column=j, value=v)
+    style_header(bzu, 7)
+    bzu.auto_filter.ref = f"A1:G{len(top_akt) + 1}"
+    hin = len(top_akt) + 3
+    bzu.cell(row=hin, column=1, value=(
+        "Zuordnung über: KldB = Code aus BERUFENET (tools/kldb_zuordnung.py, "
+        "data/beruf_kldb.csv); Hand = Korrektur aus data/beruf_kldb_manuell.csv "
+        "(Spalten beruf,kldb – hat Vorrang); Stichwort = Rückfall über "
+        "Schlüsselwörter (branchen.py), bis BERUFENET den Beruf geliefert hat; "
+        "offen = keine Zuordnung (Keine Angabe)."))
+
+    zs["A12"] = "Branchenzuordnung"
+    zs["B12"] = (f"{(quelle_stand['KldB'] + quelle_stand['Hand']) / n_q:.0%} "
+                 f"der Stellen per KldB-Code, "
+                 f"{quelle_stand['Stichwort'] / n_q:.0%} per Stichwort, "
+                 f"{quelle_stand['offen'] / n_q:.1%} ohne Zuordnung "
+                 "(Blätter Branchen, Branchen-Zuordnung)")
+    zs["A12"].font = Font(name=ARIAL, bold=True)
 
     # ---------------- Aktuell (alle Berufe des Stichtags)
     ak = wb.create_sheet("Aktuell")
@@ -1357,8 +1727,6 @@ def build_excel():
     # ---------------- Alle Quellen gemeinsam (BA + Karriereseiten)
     # Die BA-Blaetter oben bleiben reine BA-Zahlen (Zeitreihen bleiben
     # vergleichbar). Hier: gemeinsames Format, jede Stelle einmal.
-    sj = read_csv("scrapjobs_log.csv")
-    alle = baue_stellen_alle(log, sj, stand)
     alle_offen = [r for r in alle if r["offen"] == "ja"]
     herk = [HERKUNFT_BA, HERKUNFT_BEIDE, HERKUNFT_SJ]
 
@@ -1392,11 +1760,16 @@ def build_excel():
         zeile_nr += 3
 
     kreuz("Kreis", "kreis")
-    kreuz("Branche", "branche")
+    kreuz("Berufssegment", "branche")
+    for r in alle_offen:
+        r["hg_name"] = (f"{r['hauptgruppe']} {HAUPTGRUPPEN[r['hauptgruppe']][0]}"
+                        if r.get("hauptgruppe") in HAUPTGRUPPEN else SONSTIGE)
+    kreuz("Berufshauptgruppe", "hg_name")
     kreuz("Arbeitgeber (Top 50)", "arbeitgeber", limit=50)
     gs.cell(row=zeile_nr, column=1, value=(
         "Kreis: aus dem Arbeitsort (orte.py), überschneidungsfrei - anders "
-        "als die BA-Suchgebiete. Branche: aus dem BA-Beruf; bei reinen "
+        "als die BA-Suchgebiete. Berufssegment/-hauptgruppe (KldB 2010, "
+        "siehe Blatt Branchen): aus dem BA-Beruf; bei reinen "
         "Karriereseiten-Stellen über gleichen Titel in den BA-Daten, "
         "Stichwörter im Titel oder die übliche Branche des Arbeitgebers "
         "(Spalte branche_quelle im Blatt Alle Stellen)."))
@@ -1530,6 +1903,15 @@ def build_excel():
     for ws in wb.worksheets:
         base_font(ws)
         autosize(ws)
+    # Branchen: feste Breiten, sonst richten sich die Spalten nach den
+    # langen Hinweis- und Berufstexten und die Tabelle wird unlesbar breit
+    if "Branchen" in wb.sheetnames:
+        bws = wb["Branchen"]
+        breiten = {"A": 50, "B": 13, "C": 9, "D": 10, "E": 10, "F": 10,
+                   "G": 10, "H": 12, "I": 18}
+        for col in range(1, bws.max_column + 1):
+            bst = get_column_letter(col)
+            bws.column_dimensions[bst].width = breiten.get(bst, 14)
     # Gemeinsame/ScrapJobs-Blaetter direkt hinter die Zusammenfassung,
     # damit sie nicht hinter den langen BA-Blaettern verschwinden
     vorn = [n for n in ("Gesamt-Übersicht", "Alle Stellen", "ScrapJobs",
