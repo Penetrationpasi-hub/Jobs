@@ -28,8 +28,18 @@ REGELN = [
     ("IT & Telekommunikation", [
         "informatik", "software", "programmier", "it-", "entwickler", "web",
         "netzwerk", "daten", "cloud", "devops", "systemadmin",
-        "systemintegr", "cyber", "telekommunikation", "ux", "scrum", "sap-",
+        "systemintegr", "cyber", "informationssicherheit", "telekommunikation", "ux", "scrum", "sap-",
         "anwendungs", "datenbank", "digital", "erp", "business-analyst", "business analyst", "ki-", "data ", "data-", "supporter", "edv", "sps-", "admin"]),
+    # Sicherheit & Schutz steht frueh (vor Gastronomie, wegen "Servicekraft -
+    # Schutz und Sicherheit"), aber mit engen Woertern: SicherheitsTECHNIK
+    # (Ingenieure, Alarmanlagen) bleibt bei Industrie, Informationssicherheit
+    # bei IT. Arbeitssicherheit/Brandschutz gehoeren hierher.
+    ("Sicherheit & Schutz", [
+        "sicherheitsmitarbeit", "sicherheitskraft", "sicherheitsdienst",
+        "sicherheitsfach", "sicherheitsmanag", "schutz und sicherheit",
+        "arbeitssicherheit", "gesundheitsschutz", "arbeitsschutz",
+        "wachmann", "wach-", "bewach", "security", "objektschutz", "werkschutz",
+        "pförtner", "detektiv", "brandschutz", "feuerwehr"]),
     ("Logistik & Verkehr", [
         "lager", "logistik", "kraftfahrer", "fahrer", "gabelstapler", "stapler",
         "kommissionier", "fuhrpark", "speditions", "transport", "zusteller", "kurier",
@@ -78,10 +88,9 @@ REGELN = [
         "feinwerk", "helfer/in - metall", "bediener", "instandhalt",
         "fachkraft - metall", "maschinenbau", "prüfer", "stanz",
         "druck", "werkstatt", "meister", "qualitätskontroll", "physiker", "engineer", "reklame", "löter", "arbeitsvorbereit", "schichtführ", "abfüller", "schleifer", "demontage", "mediengest", "betriebsschlosser", "werkstoff"]),
-    ("Reinigung & Sicherheit", [
-        "reinig", "sicherheit", "wachmann", "wach-", "security", "gebäudereinig",
-        "hausmeister", "facility", "entsorgung", "abfall", "müll", "desinfekt", "wäscherei",
-        "textilreinig", "objektschutz", "pförtner"]),
+    ("Reinigung & Entsorgung", [
+        "reinig", "gebäudereinig", "hausmeister", "facility", "entsorgung",
+        "abfall", "müll", "desinfekt", "wäscherei", "textilreinig"]),
     ("Land- & Forstwirtschaft", [
         "landwirt", "forst", "agrar", "gärtner", "tierpfleg", "tierwirt",
         "pferde", "gartenbau", "obst", "weinbau", "fischerei", "schäfer",
