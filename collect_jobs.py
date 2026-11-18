@@ -1071,6 +1071,8 @@ def build_excel():
 
     fmt = lambda d: f"{as_date(d):%d.%m.%Y}" if d else "n/a"
     zr30 = f"{fmt(d30)} – {fmt(stand)}"
+    d0 = daten[0]                       # erster Erhebungstag
+    zr0 = f"{fmt(d0)} – {fmt(stand)}"
     bab_txt = (f"{bab_monat[5:]}/{bab_monat[:4]}" if bab_monat else "n/a")
 
     bn = wb.create_sheet("Branchen")
@@ -1082,12 +1084,17 @@ def build_excel():
                 "37 Berufshauptgruppen → 14 Berufssegmente → 5 Sektoren, "
                 "dieselbe Gliederung wie die BA-Arbeitsmarktstatistik. "
                 "Stellenzahlen sind auf die Gesamtzahl hochgerechnet, wenn "
-                "nicht alle Stellen geladen wurden. Zuordnung je Beruf: Blatt "
-                "Branchen-Zuordnung.")
+                "nicht alle Stellen geladen wurden (betrifft v. a. die Werte "
+                f"vom {fmt(d0)}, dem ersten Erhebungstag). Zuordnung je Beruf: "
+                "Blatt Branchen-Zuordnung.")
 
     # Kennzahlen-Kopf
     pp30 = {sg: pp(seg_tag, sg, d30) for sg in segs if sg}
     pp_ok = {k: v for k, v in pp30.items() if v is not None}
+    pp0 = {sg: pp(seg_tag, sg, d0) for sg in segs if sg}
+    pp0_ok = {k: v for k, v in pp0.items() if v is not None}
+    gew0 = max(pp0_ok, key=pp0_ok.get) if pp0_ok else None
+    ver0 = min(pp0_ok, key=pp0_ok.get) if pp0_ok else None
     gewinner = max(pp_ok, key=pp_ok.get) if pp_ok else None
     verlierer = min(pp_ok, key=pp_ok.get) if pp_ok else None
     n_q = sum(quelle_stand.values()) or 1
@@ -1102,6 +1109,12 @@ def build_excel():
         ("Stärkster Rückgang (Anteil)",
          f"{seg_kurz(verlierer)}: {pp_ok[verlierer]:+.2f} Prozentpunkte"
          if verlierer else "n/a", None),
+        (f"Δ seit Beginn ({zr0})",
+         round(ges_tag[stand] - ges_tag[d0]), "+#,##0;-#,##0;0"),
+        ("Seit Beginn: Zuwachs / Rückgang (Anteil)",
+         (f"{seg_kurz(gew0)}: {pp0_ok[gew0]:+.2f} Pp. / "
+          f"{seg_kurz(ver0)}: {pp0_ok[ver0]:+.2f} Pp.") if gew0 else "n/a",
+         None),
         ("Zuordnung per KldB-Code / Stichwort",
          f"{(quelle_stand['KldB'] + quelle_stand['Hand']) / n_q:.0%} / "
          f"{quelle_stand['Stichwort'] / n_q:.0%} der Stellen "
@@ -1115,23 +1128,26 @@ def build_excel():
             c.number_format = nf
 
     # ---- Tabelle A: Segmente
-    z0 = 11
+    z0 = 13
     bn.cell(row=z0 - 1, column=1, value="Berufssegmente").font = Font(
         name=ARIAL, bold=True, size=12)
     kopf = (["Berufssegment", "Stellen aktuell", "Anteil", "Δ 7 Tage",
              "Δ 7 Tage %", "Δ 30 Tage", "Δ 30 Tage %", f"Anteil am {fmt(d30)}",
-             f"Δ Anteil in Prozentpunkten ({zr30})"]
+             f"Δ Anteil in Prozentpunkten ({zr30})",
+             f"Δ seit Beginn ({fmt(d0)})", f"Δ % seit Beginn ({fmt(d0)})",
+             f"Anteil am {fmt(d0)}",
+             f"Δ Anteil in Prozentpunkten seit Beginn ({zr0})"]
             + [reg_name(r) for r in basis]
             + ["Nur Karriereseite (ScrapJobs)", "Gesamt inkl. Karriereseite",
                "Anteil gesamt", f"Arbeitslose ({bab_txt}, AA Waiblingen)",
                f"Gemeldete Stellen BA-Statistik ({bab_txt})",
                "Arbeitslose je gemeldeter Stelle", "Sektor"])
-    c_reg = 10
+    c_reg = 14
     c_sj = c_reg + len(basis)
     for c, t in enumerate(kopf, start=1):
         bn.cell(row=z0, column=c, value=t)
     style_header(bn, len(kopf), row=z0)
-    bn.row_dimensions[z0].height = 45
+    bn.row_dimensions[z0].height = 70
     bn.freeze_panes = bn.cell(row=z0 + 1, column=2)
     sj_summe = sum(nur_sj.values())
     gesamt_alle = round(ges_tag[stand]) + sj_summe
@@ -1155,6 +1171,16 @@ def build_excel():
                     ).number_format = "0.0%"
             bn.cell(row=i, column=9, value=pp(seg_tag, sg, d30)
                     ).number_format = "+0.00;-0.00;0.00"
+        alt0 = round(akt(sg, d0))
+        bn.cell(row=i, column=10, value=a - alt0).number_format = \
+            "+#,##0;-#,##0;0"
+        if alt0:
+            bn.cell(row=i, column=11, value=a / alt0 - 1
+                    ).number_format = "+0.0%;-0.0%;0.0%"
+        bn.cell(row=i, column=12, value=anteil(seg_tag, d0, sg)
+                ).number_format = "0.0%"
+        bn.cell(row=i, column=13, value=pp(seg_tag, sg, d0)
+                ).number_format = "+0.00;-0.00;0.00"
         for j, rg in enumerate(basis, start=c_reg):
             bn.cell(row=i, column=j, value=round(seg_reg.get((stand, rg, sg), 0))
                     ).number_format = "#,##0"
@@ -1178,6 +1204,9 @@ def build_excel():
             bn.cell(row=z_sum, column=c_abs,
                     value=round(ges_tag[stand]) - round(ges_tag[dx])
                     ).number_format = "+#,##0;-#,##0;0"
+    bn.cell(row=z_sum, column=10,
+            value=round(ges_tag[stand]) - round(ges_tag[d0])
+            ).number_format = "+#,##0;-#,##0;0"
     for j, rg in enumerate(basis, start=c_reg):
         bn.cell(row=z_sum, column=j, value=round(sum(
             seg_reg.get((stand, rg, sg), 0) for sg in segs))).number_format = "#,##0"
@@ -1202,7 +1231,7 @@ def build_excel():
     ampel = dict(start_type="min", start_color="F8696B", mid_type="num",
                  mid_value=0, mid_color="FFFFFF", end_type="max",
                  end_color="63BE7B")
-    for col in ("D", "F", "I"):
+    for col in ("D", "F", "I", "J", "M"):
         bn.conditional_formatting.add(f"{col}{erste}:{col}{letzte}",
                                       ColorScaleRule(**ampel))
     col_q = get_column_letter(c_sj + 5)
@@ -1215,10 +1244,12 @@ def build_excel():
     # ---- Tabelle: Sektoren
     zs0 = z_sum + 3
     bn.cell(row=zs0 - 1, column=1,
-            value=f"Berufssektoren (Veränderung {zr30})").font = Font(
+            value=(f"Berufssektoren (Veränderung {zr30} bzw. seit Beginn "
+                   f"{zr0})")).font = Font(
         name=ARIAL, bold=True, size=12)
     kopf_s = ["Berufssektor", "Stellen aktuell", "Anteil", "Δ 30 Tage",
-              "Δ Anteil (Pp.)"]
+              "Δ Anteil 30 Tage (Pp.)", f"Δ seit {fmt(d0)}",
+              f"Δ Anteil seit {fmt(d0)} (Pp.)"]
     for c, t in enumerate(kopf_s, start=1):
         bn.cell(row=zs0, column=c, value=t)
     style_header(bn, len(kopf_s), row=zs0)
@@ -1236,17 +1267,22 @@ def build_excel():
                     ).number_format = "+#,##0;-#,##0;0"
             bn.cell(row=i, column=5, value=pp(sek_tag, sk, d30)
                     ).number_format = "+0.00;-0.00;0.00"
+        bn.cell(row=i, column=6, value=a - round(sek_tag.get((d0, sk), 0))
+                ).number_format = "+#,##0;-#,##0;0"
+        bn.cell(row=i, column=7, value=pp(sek_tag, sk, d0)
+                ).number_format = "+0.00;-0.00;0.00"
 
     # ---- Tabelle B: Berufshauptgruppen
     zh0 = zs0 + len(SEKTOREN) + 4
     bn.cell(row=zh0 - 1, column=1,
             value=("Berufshauptgruppen (Unterebene, 2-Steller KldB 2010; "
-                   f"Veränderung {zr30})")
+                   f"Veränderung {zr30} bzw. seit Beginn {zr0})")
             ).font = Font(name=ARIAL, bold=True, size=12)
     kopf_h = ["Berufshauptgruppe", "Stellen aktuell", "Anteil", "Δ 30 Tage",
               "Δ 30 Tage %", "Δ Anteil (Pp.)", f"Stellen am {fmt(d30)}",
-              f"Anteil am {fmt(d30)}", "Berufssegment",
-              "Häufigste Berufe (Stellen)"]
+              f"Anteil am {fmt(d30)}", f"Δ seit {fmt(d0)}",
+              f"Δ % seit {fmt(d0)}", f"Δ Anteil seit {fmt(d0)} (Pp.)",
+              "Berufssegment", "Häufigste Berufe (Stellen)"]
     for c, t in enumerate(kopf_h, start=1):
         bn.cell(row=zh0, column=c, value=t)
     style_header(bn, len(kopf_h), row=zh0)
@@ -1268,16 +1304,24 @@ def build_excel():
             bn.cell(row=i, column=7, value=alt).number_format = "#,##0"
             bn.cell(row=i, column=8, value=anteil(hg_tag, d30, hg)
                     ).number_format = "0.0%"
+        alt0 = round(hg_tag.get((d0, hg), 0))
+        bn.cell(row=i, column=9, value=a - alt0).number_format = \
+            "+#,##0;-#,##0;0"
+        if alt0:
+            bn.cell(row=i, column=10, value=a / alt0 - 1
+                    ).number_format = "+0.0%;-0.0%;0.0%"
+        bn.cell(row=i, column=11, value=pp(hg_tag, hg, d0)
+                ).number_format = "+0.00;-0.00;0.00"
         sg = HAUPTGRUPPEN[hg][1] if hg in HAUPTGRUPPEN else ""
-        bn.cell(row=i, column=9, value=seg_kurz(sg))
+        bn.cell(row=i, column=12, value=seg_kurz(sg))
         top = hg_berufe.get(hg, Counter()).most_common(3)
-        bn.cell(row=i, column=10, value="; ".join(f"{b} ({n})" for b, n in top))
+        bn.cell(row=i, column=13, value="; ".join(f"{b} ({n})" for b, n in top))
     zh_end = zh0 + len(hgs)
     bn.conditional_formatting.add(
         f"B{zh0 + 1}:B{zh_end}",
         DataBarRule(start_type="num", start_value=0, end_type="max",
                     color="5B8BD0"))
-    for col in ("D", "F"):
+    for col in ("D", "F", "I", "K"):
         bn.conditional_formatting.add(f"{col}{zh0 + 1}:{col}{zh_end}",
                                       ColorScaleRule(**ampel))
 
@@ -1308,6 +1352,10 @@ def build_excel():
                      key=lambda sg: -pp30[sg])
     block(5, "pp", ["Segment", f"Δ Prozentpunkte ({zr30})"],
           [(seg_kurz(sg), pp30[sg]) for sg in pp_sort], [None, "+0.00;-0.00"])
+    pp0_sort = sorted((sg for sg in segs_d if pp0.get(sg) is not None),
+                      key=lambda sg: -pp0[sg])
+    block(14, "pp0", ["Segment", f"Δ Prozentpunkte seit Beginn ({zr0})"],
+          [(seg_kurz(sg), pp0[sg]) for sg in pp0_sort], [None, "+0.00;-0.00"])
     eng = sorted(((sg, engpass(sg)[2]) for sg in segs_d
                   if engpass(sg)[2] is not None), key=lambda t: -t[1])
     block(8, "engpass", ["Segment", "Arbeitslose je gemeldeter Stelle"],
@@ -1364,6 +1412,25 @@ def build_excel():
                 ser.dPt.append(dp)
         setze(c2, 23)
 
+    if blk["pp0"][1]:
+        c2b = balken_chart(f"2b  Gewinner und Verlierer seit Beginn: Δ Anteil "
+                           f"in Prozentpunkten ({zr0})", "Prozentpunkte",
+                           blk["pp0"][1], hoehe=11, breite=20)
+        c2b.add_data(ref("pp0", 1), titles_from_data=True)
+        c2b.set_categories(ref("pp0", 0, False))
+        c2b.legend = None
+        c2b.y_axis.number_format = "+0.0;-0.0;0"
+        c2b.x_axis.tickLblPos = "low"
+        ser = c2b.series[0]
+        ser.invertIfNegative = False
+        ser.graphicalProperties.solidFill = "63BE7B"
+        for idx, sg in enumerate(pp0_sort):
+            if pp0[sg] < 0:
+                dp = DataPoint(idx=idx)
+                dp.graphicalProperties.solidFill = "F8696B"
+                ser.dPt.append(dp)
+        setze(c2b, 23)
+
     if blk["engpass"][1]:
         c4 = balken_chart(f"3  Engpass: Arbeitslose je gemeldeter Stelle "
                           f"({bab_txt}, Rems-Murr) – niedrig = Fachkräfte knapp",
@@ -1387,7 +1454,7 @@ def build_excel():
     kopf_t = (["Datum"] + [seg_kurz(sg) for sg in segs] + ["Summe"]
               + [f"Anteil {seg_kurz(sg)}" for sg in segs])
     top6 = segs_d[:6]
-    basis_idx = d30 if d30 else daten[0]
+    basis_idx = d0                      # Index: erster Erhebungstag = 100
     kopf_t += [f"Index {seg_kurz(sg)}" for sg in top6]
     kopf_t += [hg_name(hg) for hg in hgs]
     bt.append(kopf_t)
@@ -1485,7 +1552,8 @@ def build_excel():
     ak = wb.create_sheet("Aktuell")
     kopf = (["Beruf"] + [reg_name(r) for r in regionen] +
             ["Gesamt", f"Vor 7 Tagen ({d7 or 'n/a'})",
-             f"Vor 30 Tagen ({d30 or 'n/a'})", "Δ 7 Tage", "Δ 30 Tage"])
+             f"Vor 30 Tagen ({d30 or 'n/a'})", "Δ 7 Tage", "Δ 30 Tage",
+             f"Erster Erhebungstag ({d0})", "Δ seit Beginn"])
     ak.append(kopf)
     nr = len(regionen)
     for i, b in enumerate(top_akt, start=2):
@@ -1502,7 +1570,11 @@ def build_excel():
                 value=(ges - v7) if v7 is not None else None)
         ak.cell(row=i, column=nr + 6,
                 value=(ges - v30) if v30 is not None else None)
-    style_header(ak, nr + 6)
+        v0 = bges.get((d0, b))
+        ak.cell(row=i, column=nr + 7, value=v0)
+        ak.cell(row=i, column=nr + 8,
+                value=(ges - v0) if v0 is not None else None)
+    style_header(ak, nr + 8)
     n_chart = min(15, len(top_akt))
     fl = balken_chart(f"Top {n_chart} Berufe nach Suchgebiet (aktuell)",
                       "Stellen", n_chart, hoehe=18, breite=24)
@@ -1908,7 +1980,8 @@ def build_excel():
     if "Branchen" in wb.sheetnames:
         bws = wb["Branchen"]
         breiten = {"A": 50, "B": 13, "C": 9, "D": 10, "E": 10, "F": 10,
-                   "G": 10, "H": 12, "I": 18}
+                   "G": 10, "H": 12, "I": 18, "J": 13, "K": 13, "L": 13,
+                   "M": 18}
         for col in range(1, bws.max_column + 1):
             bst = get_column_letter(col)
             bws.column_dimensions[bst].width = breiten.get(bst, 14)
