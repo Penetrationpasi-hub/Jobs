@@ -21,7 +21,13 @@ jobs:
   sammeln:
     runs-on: ubuntu-latest
     steps:
+      # Immer den AKTUELLEN Stand von main holen, nicht den Commit, der
+      # den Lauf ausgeloest hat: ein Lauf, der per concurrency gewartet
+      # hat, saehe sonst die Daten des vorherigen Laufs nicht und
+      # scheitert beim Push an Konflikten (so am 18.11.2026).
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
