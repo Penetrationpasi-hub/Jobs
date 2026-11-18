@@ -20,7 +20,10 @@ jobs:
   sammeln:
     runs-on: ubuntu-latest
     steps:
+      # aktuellen main statt ausloesenden Commit (siehe collect.yml)
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
