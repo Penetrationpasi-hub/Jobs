@@ -1020,9 +1020,13 @@ def build_excel():
                 "Berufsbezeichnung abgeleitet (branchen.py), die API liefert "
                 "keine Branche. Stellenzahlen sind auf die Gesamtzahl "
                 "hochgerechnet, wenn nicht alle Stellen geladen wurden.")
+    # Zeitraum in die Kopfzeilen, damit klar ist, worauf sich H/I beziehen
+    fmt = lambda d: f"{as_date(d):%d.%m.%Y}" if d else "n/a"
+    zr30 = f"{fmt(d30)} – {fmt(stand)}"
     kopf = ["Branche", "Stellen aktuell", "Anteil", "Δ 7 Tage", "Δ 7 Tage %",
-            "Δ 30 Tage", "Δ 30 Tage %", "Anteil vor 30 Tagen",
-            "Δ Anteil (Prozentpunkte)"] + [reg_name(r) for r in basis]
+            "Δ 30 Tage", "Δ 30 Tage %", f"Anteil am {fmt(d30)}",
+            f"Δ Anteil in Prozentpunkten ({zr30})"] \
+        + [reg_name(r) for r in basis]
     for c, t in enumerate(kopf, start=1):
         bn.cell(row=4, column=c, value=t)
     style_header(bn, len(kopf), row=4)
@@ -1526,6 +1530,13 @@ def build_excel():
     for ws in wb.worksheets:
         base_font(ws)
         autosize(ws)
+    # Gemeinsame/ScrapJobs-Blaetter direkt hinter die Zusammenfassung,
+    # damit sie nicht hinter den langen BA-Blaettern verschwinden
+    vorn = [n for n in ("Gesamt-Übersicht", "Alle Stellen", "ScrapJobs",
+                        "ScrapJobs-Abgleich") if n in wb.sheetnames]
+    for pos, name in enumerate(vorn, start=1):
+        ws = wb[name]
+        wb.move_sheet(ws, offset=pos - wb.worksheets.index(ws))
     wb.save(OUT)
     print(f"Excel geschrieben: {OUT}")
     print(f"Stand {stand}, {len(daten)} Erhebungstage, "
