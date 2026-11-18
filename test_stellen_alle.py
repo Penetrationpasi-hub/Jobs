@@ -62,7 +62,7 @@ def test_baue_stellen_alle(tmp_path, monkeypatch):
     assert by["SJ:b"]["beruf"] == "Elektroniker/in"      # ueber Titel
     assert by["SJ:b"]["beruf_quelle"] == "Titel-Abgleich"
     assert by["SJ:c"]["offen"] == "nein"
-    assert by["SJ:c"]["branche"] == "Gesundheit & Pflege"
+    assert by["SJ:c"]["branche"] == "Medizinische u. nicht-medizinische Gesundheitsberufe"
     assert all(r["kreis"] == "Rems-Murr-Kreis" for r in alle)
     with open(tmp_path / "stellen_alle.csv", encoding="utf-8") as fh:
         assert len(list(csv.DictReader(fh))) == 5

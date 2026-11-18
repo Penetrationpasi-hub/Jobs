@@ -6,6 +6,11 @@ on:
     # damit stellen.json vom selben Tag gelesen wird
     - cron: "17 8 * * *"
   workflow_dispatch:
+    inputs:
+      kldb_probe:
+        description: "BERUFENET-Rohantworten ins Log schreiben (Diagnose der KldB-Zuordnung)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -35,6 +40,18 @@ jobs:
 
       - name: Pakete installieren
         run: pip install openpyxl
+
+      # KldB-Code je Beruf (BERUFENET) fuer die Branchenanalyse; nur neue
+      # Berufe, hoechstens KLDB_MAX je Lauf. Ein Ausfall stoppt den
+      # Datenlauf nicht, dann greift der Stichwort-Rueckfall in branchen.py.
+      - name: Berufe der KldB zuordnen
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          if [ "${{ inputs.kldb_probe }}" = "true" ]; then
+            python tools/kldb_zuordnung.py --probe || true
+          fi
+          python tools/kldb_zuordnung.py
 
       - name: Sammeln und auswerten
         env:
