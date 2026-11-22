@@ -62,7 +62,7 @@ BA,Crailsheim,5,ausserhalb,64.55
 BA,Deckenpfronn,6,innerhalb,41.33
 BA,Deggingen,1,innerhalb,39.45
 BA,Deizisau,104,innerhalb,14.31
-BA,"Denkendorf, Württemberg",180,innerhalb,15.22
+BA,"Denkendorf, Württemberg",181,innerhalb,15.22
 BA,"Dettenhausen, Württemberg",2,innerhalb,29.6
 BA,Dettingen an der Erms,4,innerhalb,33.6
 BA,Dettingen unter Teck,52,innerhalb,25.91
@@ -124,12 +124,12 @@ BA,Güglingen,8,innerhalb,34.72
 BA,Hardthausen am Kocher,3,innerhalb,47.69
 BA,"Hattenhofen, Württemberg",13,innerhalb,26.43
 BA,Heidenheim an der Brenz,1767,ausserhalb,62.85
-BA,"Heilbronn, Neckar",116,innerhalb,37.5
+BA,"Heilbronn, Neckar",118,innerhalb,37.5
 BA,Heimsheim,3,innerhalb,33.0
 BA,"Hemmingen, Württemberg",86,innerhalb,21.06
 BA,Herbrechtingen,337,ausserhalb,67.26
 BA,Hermaringen,34,ausserhalb,74.12
-BA,Herrenberg im Gäu,15,innerhalb,42.25
+BA,Herrenberg im Gäu,16,innerhalb,42.25
 BA,Hessigheim,2,innerhalb,20.34
 BA,"Heubach, Württemberg",152,innerhalb,45.42
 BA,"Heuchlingen, Lein",6,innerhalb,45.97
@@ -182,7 +182,7 @@ BA,Markgröningen,189,innerhalb,19.04
 BA,Marktoffingen,4,ausserhalb,85.05
 BA,Maulbronn,2,innerhalb,41.84
 BA,"Merklingen, Alb",3,innerhalb,48.08
-BA,"Metzingen, Württemberg",24,innerhalb,32.94
+BA,"Metzingen, Württemberg",25,innerhalb,32.94
 BA,Michelbach an der Bilz,2,innerhalb,41.96
 BA,"Michelfeld, Kreis Schwäbisch Hall",42,innerhalb,39.72
 BA,Mundelsheim,17,innerhalb,20.34
@@ -230,7 +230,7 @@ BA,Ostfildern,336,innerhalb,12.7
 BA,"Ottenbach, Württemberg",2,innerhalb,33.4
 BA,"Pfaffenhofen, Württemberg",2,innerhalb,35.8
 BA,Pfedelbach,141,innerhalb,40.83
-BA,Pforzheim,138,innerhalb,47.91
+BA,Pforzheim,139,innerhalb,47.91
 BA,Pfullingen,4,innerhalb,41.41
 BA,Pleidelsheim,126,innerhalb,16.35
 BA,Pliezhausen,2,innerhalb,31.4
@@ -263,7 +263,7 @@ BA,"Schwaigern, Württemberg",4,innerhalb,39.63
 BA,Schwaikheim,127,innerhalb,5.55
 BA,Schwieberdingen,88,innerhalb,18.37
 BA,Schwäbisch Gmünd,1070,innerhalb,37.08
-BA,Schwäbisch Hall,45,innerhalb,43.75
+BA,Schwäbisch Hall,46,innerhalb,43.75
 BA,"Schönaich, Württemberg",46,innerhalb,26.95
 BA,Sersheim,62,innerhalb,26.51
 BA,Sindelfingen,811,innerhalb,28.54
@@ -275,7 +275,7 @@ BA,Steinheim am Albuch,172,ausserhalb,57.0
 BA,Steinheim an der Murr,87,innerhalb,14.82
 BA,Steinächle,1,unklar,
 BA,Stimpfach,186,ausserhalb,62.15
-BA,Stuttgart,15566,innerhalb,15.34
+BA,Stuttgart,15567,innerhalb,15.34
 BA,Stödtlen,6,ausserhalb,74.25
 BA,Sulzbach an der Murr,126,innerhalb,23.25
 BA,Sulzbach-Laufen,65,innerhalb,41.77
@@ -359,167 +359,496 @@ Karriereseite,63762 Großostheim DE,1,ausserhalb,122.17
 Karriereseite,66663 Merzig DE,1,ausserhalb,206.29
 Karriereseite,66763 Dillingen DE,1,ausserhalb,197.25
 Karriereseite,66793 Saarwellingen DE,2,ausserhalb,191.85
-Karriereseite,70 Fellbach Baden-Württemberg DE,1,innerhalb,3.8
+Karriereseite,70 Fellbach Baden-Württemberg DE,3,innerhalb,3.8
 Karriereseite,70 Stuttgart Baden-Württemberg Deutschland,1,innerhalb,15.34
-Karriereseite,70173 Stuttgart Deutschland,3,innerhalb,12.18
-Karriereseite,70174 Stuttgart Deutschland,5,innerhalb,12.18
+Karriereseite,70173 Stuttgart BW DE,1,innerhalb,12.18
+Karriereseite,70173 Stuttgart Deutschland,11,innerhalb,12.18
+Karriereseite,70174 Stuttgart Deutschland,9,innerhalb,12.18
+Karriereseite,70178 Stuttgart BW DE,1,innerhalb,13.25
+Karriereseite,70178 Stuttgart DE,19,innerhalb,13.25
+Karriereseite,70180 Stuttgart Deutschland,2,innerhalb,13.25
 Karriereseite,70180 Süd Deutschland,1,innerhalb,13.25
+Karriereseite,70182 Stuttgart DE,9,innerhalb,12.18
+Karriereseite,70188 Stuttgart Deutschland,2,innerhalb,12.18
+Karriereseite,70191 Stuttgart DE,9,innerhalb,12.18
+Karriereseite,70193 Stuttgart DE,9,innerhalb,13.21
 Karriereseite,70193 Stuttgart Deutschland,8,innerhalb,13.21
+Karriereseite,70195 Stuttgart DE,9,innerhalb,14.99
+Karriereseite,70197 Stuttgart DE,9,innerhalb,14.29
 Karriereseite,70199 Stuttgart Baden-Württemberg Deutschland,4,innerhalb,14.66
-Karriereseite,70372 Stuttgart DE,7,innerhalb,8.06
+Karriereseite,70327 Stuttgart DE,7,innerhalb,12.18
+Karriereseite,70327 Stuttgart Deutschland,1,innerhalb,12.18
+Karriereseite,70329 Stuttgart DE,10,innerhalb,12.18
+Karriereseite,70329 Stuttgart Deutschland,1,innerhalb,12.18
+Karriereseite,70372 Stuttgart DE,26,innerhalb,8.06
+Karriereseite,70372 Stuttgart Deutschland,6,innerhalb,8.06
 Karriereseite,70374 Stuttgart Baden-Württemberg Deutschland,2,innerhalb,12.18
+Karriereseite,70376 Eislingen BW DE,1,innerhalb,12.18
+Karriereseite,70376 Stuttgart Baden-Württemberg DE,1,innerhalb,12.18
+Karriereseite,70376 Stuttgart DE,9,innerhalb,12.18
 Karriereseite,70376 Stuttgart-Bad Cannstatt Baden-Württemberg DE,1,innerhalb,12.18
 Karriereseite,70378 Stuttgart Baden-Württemberg Deutschland,1,innerhalb,6.56
-Karriereseite,70378 Stuttgart Deutschland,2,innerhalb,6.56
+Karriereseite,70378 Stuttgart DE,6,innerhalb,6.56
+Karriereseite,70378 Stuttgart Deutschland,3,innerhalb,6.56
+Karriereseite,70435 Stuttgart DE,4,innerhalb,12.18
+Karriereseite,70435 Stuttgart Deutschland,1,innerhalb,12.18
 Karriereseite,70469 Feuerbach Deutschland,1,innerhalb,12.18
+Karriereseite,70469 Stuttgart DE,2,innerhalb,12.18
+Karriereseite,70469 Stuttgart Deutschland,1,innerhalb,12.18
 Karriereseite,70499 Stuttgart Baden-Württemberg Deutschland,1,innerhalb,17.2
-Karriereseite,70499 Stuttgart Deutschland,1,innerhalb,17.2
+Karriereseite,70499 Stuttgart DE,5,innerhalb,17.2
+Karriereseite,70499 Stuttgart Deutschland,4,innerhalb,17.2
+Karriereseite,70563 Stuttgart DE,6,innerhalb,19.38
+Karriereseite,70565 Stuttgart BW DE,2,innerhalb,20.05
+Karriereseite,70565 Stuttgart DE,8,innerhalb,20.05
 Karriereseite,70565 Stuttgart Deutschland,2,innerhalb,20.05
+Karriereseite,70565 Stuttgart-Vaihingen BW DE,1,innerhalb,20.05
 Karriereseite,70567 Stuttgart Baden-Württemberg Deutschland,1,innerhalb,17.19
-Karriereseite,70734 Fellbach Deutschland,4,innerhalb,3.8
-Karriereseite,70736 Fellbach BW DE,2,innerhalb,3.38
+Karriereseite,70567 Stuttgart DE,22,innerhalb,17.19
+Karriereseite,70569 Stuttgart Deutschland,2,innerhalb,19.57
+Karriereseite,70597 Stuttgart Deutschland,1,innerhalb,17.24
+Karriereseite,70597 Stuttgart/Halle BW DE,1,innerhalb,17.24
+Karriereseite,70734 Fellbach Baden-Württemberg DE,4,innerhalb,3.8
+Karriereseite,70734 Fellbach Deutschland,5,innerhalb,3.8
+Karriereseite,70736 Fellbach BW DE,3,innerhalb,3.38
+Karriereseite,70736 Fellbach Baden-Württemberg DE,4,innerhalb,3.38
 Karriereseite,70736 Fellbach Baden-Württemberg Deutschland,1,innerhalb,3.38
-Karriereseite,70736 Fellbach DE,2,innerhalb,3.38
-Karriereseite,"70736 Fellbach, Württemberg Deutschland",2,innerhalb,3.38
+Karriereseite,70736 Fellbach DE,16,innerhalb,3.38
+Karriereseite,70736 Fellbach Deutschland,1,innerhalb,3.38
+Karriereseite,"70736 Fellbach, Württemberg Deutschland",4,innerhalb,3.38
+Karriereseite,70771 Leinfelden-Echterdingen DE,16,innerhalb,18.83
+Karriereseite,70771 Leinfelden-Echterdingen Deutschland,3,innerhalb,18.83
 Karriereseite,70794 Filderstadt Baden-Württemberg DE,4,innerhalb,20.73
 Karriereseite,70794 Filderstadt Baden-Württemberg Deutschland,5,innerhalb,20.73
+Karriereseite,70794 Filderstadt DE,5,innerhalb,20.73
 Karriereseite,70794 Filderstadt Deutschland,1,innerhalb,20.73
 Karriereseite,70806 Kornwestheim BW DE,3,innerhalb,10.1
-Karriereseite,70825 Korntal-Münchingen BW DE,1,innerhalb,14.72
-Karriereseite,70825 Korntal-Münchingen DE,1,innerhalb,14.72
-Karriereseite,71 Backnang Baden-Württemberg DE,1,innerhalb,15.54
-Karriereseite,71 Leutenbach Baden-Württemberg DE,1,innerhalb,8.32
-Karriereseite,71032 Böblingen DE,1,innerhalb,27.9
-Karriereseite,71032 Böblingen Deutschland,1,innerhalb,27.9
-Karriereseite,71034 Böblingen Deutschland,1,innerhalb,29.88
-Karriereseite,71063 Sindelfingen DE,1,innerhalb,27.0
-Karriereseite,71063 Sindelfingen Deutschland,1,innerhalb,27.0
+Karriereseite,70806 Kornwestheim DE,9,innerhalb,10.1
+Karriereseite,70825 Korntal-Münchingen BW DE,2,innerhalb,14.72
+Karriereseite,70825 Korntal-Münchingen DE,9,innerhalb,14.72
+Karriereseite,70825 Korntal-Münchingen Deutschland,5,innerhalb,14.72
+Karriereseite,70839 Gerlingen BW DE,1,innerhalb,18.9
+Karriereseite,70839 Gerlingen DE,5,innerhalb,18.9
+Karriereseite,70839 Gerlingen Deutschland,1,innerhalb,18.9
+Karriereseite,71 Backnang Baden-Württemberg DE,3,innerhalb,15.54
+Karriereseite,71 Burgstetten Baden-Württemberg DE,1,innerhalb,11.4
+Karriereseite,71 Leutenbach Baden-Württemberg DE,4,innerhalb,8.32
+Karriereseite,71 Weissach im Tal Baden-Württemberg DE,3,innerhalb,15.99
+Karriereseite,71032 Böblingen DE,7,innerhalb,27.9
+Karriereseite,71032 Böblingen Deutschland,3,innerhalb,27.9
+Karriereseite,71034 Böblingen BW DE,1,innerhalb,29.88
+Karriereseite,71034 Böblingen Deutschland,7,innerhalb,29.88
+Karriereseite,71063 Sindelfingen DE,9,innerhalb,27.0
+Karriereseite,71063 Sindelfingen Deutschland,2,innerhalb,27.0
 Karriereseite,71065 Sindelfingen Baden-Württemberg DE,2,innerhalb,25.98
-Karriereseite,71065 Sindelfingen DE,1,innerhalb,25.98
-Karriereseite,71065 Sindelfingen Deutschland,1,innerhalb,25.98
+Karriereseite,71065 Sindelfingen DE,6,innerhalb,25.98
+Karriereseite,71065 Sindelfingen Deutschland,3,innerhalb,25.98
+Karriereseite,71083 Herrenberg BW DE,2,innerhalb,42.25
 Karriereseite,71083 Herrenberg Baden-Württemberg Deutschland,1,innerhalb,42.25
-Karriereseite,71083 Herrenberg DE,1,innerhalb,42.25
+Karriereseite,71083 Herrenberg DE,15,innerhalb,42.25
+Karriereseite,71088 Holzgerlingen DE,6,innerhalb,30.97
+Karriereseite,71093 Weil im Schönbuch Deutschland,3,innerhalb,29.8
+Karriereseite,71106 Magstadt BW DE,1,innerhalb,27.41
+Karriereseite,71106 Magstadt DE,8,innerhalb,27.41
+Karriereseite,71106 Magstdt BW DE,1,innerhalb,27.41
+Karriereseite,71106 Standort BW DE,1,innerhalb,27.41
+Karriereseite,71111 Waldenbuch DE,2,innerhalb,25.45
 Karriereseite,71116 Gärtringen Deutschland,1,innerhalb,37.13
-Karriereseite,71139 Ehningen DE,1,innerhalb,33.61
+Karriereseite,71126 Gäufelden DE,4,innerhalb,48.28
+Karriereseite,71139 Ehningen DE,8,innerhalb,33.61
+Karriereseite,71144 Steinenbronn Deutschland,2,innerhalb,23.53
+Karriereseite,71154 Nufringen BW DE,1,innerhalb,39.02
+Karriereseite,71154 Nufringen DE,5,innerhalb,39.02
+Karriereseite,71229 Ditzingen BW DE,1,innerhalb,22.24
+Karriereseite,71229 Leonberg BW DE,9,innerhalb,22.24
+Karriereseite,71229 Leonberg DE,13,innerhalb,22.24
 Karriereseite,"71229 Leonberg, Württemberg Deutschland",1,innerhalb,22.24
-Karriereseite,71263 Weil der Stadt Deutschland,2,innerhalb,33.85
-Karriereseite,71272 Renningen DE,2,innerhalb,28.53
-Karriereseite,71272 Renningen Deutschland,2,innerhalb,28.53
-Karriereseite,71296 Heimsheim Deutschland,1,innerhalb,33.0
-Karriereseite,71332 Waiblingen Baden-Württemberg DE,4,innerhalb,0.5
+Karriereseite,71229 Renningen BW DE,4,innerhalb,22.24
+Karriereseite,71254 Ditzingen BW DE,1,innerhalb,18.27
+Karriereseite,71254 Ditzingen DE,5,innerhalb,18.27
+Karriereseite,71254 Ditzingen Deutschland,2,innerhalb,18.27
+Karriereseite,71254 Höfinger Weg 6 BW DE,1,innerhalb,18.27
+Karriereseite,71263 Altbach BW DE,1,innerhalb,33.85
+Karriereseite,71263 Weil der Stadt DE,3,innerhalb,33.85
+Karriereseite,71263 Weil der Stadt Deutschland,3,innerhalb,33.85
+Karriereseite,71272 Renningen DE,4,innerhalb,28.53
+Karriereseite,71272 Renningen Deutschland,4,innerhalb,28.53
+Karriereseite,71282 Hemmingen Deutschland,1,innerhalb,21.06
+Karriereseite,71292 Friolzheim BW DE,1,innerhalb,35.36
+Karriereseite,71296 Heimsheim BW DE,1,innerhalb,33.0
+Karriereseite,71296 Heimsheim DE,7,innerhalb,33.0
+Karriereseite,71296 Heimsheim Deutschland,3,innerhalb,33.0
+Karriereseite,71297 Mönsheim DE,5,innerhalb,33.13
+Karriereseite,71299 Wimsheim BW DE,1,innerhalb,35.41
+Karriereseite,71332 Stuttgarter Str. 83 BW DE,1,innerhalb,0.5
+Karriereseite,71332 Waiblingen BW DE,1,innerhalb,0.5
+Karriereseite,71332 Waiblingen Baden-Württemberg DE,6,innerhalb,0.5
 Karriereseite,71332 Waiblingen Baden-Württemberg DE / 71384 Weinstadt Baden-Württemberg DE,1,innerhalb,5.16
 Karriereseite,71332 Waiblingen Baden-Württemberg Deutschland,1,innerhalb,0.5
-Karriereseite,71332 Waiblingen DE,45,innerhalb,0.5
+Karriereseite,71332 Waiblingen DE,58,innerhalb,0.5
 Karriereseite,71332 Waiblingen DE-BW,10,innerhalb,0.5
-Karriereseite,71332 Waiblingen Deutschland,6,innerhalb,0.5
+Karriereseite,71332 Waiblingen Deutschland,12,innerhalb,0.5
 Karriereseite,"71332 Waiblingen, Germany DE",2,innerhalb,0.5
-Karriereseite,71336 Waiblingen Baden-Württemberg DE,2,innerhalb,1.2
+Karriereseite,71336 Waiblingen Baden-Württemberg DE,5,innerhalb,1.2
 Karriereseite,71336 Waiblingen Baden-Württemberg Deutschland,1,innerhalb,1.2
+Karriereseite,71336 Waiblingen Deutschland,5,innerhalb,1.2
+Karriereseite,71336 Waiblingen Neustadt BW DE,1,innerhalb,1.2
 Karriereseite,71364 Winnenden,5,innerhalb,7.67
 Karriereseite,71364 Winnenden BW de,14,innerhalb,7.67
-Karriereseite,71364 Winnenden Baden-Württemberg DE,6,innerhalb,7.67
+Karriereseite,71364 Winnenden Baden-Württemberg DE,19,innerhalb,7.67
 Karriereseite,71364 Winnenden Baden-Württemberg Deutschland,2,innerhalb,7.67
-Karriereseite,71364 Winnenden DE,14,innerhalb,7.67
+Karriereseite,71364 Winnenden DE,22,innerhalb,7.67
 Karriereseite,71364 Winnenden DE / 71332 Waiblingen DE / 71522 Backnang DE / 73614 Schorndorf DE / 70736 Fellbach ,1,innerhalb,15.72
-Karriereseite,71364 Winnenden Deutschland,3,innerhalb,7.67
-Karriereseite,"71364 Winnenden, Württemberg Deutschland",3,innerhalb,7.67
+Karriereseite,71364 Winnenden Deutschland,4,innerhalb,7.67
+Karriereseite,"71364 Winnenden, Württemberg Deutschland",11,innerhalb,7.67
 Karriereseite,71364 Winnenden-Hertmannsweiler Baden-Württemberg DE,2,innerhalb,7.67
 Karriereseite,71384 Weinstadt BW DE,3,innerhalb,5.16
-Karriereseite,71384 Weinstadt Baden-Württemberg DE,3,innerhalb,5.16
+Karriereseite,71384 Weinstadt Baden-Württemberg DE,13,innerhalb,5.16
 Karriereseite,71384 Weinstadt Baden-Württemberg Deutschland,4,innerhalb,5.16
-Karriereseite,71384 Weinstadt Deutschland,2,innerhalb,5.16
-Karriereseite,71394 Kernen im Remstal Baden-Württemberg DE,2,innerhalb,2.8
+Karriereseite,71384 Weinstadt DE,9,innerhalb,5.16
+Karriereseite,71384 Weinstadt Deutschland,5,innerhalb,5.16
+Karriereseite,71394 Kernen im Remstal Baden-Württemberg DE,9,innerhalb,2.8
 Karriereseite,71394 Kernen im Remstal Baden-Württemberg Deutschland,26,innerhalb,2.8
+Karriereseite,71394 Kernen im Remstal Deutschland,1,innerhalb,2.8
 Karriereseite,71397 Leutenbach Deutschland,4,innerhalb,8.32
-Karriereseite,71522 Backnang BW DE,1,innerhalb,15.54
-Karriereseite,71522 Backnang Baden-Württemberg DE,2,innerhalb,15.54
+Karriereseite,71409 Schwaikheim Baden-Württemberg DE,2,innerhalb,5.55
+Karriereseite,71522 Backnang + Rems-Murr-Kreis BW DE,1,innerhalb,15.54
+Karriereseite,71522 Backnang BW DE,21,innerhalb,15.54
+Karriereseite,71522 Backnang Baden-Württemberg DE,4,innerhalb,15.54
 Karriereseite,71522 Backnang Baden-Württemberg DE / 71540 Murrhardt Baden-Württemberg DE / 71364 Winnenden Baden-W,1,innerhalb,24.92
-Karriereseite,71522 Backnang DE,3,innerhalb,15.54
+Karriereseite,71522 Backnang DE,38,innerhalb,15.54
 Karriereseite,71522 Backnang DE / 71384 Weinstadt DE,1,innerhalb,15.54
+Karriereseite,71522 Backnang Deutschland,2,innerhalb,15.54
 Karriereseite,71522 Backnang de,4,innerhalb,15.54
 Karriereseite,71522 Stuttgart DE-BW DE,5,innerhalb,15.54
-Karriereseite,71540 Murrhardt Baden-Württemberg DE,1,innerhalb,24.92
+Karriereseite,71522 Sulzbach/Murr BW DE,2,innerhalb,15.54
+Karriereseite,71540 Murrhardt Baden-Württemberg DE,3,innerhalb,24.92
+Karriereseite,71540 Murrhardt DE,9,innerhalb,24.92
+Karriereseite,71546 Aspach BW DE,1,innerhalb,16.14
+Karriereseite,71549 Auenwald-Däfern BW DE,1,innerhalb,17.5
 Karriereseite,71554 Weissach im Tal Baden-Württemberg Deutschland,1,innerhalb,15.99
-Karriereseite,71570 Oppenweiler Deutschland,7,innerhalb,19.68
+Karriereseite,71560 Sulzbach Deutschland,1,innerhalb,23.25
+Karriereseite,71560 Sulzbach/Murr BW DE,2,innerhalb,23.25
+Karriereseite,71566 Althütte Deutschland,1,innerhalb,20.71
+Karriereseite,71570 Oppenweiler BW DE,1,innerhalb,19.68
+Karriereseite,71570 Oppenweiler Deutschland,15,innerhalb,19.68
+Karriereseite,71573 Allmersbach BW DE,1,innerhalb,13.83
+Karriereseite,71573 Allmersbach im Tal BW DE,2,innerhalb,13.83
 Karriereseite,71573 Allmersbach im Tal Baden-Württemberg Deutschland,1,innerhalb,13.83
 Karriereseite,71573 Allmersbach im Tal Deutschland,1,innerhalb,13.83
+Karriereseite,71576 Rems-Murr-Kreis BW DE,1,innerhalb,11.4
 Karriereseite,71634 Ludwigsburg BW DE / 71636 Ludwigsburg BW DE / 71063 Sindelfingen BW DE / 73614 Schorndorf BW D,1,innerhalb,27.0
 Karriereseite,71634 Ludwigsburg Baden-Württemberg Deutschland,1,innerhalb,13.15
+Karriereseite,71634 Ludwigsburg DE,4,innerhalb,13.15
 Karriereseite,"71634 Ludwigsburg, Württemberg Deutschland",1,innerhalb,13.15
+Karriereseite,71636 Ludwigsburg DE,9,innerhalb,12.2
 Karriereseite,"71636 Ludwigsburg, Württemberg Deutschland",1,innerhalb,12.2
+Karriereseite,71636 Tamm BW DE,1,innerhalb,12.2
+Karriereseite,71638 Ludwigsburg DE,11,innerhalb,11.32
+Karriereseite,71638 Ludwigsburg Deutschland,1,innerhalb,11.32
 Karriereseite,"71638 Ludwigsburg, Württemberg Deutschland",1,innerhalb,11.32
+Karriereseite,71642 Ludwigsburg BW DE,2,innerhalb,11.01
+Karriereseite,"71642 Ludwigsburg, Württemberg Deutschland",2,innerhalb,11.01
+Karriereseite,71665 Vaihingen an der Enz Deutschland,1,innerhalb,28.45
+Karriereseite,71665 Vaihingen/Enz BW DE,1,innerhalb,28.45
+Karriereseite,71665 Vaihingen/Enz DE,3,innerhalb,28.45
+Karriereseite,71672 Marbach am Neckar BW DE,1,innerhalb,15.33
 Karriereseite,71672 Marbach am Neckar Baden-Württemberg Deutschland,2,innerhalb,15.33
+Karriereseite,71672 Marbach am Neckar DE,4,innerhalb,15.33
 Karriereseite,71672 Marbach am Neckar Deutschland,3,innerhalb,15.33
-Karriereseite,71679 Asperg Deutschland,3,innerhalb,15.55
-Karriereseite,71686 Remseck am Neckar Deutschland,1,innerhalb,6.24
-Karriereseite,71729 Erdmannhausen Deutschland,1,innerhalb,12.34
+Karriereseite,71679 Asperg DE,3,innerhalb,15.55
+Karriereseite,71679 Asperg Deutschland,6,innerhalb,15.55
+Karriereseite,71686 Remseck DE,9,innerhalb,6.24
+Karriereseite,71686 Remseck am Neckar Deutschland,2,innerhalb,6.24
+Karriereseite,71696 Möglingen DE,2,innerhalb,15.15
+Karriereseite,"71696 Möglingen, Kreis Ludwigsburg Deutschland",2,innerhalb,15.15
+Karriereseite,71701 Schwieberdingen DE,5,innerhalb,18.37
+Karriereseite,71706 Markgrönigen BW DE,1,innerhalb,19.04
+Karriereseite,71711 Gottlieb-Daimler-Str. 60 BW DE,1,innerhalb,15.02
+Karriereseite,71711 Murr BW DE,9,innerhalb,15.02
+Karriereseite,71711 Murr DE,2,innerhalb,15.02
+Karriereseite,71711 Steinheim an der Murr DE,8,innerhalb,15.02
+Karriereseite,71723 Großbottwar DE,3,innerhalb,18.88
+Karriereseite,71729 Erdmannhausen Deutschland,5,innerhalb,12.34
+Karriereseite,71735 Eberdingen BW DE,1,innerhalb,26.23
+Karriereseite,71737 Kirchberg an der Murr BW DE,1,innerhalb,12.43
 Karriereseite,72070 Tübingen Baden-Württemberg DE,1,innerhalb,40.7
-Karriereseite,72070 Tübingen Deutschland,1,innerhalb,40.7
+Karriereseite,72070 Tübingen Deutschland,2,innerhalb,40.7
+Karriereseite,72070 Tübingen-Hirschau BW DE,3,innerhalb,40.7
+Karriereseite,72072 Ergenzingen BW DE,1,innerhalb,39.91
+Karriereseite,72072 Gomaringen BW DE,1,innerhalb,39.91
+Karriereseite,72072 Leonberg BW DE,5,innerhalb,39.91
+Karriereseite,72072 Reutlingen BW DE,5,innerhalb,39.91
+Karriereseite,72072 Tübingen BW DE,18,innerhalb,39.91
+Karriereseite,72072 Tübingen DE,11,innerhalb,39.91
+Karriereseite,72072 Tübingen Deutschland,1,innerhalb,39.91
+Karriereseite,72119 Ammerbuch BW DE,1,innerhalb,40.01
+Karriereseite,72119 Ammerbuch DE,3,innerhalb,40.01
+Karriereseite,72135 Dettenhausen BW DE,1,innerhalb,29.6
+Karriereseite,72138 Kirchentellinsfurt DE,6,innerhalb,35.52
+Karriereseite,72144 Dußlingen BW DE,1,innerhalb,46.28
+Karriereseite,72147 Nehren BW DE,1,innerhalb,48.17
+Karriereseite,72218 Wildberg DE,4,innerhalb,47.91
 Karriereseite,72250 Freudenstadt Baden-Württemberg Deutschland,1,ausserhalb,77.77
-Karriereseite,72622 Nürtingen Deutschland,1,innerhalb,23.07
+Karriereseite,72525 Münsingen DE,11,innerhalb,48.67
+Karriereseite,72555 Metzingen DE,15,innerhalb,32.94
+Karriereseite,72574 Bad Urach DE,7,innerhalb,38.45
+Karriereseite,72581 Dettingen BW DE,1,innerhalb,33.6
+Karriereseite,72585 Riederich BW DE,1,innerhalb,30.46
+Karriereseite,72622 Nürtingen BW DE,1,innerhalb,23.07
+Karriereseite,72622 Nürtingen DE,18,innerhalb,23.07
+Karriereseite,72622 Nürtingen Deutschland,2,innerhalb,23.07
+Karriereseite,72636 Frickenhausen BW DE,4,innerhalb,26.76
 Karriereseite,72636 Frickenhausen Baden-Württemberg Deutschland,1,innerhalb,26.76
-Karriereseite,72660 Beuren Deutschland,1,innerhalb,29.96
+Karriereseite,72636 Frickenhausen DE,2,innerhalb,26.76
+Karriereseite,72654 Neckartenzlingen BW DE,2,innerhalb,27.63
+Karriereseite,72654 Neckartenzlingen DE,10,innerhalb,27.63
+Karriereseite,72658 Bempflingen BW DE,1,innerhalb,29.19
+Karriereseite,72658 Bempflingen DE,5,innerhalb,29.19
+Karriereseite,72660 Beuren Deutschland,4,innerhalb,29.96
+Karriereseite,72661 Grafenberg BW DE,1,innerhalb,29.75
+Karriereseite,72661 Grafenberg Deutschland,1,innerhalb,29.75
 Karriereseite,72760 Reutlingen Baden-Württemberg DE,3,innerhalb,36.85
-Karriereseite,73 Remshalden Baden-Württemberg DE,1,innerhalb,8.1
+Karriereseite,72760 Reutlingen DE,11,innerhalb,36.85
+Karriereseite,72762 Metzingen BW DE,1,innerhalb,39.72
+Karriereseite,72762 Neckartenzlingen BW DE,1,innerhalb,39.72
+Karriereseite,72762 Neuffen BW DE,1,innerhalb,39.72
+Karriereseite,72762 Reutlingen (Kundenstandort Bos BW DE,1,innerhalb,39.72
+Karriereseite,72762 Reutlingen BW DE,2,innerhalb,39.72
+Karriereseite,72762 Reutlingen DE,6,innerhalb,39.72
+Karriereseite,72762 reutlingen BW DE,1,innerhalb,39.72
+Karriereseite,72766 Reutlingen BW DE,2,innerhalb,36.39
+Karriereseite,72770 Reutlingen BW DE,1,innerhalb,39.18
+Karriereseite,72770 Reutlingen DE,6,innerhalb,39.18
+Karriereseite,72793 Pfullingen DE,7,innerhalb,41.41
+Karriereseite,72800 Eningen BW DE,1,innerhalb,38.64
+Karriereseite,72800 Eningen u. A. DE,3,innerhalb,38.64
+Karriereseite,72805 Lichtenstein BW DE,1,innerhalb,43.93
+Karriereseite,72805 Lichtenstein DE,3,innerhalb,43.93
+Karriereseite,72810 Gomaringen DE,6,innerhalb,45.14
+Karriereseite,73 Remshalden Baden-Württemberg DE,3,innerhalb,8.1
 Karriereseite,73 Schorndorf Baden-Württemberg DE,1,innerhalb,15.72
-Karriereseite,73 Winterbach Baden-Württemberg DE,2,innerhalb,12.47
+Karriereseite,73 Schorndorf Baden-Württemberg DE / Waiblingen Baden-Württemberg DE,2,innerhalb,15.72
+Karriereseite,73 Welzheim Baden-Württemberg DE,1,innerhalb,23.78
+Karriereseite,73 Winterbach Baden-Württemberg DE,4,innerhalb,12.47
+Karriereseite,73033 Eislingen BW DE,1,innerhalb,28.21
 Karriereseite,73033 Göppingen Baden-Württemberg DE,1,innerhalb,28.21
+Karriereseite,73033 Göppingen DE,2,innerhalb,28.21
 Karriereseite,73033 Göppingen Deutschland,1,innerhalb,28.21
+Karriereseite,73033 Rechberghausen BW DE,1,innerhalb,28.21
+Karriereseite,73033 Uhingen BW DE,1,innerhalb,28.21
 Karriereseite,73035 Göppingen Baden-Württemberg DE,1,innerhalb,29.6
+Karriereseite,73035 Göppingen DE,2,innerhalb,29.6
+Karriereseite,73037 Göppingen BW DE,4,innerhalb,29.7
+Karriereseite,73037 Göppingen DE,4,innerhalb,29.7
 Karriereseite,73037 Göppingen Deutschland,1,innerhalb,29.7
+Karriereseite,73054 Eislingen BW DE,1,innerhalb,32.09
+Karriereseite,73054 Eislingen DE,4,innerhalb,32.09
 Karriereseite,73054 Eislingen Deutschland,1,innerhalb,32.09
 Karriereseite,73054 Eislingen/Fils Deutschland,3,innerhalb,32.09
 Karriereseite,73061 Ebersbach BW DE,2,innerhalb,19.95
 Karriereseite,73061 Ebersbach Deutschland,1,innerhalb,19.95
 Karriereseite,73061 Ebersbach an der Fils Baden-Württemberg Deutschland,1,innerhalb,19.95
+Karriereseite,73061 Ebersbach an der Fils DE,15,innerhalb,19.95
 Karriereseite,73061 Ebersbach an der Fils Deutschland,1,innerhalb,19.95
 Karriereseite,73066 Uhingen Baden-Württemberg DE,1,innerhalb,24.31
+Karriereseite,73066 Uhingen DE,9,innerhalb,24.31
 Karriereseite,73066 Uhingen Deutschland,2,innerhalb,24.31
+Karriereseite,73072 Donzdorf DE,2,innerhalb,39.74
 Karriereseite,73072 Donzdorf Deutschland,1,innerhalb,39.74
+Karriereseite,73079 Süßen DE,2,innerhalb,36.4
+Karriereseite,73084 Salach BW DE,2,innerhalb,34.56
+Karriereseite,73084 Salach DE,2,innerhalb,34.56
 Karriereseite,73084 Salach Deutschland,1,innerhalb,34.56
+Karriereseite,73087 Bad Boll DE,9,innerhalb,30.23
+Karriereseite,73095 Albershausen Deutschland,1,innerhalb,24.03
+Karriereseite,73098 Rechberghausen DE,4,innerhalb,26.54
 Karriereseite,73098 Rechberghausen Deutschland,1,innerhalb,26.54
 Karriereseite,73119 Zell unter Aichelberg Deutschland,1,innerhalb,27.68
+Karriereseite,73207 Plochingen BW DE,4,innerhalb,15.5
 Karriereseite,73207 Plochingen Baden-Württemberg DE,1,innerhalb,15.5
-Karriereseite,73207 Plochingen Deutschland,1,innerhalb,15.5
+Karriereseite,73207 Plochingen DE,6,innerhalb,15.5
+Karriereseite,73207 Plochingen Deutschland,4,innerhalb,15.5
 Karriereseite,73230 Kirchheim unter Teck Baden-Württemberg DE,1,innerhalb,22.97
-Karriereseite,73230 Kirchheim unter Teck Deutschland,2,innerhalb,22.97
+Karriereseite,73230 Kirchheim unter Teck DE,12,innerhalb,22.97
+Karriereseite,73230 Kirchheim unter Teck Deutschland,3,innerhalb,22.97
+Karriereseite,73240 Wendlingen DE,10,innerhalb,18.45
+Karriereseite,73249 Wernau DE,6,innerhalb,17.1
+Karriereseite,73252 Mönchengladbach BW DE,1,innerhalb,32.42
+Karriereseite,73278 Schlierbach BW DE,1,innerhalb,23.03
+Karriereseite,73312 Geislingen an der Steige BW DE,1,innerhalb,45.53
+Karriereseite,73312 Geislingen an der Steige DE,15,innerhalb,45.53
 Karriereseite,73312 Geislingen an der Steige Deutschland,1,innerhalb,45.53
 Karriereseite,73312 Geislingen an der Steige Türkheim Deutschland,1,innerhalb,45.53
+Karriereseite,73329 Kuchen DE,2,innerhalb,41.66
 Karriereseite,73333 Gingen an der Fils Deutschland,1,innerhalb,39.09
+Karriereseite,73337 Bad Überkingen BW DE,1,innerhalb,43.66
+Karriereseite,73342 Bad Ditzenbach DE,6,innerhalb,39.31
+Karriereseite,73525 Großdeinbach BW DE,1,innerhalb,35.52
+Karriereseite,73525 Schwäbisch Gmünd BW DE,2,innerhalb,35.52
+Karriereseite,73525 Schwäbisch Gmünd DE,4,innerhalb,35.52
+Karriereseite,73527 Schwäbisch Gmünd DE,4,innerhalb,38.24
+Karriereseite,73540 Heubach DE,2,innerhalb,45.42
+Karriereseite,73547 Lorch BW DE,1,innerhalb,27.72
+Karriereseite,73547 Lorch Baden-Württemberg DE,2,innerhalb,27.72
 Karriereseite,73547 Lorch Baden-Württemberg Deutschland,5,innerhalb,27.72
+Karriereseite,73547 Lorch DE,3,innerhalb,27.72
+Karriereseite,73547 Lorch Deutschland,1,innerhalb,27.72
+Karriereseite,73550 Bettringen BW DE,1,innerhalb,37.71
+Karriereseite,73550 Waldstetten BW DE,1,innerhalb,37.71
+Karriereseite,73550 Waldstetten DE,5,innerhalb,37.71
+Karriereseite,73557 Mutlangen DE,2,innerhalb,35.19
+Karriereseite,73565 Spraitbach Deutschland,1,innerhalb,33.05
+Karriereseite,73566 73566 BW DE,1,innerhalb,49.94
+Karriereseite,73566 Bartholomä BW DE,3,innerhalb,49.94
 Karriereseite,73566 Bartholomä Baden-Württemberg Deutschland,2,innerhalb,49.94
-Karriereseite,73614 Schorndorf Baden-Württemberg DE,11,innerhalb,15.72
+Karriereseite,73574 Iggingen DE,2,innerhalb,41.17
+Karriereseite,73614 Schorndorf BW DE,5,innerhalb,15.72
+Karriereseite,73614 Schorndorf Baden-Württemberg DE,17,innerhalb,15.72
 Karriereseite,73614 Schorndorf Baden-Württemberg Deutschland,1,innerhalb,15.72
-Karriereseite,73614 Schorndorf DE,15,innerhalb,15.72
+Karriereseite,73614 Schorndorf DE,22,innerhalb,15.72
 Karriereseite,73614 Schorndorf DE / 71364 Winnenden DE,1,innerhalb,15.72
 Karriereseite,73614 Schorndorf Deutschland,8,innerhalb,15.72
-Karriereseite,73635 Rudersberg Baden-Württemberg DE,2,innerhalb,16.64
+Karriereseite,73630 Remshalden Baden-Württemberg DE,2,innerhalb,8.1
+Karriereseite,73630 Remshalden DE,6,innerhalb,8.1
+Karriereseite,73635 Rudersberg Baden-Württemberg DE,16,innerhalb,16.64
 Karriereseite,73635 Rudersberg Baden-Württemberg Deutschland,7,innerhalb,16.64
-Karriereseite,73642 Welzheim Baden-Württemberg DE,1,innerhalb,23.78
-Karriereseite,73650 Winterbach Baden-Württemberg DE,5,innerhalb,12.47
-Karriereseite,73650 Winterbach DE,21,innerhalb,12.47
+Karriereseite,73635 Rudersberg DE,8,innerhalb,16.64
+Karriereseite,73642 Welzheim Baden-Württemberg DE,3,innerhalb,23.78
+Karriereseite,73642 Welzheim DE,6,innerhalb,23.78
+Karriereseite,73642 Welzheim Deutschland,1,innerhalb,23.78
+Karriereseite,73650 Winterbach Baden-Württemberg DE,9,innerhalb,12.47
+Karriereseite,73650 Winterbach DE,24,innerhalb,12.47
 Karriereseite,73650 Winterbach DE / 6403 Küssnacht am Rigi CH,1,unklar,
 Karriereseite,73650 Winterbach Deutschland,1,innerhalb,12.47
-Karriereseite,73663 Berglen Deutschland,1,innerhalb,11.64
+Karriereseite,73655 Plüderhausen Baden-Württemberg DE,1,innerhalb,20.8
+Karriereseite,73655 Plüderhausen DE,7,innerhalb,20.8
+Karriereseite,73660 Urbach BW DE,1,innerhalb,19.15
+Karriereseite,73660 Urbach Baden-Württemberg DE,4,innerhalb,19.15
+Karriereseite,73660 Urbach DE,6,innerhalb,19.15
+Karriereseite,73663 Berglen BW DE,1,innerhalb,11.64
+Karriereseite,73663 Berglen Deutschland,2,innerhalb,11.64
+Karriereseite,73728 Esslingen BW DE,6,innerhalb,10.37
 Karriereseite,73728 Esslingen am Neckar Baden-Württemberg Deutschland,6,innerhalb,10.37
-Karriereseite,73730 Esslingen BW DE,2,innerhalb,11.15
-Karriereseite,73734 Esslingen am Neckar Deutschland,1,innerhalb,10.8
+Karriereseite,73728 Frickenhausen BW DE,1,innerhalb,10.37
+Karriereseite,73728 Köngen BW DE,2,innerhalb,10.37
+Karriereseite,73728 Nürtingen BW DE,1,innerhalb,10.37
+Karriereseite,73730 Esslingen BW DE,3,innerhalb,11.15
+Karriereseite,73730 Esslingen am Neckar DE,17,innerhalb,11.15
+Karriereseite,73730 Esslingen am Neckar Deutschland,2,innerhalb,11.15
+Karriereseite,73733 Esslingen am Neckar DE,10,innerhalb,9.24
+Karriereseite,73734 Esslingen am Neckar Deutschland,5,innerhalb,10.8
+Karriereseite,73760 Ostfildern BW DE,1,innerhalb,12.7
+Karriereseite,73760 Ostfildern DE,15,innerhalb,12.7
+Karriereseite,73760 Ostfildern Deutschland,2,innerhalb,12.7
+Karriereseite,73770 Denkendorf BW DE,1,innerhalb,15.22
+Karriereseite,73770 Denkendorf DE,6,innerhalb,15.22
+Karriereseite,73770 Esslingen Denkendorf BW DE,1,innerhalb,15.22
+Karriereseite,73776 Altbach BW DE,2,innerhalb,13.08
+Karriereseite,73776 Altbach DE,7,innerhalb,13.08
+Karriereseite,74072 Heilbronn BW DE,1,innerhalb,35.12
 Karriereseite,74072 Heilbronn Baden-Württemberg DE,1,innerhalb,35.12
-Karriereseite,74072 Heilbronn DE,1,innerhalb,35.12
+Karriereseite,74072 Heilbronn DE,38,innerhalb,35.12
 Karriereseite,"74072 Heilbronn, Neckar Deutschland",1,innerhalb,35.12
-Karriereseite,"74076 Heilbronn, Neckar Deutschland",2,innerhalb,37.31
-Karriereseite,74172 Neckarsulm DE,1,innerhalb,40.22
-Karriereseite,74206 Bad Wimpfen DE,2,innerhalb,45.69
+Karriereseite,74072 Neckarsulm BW DE,2,innerhalb,35.12
+Karriereseite,74074 Heilbronn DE,10,innerhalb,33.66
+Karriereseite,"74074 Heilbronn, Neckar Deutschland",1,innerhalb,33.66
+Karriereseite,74076 Heilbronn BW DE,1,innerhalb,37.31
+Karriereseite,74076 Heilbronn DE,7,innerhalb,37.31
+Karriereseite,"74076 Heilbronn, Neckar Deutschland",4,innerhalb,37.31
+Karriereseite,74078 Heilbronn DE,21,innerhalb,37.5
+Karriereseite,"74078 Heilbronn, Neckar Deutschland",1,innerhalb,37.5
+Karriereseite,74080 Heilbronn BW DE,1,innerhalb,35.17
+Karriereseite,74080 Heilbronn DE,13,innerhalb,35.17
+Karriereseite,74081 Heilbronn DE,3,innerhalb,33.53
+Karriereseite,74167 Neckarsulm DE,112,innerhalb,39.42
+Karriereseite,74172 Neckarsulm DE,87,innerhalb,40.22
+Karriereseite,74177 Bad Friedrichshall BW DE,1,innerhalb,45.31
+Karriereseite,74177 Bad Friedrichshall DE,11,innerhalb,45.31
+Karriereseite,74182 Obersulm BW DE,2,innerhalb,34.06
+Karriereseite,74182 Obersulm DE,3,innerhalb,34.06
+Karriereseite,74189 Weinsberg DE,13,innerhalb,35.52
+Karriereseite,74193 Schwaigern DE,5,innerhalb,39.63
+Karriereseite,74196 Neuenstadt BW DE,1,innerhalb,44.78
+Karriereseite,74196 Neuenstadt a. K. DE,8,innerhalb,44.78
+Karriereseite,74196 Neuenstadt a. Kocher DE,1,innerhalb,44.78
+Karriereseite,74196 Neuenstadt am Kocher BW DE,1,innerhalb,44.78
+Karriereseite,74199 Untergruppenbach DE,6,innerhalb,28.73
+Karriereseite,74206 Bad Wimpfen DE,24,innerhalb,45.69
+Karriereseite,74211 Leingarten DE,3,innerhalb,37.83
 Karriereseite,74219 Möckmühl DE,26,ausserhalb,54.85
+Karriereseite,74223 Flein DE,8,innerhalb,31.07
+Karriereseite,74226 Nordheim DE,3,innerhalb,33.66
+Karriereseite,74239 Lampoldshausen BW DE,1,innerhalb,47.69
+Karriereseite,74254 Offenau DE,7,innerhalb,47.35
 Karriereseite,74321 Bietigheim-Bissingen BW DE,1,innerhalb,19.12
-Karriereseite,74363 Güglingen Deutschland,1,innerhalb,34.72
-Karriereseite,75015 Bretten DE,1,innerhalb,49.95
-Karriereseite,75179 Pforzheim BW DE,1,innerhalb,47.91
+Karriereseite,74321 Bietigheim-Bissingen DE,15,innerhalb,19.12
+Karriereseite,74321 Bietigheim-Bissingen Deutschland,1,innerhalb,19.12
+Karriereseite,74336 Brackenheim BW DE,2,innerhalb,32.86
+Karriereseite,74336 Brackenheim DE,6,innerhalb,32.86
+Karriereseite,74336 Brackenheim Deutschland,1,innerhalb,32.86
+Karriereseite,74348 Lauffen DE,4,innerhalb,29.55
+Karriereseite,74354 Besigheim BW DE,1,innerhalb,22.36
+Karriereseite,74354 Besigheim DE,5,innerhalb,22.36
+Karriereseite,74357 Bönnigheim BW DE,1,innerhalb,28.25
+Karriereseite,74357 Bönnigheim DE,5,innerhalb,28.25
+Karriereseite,74360 Ilsfeld BW DE,1,innerhalb,25.33
+Karriereseite,74360 Ilsfeld DE,10,innerhalb,25.33
+Karriereseite,74363 Güglingen DE,2,innerhalb,34.72
+Karriereseite,74363 Güglingen Deutschland,3,innerhalb,34.72
+Karriereseite,74366 Kirchheim am Neckar DE,5,innerhalb,26.85
+Karriereseite,74369 Besigheim BW DE,1,innerhalb,24.45
+Karriereseite,74385 Pleidelsheim Deutschland,1,innerhalb,16.35
+Karriereseite,74405 Gaildorf BW DE,3,innerhalb,38.01
+Karriereseite,74405 Gaildorf DE,8,innerhalb,38.01
+Karriereseite,74420 Oberrot BW DE,1,innerhalb,32.66
+Karriereseite,74423 Obersontheim Baden-Württemberg DE,2,innerhalb,49.33
+Karriereseite,74523 Schwäbisch Hall DE,29,innerhalb,43.75
+Karriereseite,74613 Öhringen DE,11,innerhalb,43.05
+Karriereseite,74613 Öhringen Deutschland,1,innerhalb,43.05
+Karriereseite,74626 Bretzfeld DE,3,innerhalb,39.6
+Karriereseite,74629 Pfedelbach BW DE,1,innerhalb,40.83
+Karriereseite,74629 Pfedelbach DE,4,innerhalb,40.83
+Karriereseite,74638 Waldenburg DE,14,innerhalb,45.73
+Karriereseite,74906 Bad Rappenau DE,15,innerhalb,47.79
+Karriereseite,74912 Kirchardt BW DE,1,innerhalb,47.72
+Karriereseite,75015 Bretten DE,18,innerhalb,49.95
+Karriereseite,75015 Bretten Gölshausen BW DE,1,innerhalb,49.95
+Karriereseite,75015 Langenmorgen 6 BW DE,1,innerhalb,49.95
+Karriereseite,75031 Eppingen BW DE,1,innerhalb,44.86
+Karriereseite,75031 Eppingen DE,10,innerhalb,44.86
+Karriereseite,75038 Oberderdingen DE,6,innerhalb,45.58
+Karriereseite,75057 Kürnbach BW DE,1,innerhalb,43.87
+Karriereseite,75172 Pforzheim BW DE,1,innerhalb,45.68
+Karriereseite,75172 Pforzheim DE,6,innerhalb,45.68
+Karriereseite,75172 Pforzheim Deutschland,1,innerhalb,45.68
+Karriereseite,75175 Pforzheim BW DE,1,innerhalb,44.44
+Karriereseite,75175 Pforzheim DE,1,innerhalb,44.44
+Karriereseite,75177 Pforzheim BW DE,1,innerhalb,45.45
+Karriereseite,75177 Pforzheim DE,11,innerhalb,45.45
+Karriereseite,75179 Pforzheim BW DE,3,innerhalb,47.91
+Karriereseite,75179 Pforzheim DE,15,innerhalb,47.91
+Karriereseite,75180 Pforzheim Deutschland,1,innerhalb,47.45
+Karriereseite,75181 Pforzheim BW DE,1,innerhalb,43.25
+Karriereseite,75181 Pforzheim DE,8,innerhalb,43.25
 Karriereseite,75203 Königsbach-Stein DE,1,ausserhalb,54.03
-Karriereseite,75242 Neuhausen DE,1,innerhalb,39.78
+Karriereseite,75223 Niefern BW DE,1,innerhalb,40.1
+Karriereseite,75242 Neuhausen DE,7,innerhalb,39.78
+Karriereseite,75248 Ölbronn BW DE,1,innerhalb,44.01
 Karriereseite,75305 Neuenbürg DE,1,ausserhalb,52.76
-Karriereseite,75428 Illingen DE,1,innerhalb,31.78
-Karriereseite,75438 Knittlingen DE,1,innerhalb,46.19
+Karriereseite,75365 Calw DE,10,innerhalb,44.22
+Karriereseite,75378 Bad Liebenzell DE,9,innerhalb,43.45
+Karriereseite,75392 Deckenpfronn BW DE,3,innerhalb,41.33
+Karriereseite,75417 Mühlacker BW DE,3,innerhalb,37.33
+Karriereseite,75417 Mühlacker DE,7,innerhalb,37.33
+Karriereseite,75417 Mühlacker Deutschland,7,innerhalb,37.33
+Karriereseite,75428 Illingen BW DE,2,innerhalb,31.78
+Karriereseite,75428 Illingen DE,6,innerhalb,31.78
+Karriereseite,75438 Knittlingen DE,6,innerhalb,46.19
+Karriereseite,75438 Knittlingen Deutschland,1,innerhalb,46.19
+Karriereseite,75443 Ötisheim BW DE,1,innerhalb,40.59
+Karriereseite,75447 Sternenfels Deutschland,1,innerhalb,41.83
+Karriereseite,75449 Wurmberg Deutschland,5,innerhalb,36.76
 Karriereseite,76131 Karlsruhe Baden-Württemberg DE,1,ausserhalb,68.35
 Karriereseite,76131 Karlsruhe DE,1,ausserhalb,68.35
 Karriereseite,76135 Karlsruhe DE,1,ausserhalb,71.23
@@ -544,11 +873,13 @@ Karriereseite,89189 Neenstetten Baden-Württemberg DE,4,ausserhalb,60.61
 Karriereseite,89189 Neenstetten Deutschland,2,ausserhalb,60.61
 Karriereseite,89537 Giengen an der Brenz Deutschland,1,ausserhalb,70.66
 Karriereseite,89547 Gerstetten-Gussenstadt DE,1,ausserhalb,56.63
+Karriereseite,89558 Böhmenkirch DE,4,innerhalb,48.16
 Karriereseite,89558 Böhmenkirch Deutschland,3,innerhalb,48.16
 Karriereseite,95326 Kulmbach Bayern Deutschland,1,ausserhalb,208.95
 Karriereseite,95615 Marktredwitz Bayern Deutschland,1,ausserhalb,238.97
 Karriereseite,AT Wien Österreich,2,unklar,
 Karriereseite,"Ahorn, DE, 74744",1,ausserhalb,76.7
+Karriereseite,Aidlingen Baden-Württemberg DE,1,innerhalb,35.3
 Karriereseite,Albstadt Baden-Württemberg Deutschland,2,ausserhalb,68.27
 Karriereseite,Allmersbach,19,innerhalb,13.83
 Karriereseite,Altbach Baden-Württemberg DE,1,innerhalb,13.08
@@ -573,7 +904,7 @@ Karriereseite,"Baar, Schweiz",1,unklar,
 Karriereseite,Backnang,2,innerhalb,15.54
 Karriereseite,Backnang BW DE / Fellbach BW DE / Schorndorf BW DE / Stuttgart BW DE / Waiblingen BW DE / Winnenden ,5,innerhalb,15.72
 Karriereseite,Backnang Baden-Württemberg DE,2,innerhalb,15.54
-Karriereseite,Backnang Deutschland,31,innerhalb,15.54
+Karriereseite,Backnang Deutschland,36,innerhalb,15.54
 Karriereseite,Backnang Gerberpark,1,innerhalb,15.54
 Karriereseite,Backnang Lerchenäcker,18,innerhalb,15.54
 Karriereseite,"Backnang, Baden-Württemberg",4,innerhalb,15.54
@@ -594,19 +925,21 @@ Karriereseite,Crailsheim DE,6,ausserhalb,64.55
 Karriereseite,Crailsheim de,2,ausserhalb,64.55
 Karriereseite,DE,2,unklar,
 Karriereseite,DE Hilden Deutschland,5,ausserhalb,309.38
-Karriereseite,DE Winnenden ELC Deutschland,2,innerhalb,7.67
+Karriereseite,DE Winnenden CE Deutschland,1,innerhalb,7.67
+Karriereseite,DE Winnenden ELC Deutschland,5,innerhalb,7.67
 Karriereseite,"Delmenhorst, DE, 27755",6,ausserhalb,468.88
 Karriereseite,"Detroit, 48201, IL",1,unklar,
 Karriereseite,Deutschlandweit,2,unklar,
 Karriereseite,Donauwörth Deutschland,1,ausserhalb,107.95
 Karriereseite,"Dällikon, CH, 8108",1,unklar,
+Karriereseite,Ebersbach an der Fils Baden-Württemberg DE,2,innerhalb,19.95
 Karriereseite,"Eislingen, DE, 73054",1,innerhalb,32.09
 Karriereseite,Esslingen am Neckar Baden-Württemberg DE,2,innerhalb,11.15
 Karriereseite,"Esslingen, DE, 73734",15,innerhalb,10.8
 Karriereseite,FR,1,unklar,
 Karriereseite,Fellbach (Württemberg) DE,1,innerhalb,3.8
 Karriereseite,Fellbach Baden-Württemberg DE,1,innerhalb,3.8
-Karriereseite,Fellbach DE,1,innerhalb,3.8
+Karriereseite,Fellbach DE,7,innerhalb,3.8
 Karriereseite,"Fellbach, DE, 70736",2,innerhalb,3.38
 Karriereseite,Field Based Bulgaria Bulgarien,1,unklar,
 Karriereseite,Field Based Croatia Kroatien,2,unklar,
@@ -627,8 +960,10 @@ Karriereseite,"Hilpoltstein, DE, 91161",7,ausserhalb,142.37
 Karriereseite,"Hohenheimer Straße 21, Stuttgart, 70184, Baden-Württemberg",3,innerhalb,13.25
 Karriereseite,"Hohenheimer Straße 70, Stuttgart, 70184, Baden-Württemberg",1,innerhalb,13.25
 Karriereseite,"Hohenheimer Straße, Stuttgart, Baden-Württemberg",2,innerhalb,15.34
+Karriereseite,Holzgerlingen Baden-Württemberg DE,1,innerhalb,30.97
 Karriereseite,IT Cinisello Balsamo Italien,2,unklar,
 Karriereseite,"Kaunas, LT",3,unklar,
+Karriereseite,Kirchheim unter Teck Baden-Württemberg DE,3,innerhalb,22.97
 Karriereseite,Korntal-Münchingen Baden-Württemberg DE,2,innerhalb,14.72
 Karriereseite,Kornwestheim Baden-Württemberg DE,2,innerhalb,10.1
 Karriereseite,"Kornwestheim, DE, 70806",2,innerhalb,10.1
@@ -636,6 +971,7 @@ Karriereseite,Köngen Baden-Württemberg DE,9,innerhalb,16.98
 Karriereseite,Leinfelden-Echterdingen Baden-Württemberg DE,3,innerhalb,18.83
 Karriereseite,Leonberg Baden-Württemberg DE,3,innerhalb,22.24
 Karriereseite,Ludwigsburg Baden-Württemberg DE,1,innerhalb,13.15
+Karriereseite,Ludwigsburg DE,2,innerhalb,13.15
 Karriereseite,"Malmö, SE, 213 76",1,unklar,
 Karriereseite,Marbach am Neckar Baden-Württemberg DE,1,innerhalb,15.33
 Karriereseite,Markgröningen Baden-Württemberg DE,1,innerhalb,19.04
@@ -647,6 +983,7 @@ Karriereseite,"Mühlacker, DE, 75417",5,innerhalb,37.33
 Karriereseite,NL Dordrecht Niederlande,1,unklar,
 Karriereseite,"Nordrhein-Westfalen, Niedersachsen · Vollzeit",1,unklar,
 Karriereseite,Nürnberg Bayern Deutschland,1,ausserhalb,139.73
+Karriereseite,Nürtingen Baden-Württemberg DE,1,innerhalb,23.07
 Karriereseite,"Obersontheim, DE, 74423",2,innerhalb,49.33
 Karriereseite,Oberstenfeld Baden-Württemberg DE,1,innerhalb,21.54
 Karriereseite,Oppenweiler,1,innerhalb,19.68
@@ -654,12 +991,15 @@ Karriereseite,Ostfildern Baden-Württemberg DE,2,innerhalb,12.7
 Karriereseite,"Ostfildern, DE, 73760",2,innerhalb,12.7
 Karriereseite,"Quistello, IT, 46026",1,unklar,
 Karriereseite,Remote Deutschland,7,unklar,
+Karriereseite,Rems-Murr-Kreis Baden-Württemberg DE,1,innerhalb,15.02
 Karriereseite,Remseck am Neckar Baden-Württemberg DE,2,innerhalb,6.24
 Karriereseite,Remshalden Baden-Württemberg DE,1,innerhalb,8.1
 Karriereseite,Remshalden DE,1,innerhalb,8.1
+Karriereseite,Renningen Baden-Württemberg DE,9,innerhalb,28.53
 Karriereseite,"Rho, IT, 20017",1,unklar,
 Karriereseite,Rommelshausen DE,1,innerhalb,2.8
 Karriereseite,Rudersberg Baden-Württemberg DE,1,innerhalb,16.64
+Karriereseite,Sachsenheim Baden-Württemberg DE,1,innerhalb,22.77
 Karriereseite,"Santa Ana, CA, 92604, CA",1,unklar,
 Karriereseite,"Santiago, CL, 9340000",1,unklar,
 Karriereseite,Schopfheim DE,1,ausserhalb,171.8
@@ -684,21 +1024,27 @@ Karriereseite,Ulm Baden-Württemberg Deutschland,1,ausserhalb,65.63
 Karriereseite,Ulm Deutschland,3,ausserhalb,65.63
 Karriereseite,"United Kingdom, GB",1,unklar,
 Karriereseite,"VN, 700000",1,unklar,
+Karriereseite,Vaihingen an der Enz Baden-Württemberg DE,1,innerhalb,28.45
 Karriereseite,"Villmar, DE, 65606",1,ausserhalb,191.46
 Karriereseite,"Vilvoorde, BE, 1800",3,unklar,
 Karriereseite,"Vöcklabruck, AT",1,unklar,
 Karriereseite,Waiblingen,6,innerhalb,1.27
-Karriereseite,Waiblingen Baden-Württemberg DE,9,innerhalb,1.27
-Karriereseite,Waiblingen DE,59,innerhalb,1.27
+Karriereseite,Waiblingen Baden-Württemberg DE,20,innerhalb,1.27
+Karriereseite,Waiblingen DE,119,innerhalb,1.27
 Karriereseite,Waldenbuch Baden-Württemberg DE,2,innerhalb,25.45
 Karriereseite,"Weener, DE, 26826",12,ausserhalb,500.79
 Karriereseite,Weiden in der Oberpfalz Bayern Deutschland,1,ausserhalb,182.57
+Karriereseite,Weil der Stadt Baden-Württemberg DE,1,innerhalb,33.85
+Karriereseite,Weil im Schönbuch Baden-Württemberg DE,1,innerhalb,29.8
 Karriereseite,Welzheim Baden-Württemberg DE,1,innerhalb,23.78
+Karriereseite,Wendlingen am Neckar Baden-Württemberg DE,1,innerhalb,18.45
 Karriereseite,Wernau (Neckar) Baden-Württemberg DE,1,innerhalb,17.1
 Karriereseite,"Werne, DE, 59368",1,ausserhalb,336.84
 Karriereseite,Winnenden BW DE,10,innerhalb,7.67
 Karriereseite,Winnenden Baden-Württemberg DE,1,innerhalb,7.67
 Karriereseite,Winnenden Hertmannsweiler,1,innerhalb,7.67
+Karriereseite,Winnenden suchen wir,1,innerhalb,7.67
+Karriereseite,Winnenden suchen wir zur Verstärkung für den Bereich Industrie- und Gebäudetechnik,2,innerhalb,7.67
 Karriereseite,"Winnenden, DE, 71349",1,unklar,
 Karriereseite,"Winnenden, DE, 71364",60,innerhalb,7.67
 Karriereseite,"Winnenden, DE, Winnenden",1,innerhalb,7.67
