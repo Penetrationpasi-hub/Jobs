@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 BA-Jobmonitor: Sammelt taeglich Stellenangebote der Bundesagentur fuer Arbeit
-fuer Waiblingen, Rems-Murr-Kreis und Ostalbkreis ueber die Jobsuche-API.
+fuer 50 km Luftlinie um Waiblingen ueber die Jobsuche-API.
 
 Auth: X-API-Key: jobboerse-jobsuche (oeffentliche clientId, keine Registrierung noetig)
 API-Doku: https://github.com/bundesAPI/jobsuche-api
@@ -30,6 +30,8 @@ import urllib.request
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from umkreis import (REGION, RADIUS_KM, filter_stellen, im_umkreis,
+                     schreibe_pruefung, zeitreihen)
 
 # Die BA hat pc/v4/jobs Anfang August 2026 abgeschaltet (Antwort:
 # "403 No match found for request"). Aktuell ist pc/v6/jobs; die
@@ -42,18 +44,9 @@ HEADERS = {
     "User-Agent": "ba-jobmonitor/1.0 (privates Arbeitsmarkt-Monitoring)",
 }
 
-# Regionen: Suche ueber Ort + Umkreis in km.
-# Die API kennt keinen sauberen Landkreis-Filter, daher Naeherung ueber Umkreise.
-# Waiblingen eng (15 km) als Kernregion, die Kreise grob ueber zentrale Orte.
+# Ein einziges Suchgebiet; alte Regionen bleiben nur in den Rohdaten.
 REGIONS = {
-    "waiblingen_30km": {"wo": "Waiblingen", "umkreis": 30},
-    "rems-murr-kreis": {"wo": "Backnang", "umkreis": 25},
-    "ostalbkreis": {"wo": "Aalen", "umkreis": 30},
-    "backnang_10km": {"wo": "Backnang", "umkreis": 10},
-    # Ostseite Stuttgarts: die API kennt nur Ort + Umkreis, keine
-    # Stadtbezirke. Naeherung ueber Fellbach (grenzt direkt an
-    # Bad Cannstatt/Untertuerkheim), kleiner Radius.
-    "stuttgart_ost": {"wo": "Fellbach", "umkreis": 8},
+    REGION: {"wo": "Waiblingen", "umkreis": RADIUS_KM},
 }
 
 PAGE_SIZE = 100
@@ -371,6 +364,9 @@ def update_jobs_log(path: Path, today: str, seen: dict[str, dict]):
 
     for refnr, info in seen.items():
         if refnr in existing:
+            # Aktuelle Orts-/Berufsdaten fuer den Filter; urspruengliches
+            # Suchgebiet und first_seen bleiben als Herkunft erhalten.
+            existing[refnr].update({k: v for k, v in info.items() if k != "region"})
             existing[refnr]["last_seen"] = today
         else:
             existing[refnr] = {**info, "first_seen": today, "last_seen": today}
@@ -381,6 +377,22 @@ def update_jobs_log(path: Path, today: str, seen: dict[str, dict]):
         w.writerows(existing.values())
 
     return existing
+
+
+def update_beobachtungen(today, seen):
+    """Tagesgenaue Detaildaten; ein erneuter Tageslauf ersetzt diesen Tag."""
+    path = DATA_DIR / "jobs_beobachtungen.csv"
+    fields = ["datum", "refnr", "beruf", "arbeitgeber", "ort"]
+    rows = []
+    if path.exists():
+        with path.open(encoding="utf-8", newline="") as f:
+            rows = [r for r in csv.DictReader(f) if r["datum"] != today]
+    rows.extend({"datum": today, **{k: r[k] for k in fields[1:]}}
+                for r in seen.values())
+    with path.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
 
 
 # ---------------- ScrapJobs: Karriereseiten regionaler Arbeitgeber
@@ -444,6 +456,8 @@ def update_scrapjobs(today: str):
                 row["first_seen"] = min(row["first_seen"], row["last_seen"])
                 existing[row["id"]] = row
     for s in stellen:
+        if not im_umkreis(s.get("location") or ""):
+            continue
         sid = s.get("id") or s.get("url")
         if not sid:
             continue
@@ -498,6 +512,10 @@ def main():
             print(f"[{region}] Hinweis: Detaildaten unvollstaendig "
                   f"({len(jobs)}/{total}).", file=sys.stderr)
 
+        jobs = [j for j in jobs
+                if im_umkreis((j.get("arbeitsort") or {}).get("ort", ""))]
+        print(f"[{region}] {len(jobs)} Stellen mit Arbeitsort im 50-km-Radius")
+
         berufe = Counter()
         arbeitszeit = Counter()
         befristung = Counter()
@@ -545,6 +563,8 @@ def main():
                ["datum", "region", "beruf", "anzahl"],
                berufe_rows)
     log = update_jobs_log(DATA_DIR / "jobs_log.csv", today, seen_jobs)
+    if snapshot_rows:
+        update_beobachtungen(today, seen_jobs)
 
     fetch_arbeitslose()
     update_scrapjobs(today)
@@ -589,6 +609,7 @@ DATA = os.path.join(BASE, "data")
 OUT = os.path.join(BASE, "arbeitsmarkt_auswertung.xlsx")
 
 REGION_NAMEN = {
+    REGION: "Waiblingen 50 km (Luftlinie)",
     "waiblingen_15km": "Waiblingen 15 km (alt)",
     "waiblingen_30km": "Waiblingen 30 km",
     "rems-murr-kreis": "Rems-Murr-Kreis",
@@ -653,6 +674,11 @@ def standzeit_tage(r):
     return (as_date(r["last_seen"]) - as_date(r["first_seen"])).days + 1
 
 
+def ba_ist_offen(r, stand):
+    # Tagesbeobachtungen haben Vorrang, insbesondere bei Wiederholungsläufen.
+    return r.get("_offen", r["last_seen"] == stand)
+
+
 # ---------------- Gemeinsames Format BA + Karriereseiten (ScrapJobs)
 ALLE_FIELDS = ["stellen_id", "herkunft", "ba_refnr", "scrapjobs_id",
                "titel", "arbeitgeber", "ort", "kreis", "ba_suchgebiet",
@@ -677,6 +703,9 @@ def baue_stellen_alle(log, sj, ba_stand):
     Branche, alle Stellen einen Kreis (orte.kreis_von). Ergebnis wird
     nach data/stellen_alle.csv geschrieben und zurueckgegeben.
     """
+    # Vor dem Quellenabgleich filtern: ein auswaertiger Treffer darf keine
+    # lokale Karriereseiten-Stelle schlucken (oder umgekehrt).
+    log, sj = filter_stellen(log), filter_stellen(sj)
     # BA-Index: Arbeitgeber-Schluessel -> Titel-Schluessel -> BA-Zeilen
     ba_idx = {}
     titel_beruf = {}
@@ -713,7 +742,7 @@ def baue_stellen_alle(log, sj, ba_stand):
                 luecke = max((sj_von - as_date(b["last_seen"])).days,
                              (as_date(b["first_seen"]) - sj_bis).days, 0)
                 if luecke <= ABGLEICH_TOLERANZ_TAGE:
-                    kandidaten.append((luecke, b["last_seen"] != ba_stand,
+                    kandidaten.append((luecke, not ba_ist_offen(b, ba_stand),
                                        b["refnr"], b))
         if kandidaten:
             b = min(kandidaten, key=lambda x: x[:3])[3]
@@ -724,7 +753,7 @@ def baue_stellen_alle(log, sj, ba_stand):
         quelle = ba or s
         first = min(x["first_seen"] for x in (ba, s) if x)
         last = max(x["last_seen"] for x in (ba, s) if x)
-        offen = bool((ba and ba["last_seen"] == ba_stand)
+        offen = bool((ba and ba_ist_offen(ba, ba_stand))
                      or (s and s.get("aktiv", "ja") == "ja"))
         if ba:
             beruf, beruf_q = ba["beruf"], HERKUNFT_BA
@@ -871,15 +900,33 @@ def balken_chart(titel, wert_titel, n_zeilen, hoehe=None, breite=22):
 
 
 def build_excel():
-    berufe = read_csv("berufe.csv")
-    snaps = read_csv("snapshots.csv")
-    log = read_csv("jobs_log.csv")
-    if not berufe or not snaps:
+    raw_snaps = read_csv("snapshots.csv")
+    raw_log = read_csv("jobs_log.csv")
+    raw_sj = read_csv("scrapjobs_log.csv")
+    log, sj = filter_stellen(raw_log), filter_stellen(raw_sj)
+    if not raw_snaps:
         print("FEHLER: keine Daten gefunden, zuerst collect_jobs.py laufen lassen.")
         return 1
 
-    daten = sorted({r["datum"] for r in berufe})
+    schreibe_pruefung(raw_log, raw_sj, os.path.join(DATA, "umkreis_pruefung.csv"))
+    berufe, snaps = zeitreihen(log, raw_snaps, read_csv("jobs_beobachtungen.csv"))
+    for name, rows, fields in (
+        ("snapshots_50km.csv", snaps,
+         ["datum", "region", "stellen_gesamt", "stellen_geladen", "methode"]),
+        ("berufe_50km.csv", berufe, ["datum", "region", "beruf", "anzahl"]),
+    ):
+        with open(os.path.join(DATA, name), "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(rows)
+
+    daten = sorted({r["datum"] for r in snaps})
     stand = daten[-1]
+    if any(r["datum"] == stand and r["region"] == REGION for r in raw_snaps):
+        aktuelle_refs = {r["refnr"] for r in read_csv("jobs_beobachtungen.csv")
+                         if r["datum"] == stand}
+        for r in log:
+            r["_offen"] = r["refnr"] in aktuelle_refs
     stand_d = as_date(stand)
     snap_map = {(s["datum"], s["region"]): int(s["stellen_gesamt"]) for s in snaps}
     # Aktive Suchgebiete (am Stichtag erhoben) zuerst, eingestellte ans Ende
@@ -918,7 +965,7 @@ def build_excel():
     # ---------------- Zusammenfassung
     zs = wb.active
     zs.title = "Zusammenfassung"
-    zs["A1"] = "Arbeitsmarkt-Auswertung Rems-Murr / Ostalb"
+    zs["A1"] = "Arbeitsmarkt-Auswertung: 50 km Luftlinie um Waiblingen"
     zs["A1"].font = Font(name=ARIAL, bold=True, size=14)
     zs["A2"] = "Stand"
     zs["B2"] = stand_d
@@ -929,19 +976,22 @@ def build_excel():
     zs["B4"] = ", ".join(reg_name(r) for r in regionen)
     zs["A5"] = "Stellen je gesehen (Log)"
     zs["B5"] = len(log)
-    zs["A7"] = (f"Hinweis: Das Script laedt bis zu {MAX_PAGES * PAGE_SIZE} "
-                "Stellen je Suchgebiet im Detail (bei API-Abbruch frueher, "
-                "siehe Actions-Log). Liegt 'Stellen gesamt' darueber, sind "
-                "Berufs- und Arbeitgeberzahlen eine Stichprobe; die Spalte "
-                "'Stellen gesamt' in der Zeitreihe ist exakt.")
+    zs["A7"] = ("Arbeitsortfilter: maximal 50 km Luftlinie um Waiblingen "
+                "(48.8324, 9.3164), anhand Orts-/PLZ-Koordinaten von GeoNames. "
+                "Unklare Orte werden ausgeschlossen; Pruefliste: data/umkreis_pruefung.csv. "
+                "Die Zahlen zaehlen geladene Stellen, ohne Hochrechnung auf API-Gesamtzahlen.")
     zs["A8"] = ("Arbeitslose je Beruf fuer das Blatt AL-Relation weiterhin "
-                "manuell aus statistik.arbeitsagentur.de eintragen (blaue "
-                "Spalte). Kreiszahlen kommen automatisch aus der "
-                "Regionaldatenbank Deutschland (Blatt Arbeitslose).")
-    zs["A9"] = ("Hinweis: Die Suchgebiete ueberschneiden sich (Umkreissuchen), "
-                "'Summe Suchgebiete' zaehlt Stellen daher mehrfach. Die Summe "
-                "laeuft nur ueber aktive Gebiete; eingestellte Suchgebiete "
-                "stehen in der Zeitreihe rechts neben der Summenspalte.")
+                 "manuell aus statistik.arbeitsagentur.de eintragen (blaue "
+                 "Spalte). Kreiszahlen kommen automatisch aus der "
+                 "Regionaldatenbank Deutschland (Blatt Arbeitslose). "
+                 "Kreis-/Agenturstatistiken sind Vergleichsdaten und decken "
+                 "nicht den 50-km-Radius ab; manuelle Relationen nur bei gleichem Raumbezug.")
+    zs["A9"] = ("Alte Zeitreihen sind aus first_seen/last_seen rekonstruierte "
+                "Naeherungen (angenommene durchgehende Sichtbarkeit, damalige "
+                "Suchabdeckung unvollstaendig). Neue 50-km-Laeufe verwenden "
+                "Tagesbeobachtungen. Methodenwechsel siehe Zeitreihe; "
+                "Veraenderungen koennen durch die Suchumstellung entstehen. "
+                "Alte Rohdaten bleiben unveraendert erhalten.")
     zs["A10"] = ("Alle Zahlen sind beim Erzeugen fest berechnet (keine "
                  "Formeln), damit sie auch in Vorschau-Apps und auf dem "
                  "Handy angezeigt werden. Einzige Ausnahme: die Relation "
@@ -949,12 +999,12 @@ def build_excel():
     for c in ("A2", "A3", "A4", "A5"):
         zs[c].font = Font(name=ARIAL, bold=True)
 
-    # ---------------- Zeitreihe (snapshots: stellen_gesamt exakt)
+    # ---------------- Zeitreihe (gefiltert, Datengrundlage je Tag ausgewiesen)
     zt = wb.create_sheet("Zeitreihe")
     n_akt = len(aktiv)
     alt_reg = regionen[n_akt:]
-    zt.append(["Datum"] + [reg_name(r) for r in aktiv] + ["Summe Suchgebiete"]
-              + [reg_name(r) for r in alt_reg])
+    zt.append(["Datum"] + [reg_name(r) for r in aktiv] + ["Stellen im Radius"]
+              + [reg_name(r) for r in alt_reg] + ["Datengrundlage"])
     for i, d in enumerate(daten, start=2):
         zt.cell(row=i, column=1, value=as_date(d)).number_format = DATUM_FMT
         werte = []
@@ -968,7 +1018,8 @@ def build_excel():
         zt.cell(row=i, column=n_akt + 2, value=sum(werte) if werte else None)
         for j, r in enumerate(alt_reg, start=n_akt + 3):
             zt.cell(row=i, column=j, value=snap_map.get((d, r)))
-    style_header(zt, len(regionen) + 2)
+        zt.cell(row=i, column=len(regionen) + 3, value=snaps[i - 2]["methode"])
+    style_header(zt, len(regionen) + 3)
     for row in zt.iter_rows(min_row=2, min_col=2):
         for c in row:
             c.number_format = "#,##0"
@@ -995,31 +1046,23 @@ def build_excel():
 
     # ---------------- Gemeinsamer Bestand BA + Karriereseiten (wird fuer
     # die Branchenauswertung und die Blaetter weiter unten gebraucht)
-    sj = read_csv("scrapjobs_log.csv")
     alle = baue_stellen_alle(log, sj, stand)
 
     # ---------------- Branchen = offizielle BA-Berufssegmente (KldB 2010)
-    # Basis sind die beiden Kreis-Suchgebiete, die ueber die gesamte Zeit
-    # erhoben wurden und sich nicht ueberschneiden. Wurden an einem Tag
-    # weniger Stellen im Detail geladen als es gibt (API-Limit), wird auf
-    # die Gesamtzahl hochgerechnet, sonst saehe man Spruenge im Juli.
-    geladen = {(r["datum"], r["region"]): int(r["stellen_geladen"] or 0)
-               for r in snaps}
-    basis = [r for r in ("rems-murr-kreis", "ostalbkreis") if r in alle_reg] \
-        or aktiv
-    seg_reg = {}         # (datum, region, segment) -> hochgerechnete Stellen
-    hg_tag = {}          # (datum, hauptgruppe) -> hochgerechnete Stellen
+    # Ausschliesslich gefilterte Einzelstellen; keine Hochrechnung der
+    # alten, raeumlich unpassenden Suchgebietssummen.
+    basis = [REGION]
+    seg_reg = {}         # (datum, region, segment) -> gefilterte Stellen
+    hg_tag = {}          # (datum, hauptgruppe) -> gefilterte Stellen
     quelle_stand = Counter()          # Herkunft der Zuordnung am Stichtag
     hg_berufe = {}                    # hauptgruppe -> Counter(beruf) Stichtag
     for (d, rg, b), n in brb.items():
         if rg not in basis:
             continue
-        ges, gel = snap_map.get((d, rg)), geladen.get((d, rg))
-        faktor = ges / gel if ges and gel and gel < ges else 1.0
         e = einordnung(b)
         k = (d, rg, e.segment)
-        seg_reg[k] = seg_reg.get(k, 0) + n * faktor
-        hg_tag[(d, e.hauptgruppe)] = hg_tag.get((d, e.hauptgruppe), 0) + n * faktor
+        seg_reg[k] = seg_reg.get(k, 0) + n
+        hg_tag[(d, e.hauptgruppe)] = hg_tag.get((d, e.hauptgruppe), 0) + n
         if d == stand:
             quelle_stand[e.quelle] += n
             hg_berufe.setdefault(e.hauptgruppe, Counter())[b] += n
@@ -1083,9 +1126,11 @@ def build_excel():
                 "Klassifikation der Berufe (KldB 2010) der Bundesagentur: "
                 "37 Berufshauptgruppen → 14 Berufssegmente → 5 Sektoren, "
                 "dieselbe Gliederung wie die BA-Arbeitsmarktstatistik. "
-                "Stellenzahlen sind auf die Gesamtzahl hochgerechnet, wenn "
-                "nicht alle Stellen geladen wurden (betrifft v. a. die Werte "
-                f"vom {fmt(d0)}, dem ersten Erhebungstag). Zuordnung je Beruf: "
+                "Nur geladene Stellen im 50-km-Radius, keine Hochrechnung. "
+                "Alte Tage: first_seen/last_seen-Naeherung; neue Tage: Tagesbeobachtungen. "
+                "Methodenwechsel und Abdeckung bei Trends beachten. "
+                "Arbeitslosenzahlen der AA Waiblingen sind separate Vergleichsdaten, "
+                "keine 50-km-Statistik. Zuordnung je Beruf: "
                 "Blatt Branchen-Zuordnung.")
 
     # Kennzahlen-Kopf
@@ -1610,7 +1655,7 @@ def build_excel():
         s = beruf_stat.setdefault(r["beruf"],
                                   {"log": 0, "offen": 0, "dauern": []})
         s["log"] += 1
-        if r["last_seen"] == stand:
+        if ba_ist_offen(r, stand):
             s["offen"] += 1
         else:
             s["dauern"].append(standzeit_tage(r))
@@ -1636,7 +1681,7 @@ def build_excel():
         s = ag_stat.setdefault(r["arbeitgeber"],
                                {"log": 0, "offen": 0, "dauern": []})
         s["log"] += 1
-        if r["last_seen"] == stand:
+        if ba_ist_offen(r, stand):
             s["offen"] += 1
         else:
             s["dauern"].append(standzeit_tage(r))
@@ -1803,7 +1848,7 @@ def build_excel():
     herk = [HERKUNFT_BA, HERKUNFT_BEIDE, HERKUNFT_SJ]
 
     gs = wb.create_sheet("Gesamt-Übersicht")
-    gs["A1"] = "Offene Stellen aus allen Quellen (jede Stelle einmal gezählt)"
+    gs["A1"] = "Offene Stellen: 50 km Luftlinie um Waiblingen (jede Stelle einmal gezählt)"
     gs["A1"].font = Font(name=ARIAL, bold=True, size=12)
     zeile_nr = 3
 
@@ -1918,7 +1963,7 @@ def build_excel():
         for r in sj_offen:
             sj_ag.setdefault(r["arbeitgeber"], []).append(r)
         ba_offen_je_key = Counter(norm_ag(r["arbeitgeber"]) for r in log
-                                  if r["last_seen"] == stand)
+                                  if ba_ist_offen(r, stand))
         sa = wb.create_sheet("ScrapJobs-Abgleich")
         sa.append(["Arbeitgeber", "Offen (Karriereseite)",
                    "davon auch in BA", "Nur auf Karriereseite",
@@ -2000,5 +2045,6 @@ def build_excel():
 
 
 if __name__ == "__main__":
-    main()
+    if "--nur-auswertung" not in sys.argv:
+        main()
     raise SystemExit(build_excel())

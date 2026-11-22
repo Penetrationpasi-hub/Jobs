@@ -1,8 +1,63 @@
 # Jobs
 
-Arbeitsmarkt-Monitoring Rems-Murr / Ostalb. `collect_jobs.py` läuft täglich
+Arbeitsmarkt-Monitoring **50 km Luftlinie um Waiblingen**. `collect_jobs.py` läuft täglich
 (`.github/workflows/collect.yml`, 08:17 UTC) und schreibt `data/` sowie
 `arbeitsmarkt_auswertung.xlsx`.
+
+## Raumbezug: Waiblingen, 50 km
+
+- Künftige BA-Abfragen: nur `wo=Waiblingen`, `umkreis=50`
+  (`waiblingen_50km`), keine zusätzlichen Suchen um Aalen oder Backnang.
+- Derselbe Arbeitsortfilter gilt für BA, den Import der Karriereseiten und
+  **sämtliche Stellen-Auswertungen** (Excel, Branchen, Arbeitgeber, Standzeiten,
+  Zeitreihen und `data/stellen_alle.csv`). Schwäbisch Gmünd liegt innerhalb,
+  Heidenheim außerhalb des Radius.
+- Mittelpunkt: 48.8324° N, 9.3164° E. Berechnung der Luftlinie mit Haversine
+  in `umkreis.py`. Da die alten Logs keine Straßenkoordinaten enthalten,
+  dienen Orts-/PLZ-Koordinaten als Näherung für den Arbeitsort. Bei mehreren
+  erkannten Standorten müssen alle innerhalb liegen; unklare, fehlende und
+  überregionale Ortsangaben werden nicht als lokale Stellen gezählt.
+- `data/umkreis_pruefung.csv` dokumentiert je Quell-Ortsangabe die Anzahl,
+  den Status und die Entfernung (innerhalb: größte, außerhalb: kleinste
+  Entfernung der zugeordneten Koordinaten). Die Datei enthält auch die
+  ausgeschlossenen Orte, damit die Filterung überprüfbar bleibt.
+- Geodaten: [GeoNames](https://www.geonames.org/),
+  [DE-Postleitzahlorte](https://download.geonames.org/export/zip/DE.zip),
+  **CC BY 4.0**. `data/geo_orte.json` liegt versioniert im Repository;
+  die täglichen Läufe benötigen keinen Geocoding-Dienst. Aktualisierung:
+  `pip install requests`, danach `python tools/geo_daten.py`.
+
+### Bestehende Daten und Zeitreihen
+
+Die bisherigen Rohdaten (`jobs_log.csv`, `scrapjobs_log.csv`, `snapshots.csv`,
+`berufe.csv` sowie `data_historie/`) bleiben erhalten. Die Auswertung liest
+sie gefiltert ein. Abgeleitete Dateien und Excel werden neu erzeugt:
+
+```bash
+python collect_jobs.py --nur-auswertung
+```
+
+Alte Summen je Suchgebiet enthalten keine Arbeitsorte und lassen sich nicht
+nachträglich exakt auf 50 km zuschneiden. Deshalb werden die alten
+Zeitreihen aus den gefilterten Einzelstellen zwischen `first_seen` und
+`last_seen` **näherungsweise rekonstruiert**. Sichtbarkeitslücken und die
+damals unvollständige räumliche Suchabdeckung lassen sich damit nicht
+beheben. Alte überlappende Suchgebietssummen werden weder addiert noch
+hochgerechnet.
+
+Künftige Läufe speichern `data/jobs_beobachtungen.csv` mit den tatsächlich
+an jedem Tag geladenen Stellen. `data/snapshots_50km.csv` (inklusive
+`methode`) und `data/berufe_50km.csv` bilden die Auswertungsgrundlage.
+Auch leere neue Tagesergebnisse bleiben null. Ein erneuter Tageslauf
+ersetzt die Beobachtungen dieses Tages. API-Limits können die Abdeckung
+weiterhin begrenzen; gezählt werden nur geladene, örtlich zuordenbare Stellen.
+Der Methodenwechsel steht im Excel-Blatt **Zeitreihe**; Veränderungen über
+die Umstellung hinweg sind nicht als reine Arbeitsmarktentwicklung zu deuten.
+
+Amtliche Arbeitslosen-, Bevölkerungs- und Beschäftigtenzahlen liegen nur
+für ganze Kreise/Agenturbezirke vor. Sie sind ausdrücklich als **separate
+Vergleichsdaten, keine 50-km-Statistik** gekennzeichnet, auch in
+`arbeitsmarkt_historie.xlsx`.
 
 ## Quellen
 
@@ -15,8 +70,8 @@ Arbeitsmarkt-Monitoring Rems-Murr / Ostalb. `collect_jobs.py` läuft täglich
 
 ## Gemeinsame Auswertung: `data/stellen_alle.csv`
 
-Wird bei jedem Lauf komplett neu aus beiden Logs gebaut. Jede Stelle steht
-genau einmal darin.
+Wird bei jedem Lauf komplett neu aus beiden Logs gebaut. Jede Stelle im
+50-km-Radius steht genau einmal darin; die Quell-Logs bleiben vollständig.
 
 | Spalte | Inhalt |
 |---|---|

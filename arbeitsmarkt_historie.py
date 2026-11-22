@@ -684,6 +684,10 @@ def build_excel():
     zs["A8"] = ("Professionelle Referenzen zum Abgleich: QuBe-Projektionen "
                 "von BIBB und IAB (bibb.de/qube) sowie das "
                 "Fachkraeftemonitoring Baden-Wuerttemberg.")
+    zs["A9"] = ("Raumbezug: amtliche Kreis-/Agenturstatistiken, keine "
+                "50-km-Auswertung. Diese aggregierten Daten lassen sich "
+                "nicht nach Luftlinienradius filtern. Die Stellenanalyse "
+                "fuer 50 km um Waiblingen steht in arbeitsmarkt_auswertung.xlsx.")
 
     # ---------------- Arbeitslose (Monatsreihe ab STARTYEAR)
     if alo:
@@ -947,7 +951,7 @@ def build_excel():
 
 
 if __name__ == "__main__":
-    geholt = fetch_all()
+    geholt = None if "--nur-auswertung" in sys.argv else fetch_all()
     rc = build_excel()
     if geholt == 0:
         print(f"Keine einzige Tabelle von {GENESIS_BASE} erhalten, "
