@@ -40,6 +40,7 @@ from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from historie_analyse import analyse_blatt
+from historie_grafiken import grafiken_blatt
 
 BASE = Path(__file__).parent
 DATA = BASE / "data_historie"
@@ -812,6 +813,7 @@ def build_excel():
 
     ba_berufe_blatt(wb)
     analyse_blatt(wb, lade, KREISE, DATA, position=1)
+    grafiken_blatt(wb, lade, KREISE, DATA, position=2)
 
     # ---------------- Perspektive (Kennzahlen statt Kaffeesatz)
     pe = wb.create_sheet("Perspektive")
@@ -938,6 +940,12 @@ def build_excel():
               "siehe Actions-Log)."))
 
     for ws in wb.worksheets:
+        # Linien nicht glaetten: geglaettete Kurven taeuschen Ausschlaege
+        # zwischen den Jahreswerten vor
+        for ch in ws._charts:
+            if isinstance(ch, LineChart):
+                for ser in ch.series:
+                    ser.smooth = False
         for row in ws.iter_rows():
             for cell in row:
                 if cell.font is None or cell.font.name is None:

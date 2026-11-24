@@ -58,8 +58,14 @@ die Umstellung hinweg sind nicht als reine Arbeitsmarktentwicklung zu deuten.
 (`historie_analyse.py`): automatisch formulierte Kernaussagen,
 Kreisvergleich, Arbeitslosenquote, Beschäftigungsindex, Anteil 60+,
 Strukturwandel nach Wirtschaftszweigen seit 2019 und Arbeitslose je
-gemeldeter Stelle (Agentur Waiblingen). Alles wird bei jedem Lauf neu
-aus `data_historie/` berechnet.
+gemeldeter Stelle (Agentur Waiblingen). Danach folgt das Blatt
+**Grafiken** (`historie_grafiken.py`, aufgebaut wie das Blatt „Branchen“
+der Stellen-Excel): 11 nummerierte Diagramme, u. a. Schere Arbeitslose/
+Beschäftigte, Quoten nach Personengruppen, Gewinner/Verlierer nach
+Wirtschaftszweig (grün/rot), Branchenmix und Altersstruktur als
+100-%-Flächen, Bevölkerung nach Alter sowie Engpass und Vorjahres-
+veränderung je Berufssegment. Alles wird bei jedem Lauf neu aus
+`data_historie/` berechnet.
 
 Amtliche Arbeitslosen-, Bevölkerungs- und Beschäftigtenzahlen liegen nur
 für ganze Kreise/Agenturbezirke vor. Sie sind ausdrücklich als **separate
