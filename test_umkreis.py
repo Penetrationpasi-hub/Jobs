@@ -138,3 +138,49 @@ def test_sammlung_behaelt_archiv_und_importiert_nur_lokale(tmp_path, monkeypatch
 def test_wiederholungslauf_verwendet_beobachtungen_fuer_offen():
     row = {"last_seen": "2026-11-22", "_offen": False}
     assert not c.ba_ist_offen(row, "2026-11-22")
+
+
+def test_archiv_alte_suchgebiete_getrennt_von_auswertung(tmp_path, monkeypatch):
+    """Alte Suchgebiete landen ungefiltert nur in data/archiv_*.csv;
+    jobs_log/snapshots (Excel-Grundlage) bleiben auf 50 km begrenzt."""
+    monkeypatch.setattr(c, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(c, "fetch_arbeitslose", lambda: None)
+    monkeypatch.setattr(c, "lade_scrapjobs_json", lambda: {
+        "aktualisiert": c.date.today().isoformat(), "stellen": []})
+    # Altbestand aus der Zeit vor der Umstellung
+    alt = _ba("aalen_alt", "Alte Firma", "Koch", "Koch/Köchin", "2026-07-01",
+              "2026-11-21", ort="Aalen, Württemberg")
+    alt["region"] = "ostalbkreis"
+    c.update_jobs_log(tmp_path / "jobs_log.csv", "2026-11-21",
+                      {"aalen_alt": alt})
+
+    def fake(params):
+        if params["wo"] == "Aalen":
+            return [{"refnr": "aalen_alt", "beruf": "Koch/Köchin",
+                     "arbeitsort": {"ort": "Aalen, Württemberg"}},
+                    {"refnr": "aalen_neu", "beruf": "Koch/Köchin",
+                     "arbeitsort": {"ort": "Aalen, Württemberg"}}], 2
+        return [{"refnr": "lokal", "beruf": "Koch/Köchin",
+                 "arbeitsort": {"ort": "Waiblingen, Rems"}}], 1
+    monkeypatch.setattr(c, "fetch_region", fake)
+    c.main()
+
+    def lies(name, feld):
+        with (tmp_path / name).open(encoding="utf-8") as f:
+            return {r[feld]: r for r in csv.DictReader(f)}
+
+    assert set(lies("jobs_log.csv", "refnr")) == {"aalen_alt", "lokal"}
+    assert set(lies("snapshots.csv", "region")) == {REGION}
+    archiv = lies("archiv_jobs_log.csv", "refnr")
+    assert {"aalen_alt", "aalen_neu", "lokal"} <= set(archiv)
+    # Altstelle laeuft mit altem first_seen weiter
+    assert archiv["aalen_alt"]["first_seen"] == "2026-11-21"
+    assert archiv["aalen_alt"]["last_seen"] == c.date.today().isoformat()
+    assert set(lies("archiv_snapshots.csv", "region")) == set(c.ARCHIV_REGIONS)
+
+
+def test_archiv_abschaltbar(tmp_path, monkeypatch):
+    monkeypatch.setattr(c, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(c, "ARCHIV_AKTIV", False)
+    c.sammle_archiv("2026-11-24")
+    assert not (tmp_path / "archiv_jobs_log.csv").exists()

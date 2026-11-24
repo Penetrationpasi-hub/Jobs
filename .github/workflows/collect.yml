@@ -56,8 +56,10 @@ jobs:
           fi
           python tools/kldb_zuordnung.py
 
-      # collect_jobs.REGIONS: ausschliesslich Waiblingen, 50 km Luftlinie.
+      # collect_jobs.REGIONS: Auswertung nur Waiblingen, 50 km Luftlinie.
       # Derselbe Arbeitsortfilter gilt fuer BA und den ScrapJobs-Import.
+      # Zusaetzlich ARCHIV_REGIONS (alte Suchgebiete inkl. Aalen/Ostalb):
+      # nur data/archiv_*.csv, nicht in der Excel. Abschalten: ARCHIV=0.
       - name: Waiblingen 50 km sammeln und auswerten
         env:
           GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
