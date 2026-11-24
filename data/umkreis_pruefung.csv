@@ -3,21 +3,21 @@ BA,,154,unklar,
 BA,"Aalen, Württemberg",2342,ausserhalb,54.84
 BA,Abstatt,102,innerhalb,26.29
 BA,Abtsgmünd,316,ausserhalb,50.61
-BA,"Adelberg, Württemberg",32,innerhalb,22.18
+BA,"Adelberg, Württemberg",33,innerhalb,22.18
 BA,Adelmannsfelden,13,ausserhalb,52.13
-BA,"Affalterbach, Württemberg",174,innerhalb,10.05
+BA,"Affalterbach, Württemberg",176,innerhalb,10.05
 BA,"Aichelberg, Kreis Göppingen",4,innerhalb,28.42
-BA,Aichtal,38,innerhalb,22.44
-BA,"Aichwald, Schurw",98,innerhalb,10.49
+BA,Aichtal,40,innerhalb,22.44
+BA,"Aichwald, Schurw",101,innerhalb,10.49
 BA,"Aidlingen, Württemberg",2,innerhalb,35.3
 BA,Albershausen,21,innerhalb,24.03
 BA,Alfdorf,133,innerhalb,29.46
-BA,Allmersbach im Tal,73,innerhalb,13.83
+BA,Allmersbach im Tal,74,innerhalb,13.83
 BA,"Altbach, Württemberg",107,innerhalb,13.08
 BA,Altdorf bei Nürtingen,10,innerhalb,26.69
 BA,Altenriet,6,innerhalb,27.68
 BA,Altheim (Alb),1,ausserhalb,59.45
-BA,Althengstett,1,innerhalb,40.14
+BA,Althengstett,3,innerhalb,40.14
 BA,"Althütte, Württemberg",1,innerhalb,20.71
 BA,Ammerbuch,2,innerhalb,40.01
 BA,"Amstetten, Württemberg",5,innerhalb,49.69
@@ -25,12 +25,12 @@ BA,Aspach bei Backnang,42,innerhalb,16.14
 BA,Asperg,207,innerhalb,15.55
 BA,Auenwald,28,innerhalb,17.5
 BA,Bachhagel,14,ausserhalb,76.93
-BA,Backnang,1210,innerhalb,15.54
+BA,Backnang,1219,innerhalb,15.54
 BA,Bad Boll,3,innerhalb,30.23
-BA,Bad Friedrichshall,17,innerhalb,45.31
+BA,Bad Friedrichshall,20,innerhalb,45.31
 BA,Bad Liebenzell,1,innerhalb,43.45
-BA,Bad Rappenau,7,innerhalb,47.79
-BA,Bad Urach,1,innerhalb,38.45
+BA,Bad Rappenau,11,innerhalb,47.79
+BA,Bad Urach,3,innerhalb,38.45
 BA,Bad Wimpfen,4,innerhalb,45.69
 BA,Baltmannsweiler,58,innerhalb,13.98
 BA,Bartholomä,71,innerhalb,49.94
@@ -40,60 +40,60 @@ BA,"Berglen, Württemberg",29,innerhalb,11.64
 BA,Berneck bei Geislingen an der Steige,2,innerhalb,44.05
 BA,Besigheim,174,innerhalb,22.36
 BA,"Beutenmühle bei Lorch, Württemberg",6,innerhalb,27.72
-BA,Bietigheim-Bissingen,833,innerhalb,19.12
+BA,Bietigheim-Bissingen,834,innerhalb,19.12
 BA,"Birenbach, Kreis Göppingen",1,innerhalb,26.97
 BA,Birkachhof bei Winnenden,1,innerhalb,7.67
 BA,Birkhof bei Alfdorf,4,innerhalb,29.46
-BA,Bissingen an der Teck,7,innerhalb,28.95
+BA,Bissingen an der Teck,8,innerhalb,28.95
 BA,Bopfingen,409,ausserhalb,76.0
-BA,Brackenheim,15,innerhalb,32.86
-BA,"Bretten, Baden",8,innerhalb,49.95
+BA,Brackenheim,16,innerhalb,32.86
+BA,"Bretten, Baden",9,innerhalb,49.95
 BA,Bretzfeld,165,innerhalb,39.6
 BA,Burgstetten,56,innerhalb,11.4
 BA,Böbingen an der Rems,41,innerhalb,44.3
-BA,Böblingen,405,innerhalb,29.88
-BA,Böhmenkirch,119,innerhalb,48.16
-BA,Bönnigheim,60,innerhalb,28.25
+BA,Böblingen,419,innerhalb,29.88
+BA,Böhmenkirch,123,innerhalb,48.16
+BA,Bönnigheim,61,innerhalb,28.25
 BA,"Börtlingen, Kreis Göppingen",7,innerhalb,24.7
-BA,Bühlertann,89,innerhalb,49.12
+BA,Bühlertann,90,innerhalb,49.12
 BA,Bühlerzell,18,innerhalb,48.07
-BA,Calw,17,innerhalb,44.22
+BA,Calw,20,innerhalb,44.22
 BA,Cleebronn,79,innerhalb,31.23
 BA,Crailsheim,5,ausserhalb,64.55
 BA,Deckenpfronn,6,innerhalb,41.33
-BA,Deggingen,1,innerhalb,39.45
+BA,Deggingen,2,innerhalb,39.45
 BA,Deizisau,104,innerhalb,14.31
 BA,"Denkendorf, Württemberg",181,innerhalb,15.22
 BA,"Dettenhausen, Württemberg",2,innerhalb,29.6
-BA,Dettingen an der Erms,5,innerhalb,33.6
+BA,Dettingen an der Erms,6,innerhalb,33.6
 BA,Dettingen unter Teck,52,innerhalb,25.91
 BA,Dinkelsbühl,152,ausserhalb,77.87
 BA,Dischingen,72,ausserhalb,78.37
-BA,Ditzingen,489,innerhalb,18.27
-BA,Donzdorf,131,innerhalb,39.74
+BA,Ditzingen,493,innerhalb,18.27
+BA,Donzdorf,132,innerhalb,39.74
 BA,Durlangen,5,innerhalb,35.23
-BA,Dußlingen,4,innerhalb,46.28
+BA,Dußlingen,7,innerhalb,46.28
 BA,Eberdingen,58,innerhalb,26.23
 BA,Ebersbach an der Fils,178,innerhalb,19.95
 BA,Ederheim,7,ausserhalb,84.22
 BA,"Ehningen, Kreis Böblingen",2,innerhalb,33.61
-BA,Eislingen/Fils,14,innerhalb,32.09
+BA,Eislingen/Fils,17,innerhalb,32.09
 BA,"Ellenberg, Württemberg",1,ausserhalb,68.89
 BA,"Ellhofen, Württemberg",60,innerhalb,34.95
 BA,Ellwangen (Jagst),825,ausserhalb,62.95
 BA,Engelsbrand,2,innerhalb,48.78
 BA,Eningen unter Achalm,1,innerhalb,38.64
-BA,Eppingen,6,innerhalb,44.86
+BA,Eppingen,9,innerhalb,44.86
 BA,Erdmannhausen,99,innerhalb,12.34
-BA,Erligheim,24,innerhalb,26.52
+BA,Erligheim,25,innerhalb,26.52
 BA,Eschach bei Schwäbisch Gmünd,32,innerhalb,43.92
 BA,"Essingen, Württemberg",168,ausserhalb,52.14
-BA,Esslingen am Neckar,2333,innerhalb,11.15
+BA,Esslingen am Neckar,2356,innerhalb,11.15
 BA,Ettenheim,1,ausserhalb,127.86
-BA,"Fellbach, Württemberg",1016,innerhalb,3.8
+BA,"Fellbach, Württemberg",1023,innerhalb,3.8
 BA,Fichtenau,82,ausserhalb,70.72
 BA,"Fichtenberg, Württemberg",60,innerhalb,33.58
-BA,Filderstadt,580,innerhalb,20.73
+BA,Filderstadt,584,innerhalb,20.73
 BA,"Flein bei Heilbronn, Neckar",44,innerhalb,31.07
 BA,Forheim,5,ausserhalb,83.35
 BA,Frankenhardt,29,ausserhalb,56.12
@@ -102,152 +102,159 @@ BA,Fremdingen,11,ausserhalb,84.85
 BA,"Freudental, Württemberg",5,innerhalb,27.24
 BA,"Frickenhausen, Württemberg",70,innerhalb,26.76
 BA,Friolzheim,1,innerhalb,35.36
-BA,Gaildorf,321,innerhalb,38.01
+BA,Gaildorf,322,innerhalb,38.01
 BA,"Gechingen, Kreis Calw",3,innerhalb,44.22
-BA,Geislingen an der Steige,13,innerhalb,44.05
+BA,Geislingen an der Steige,17,innerhalb,44.05
 BA,Gemmrigheim,35,innerhalb,24.75
 BA,"Gerlingen, Württemberg",181,innerhalb,18.9
 BA,Gerschweiler,1,unklar,
 BA,"Gerstetten, Württemberg",277,ausserhalb,56.63
 BA,Giengen an der Brenz,572,ausserhalb,70.66
+BA,Gingen an der Fils,1,innerhalb,39.09
 BA,"Grafenau, Württemberg",1,innerhalb,32.27
-BA,"Grafenberg, Württemberg",7,innerhalb,29.75
+BA,"Grafenberg, Württemberg",9,innerhalb,29.75
 BA,Großbettlingen,17,innerhalb,26.91
 BA,Großbottwar,63,innerhalb,18.88
 BA,Großerlach,17,innerhalb,28.51
 BA,Gschwend bei Gaildorf,40,innerhalb,33.25
-BA,Gärtringen,10,innerhalb,37.13
+BA,Gärtringen,11,innerhalb,37.13
 BA,Gäufelden,2,innerhalb,48.28
 BA,"Göggingen, Württemberg",13,innerhalb,41.66
-BA,Göppingen,464,innerhalb,29.7
-BA,Göppingen-Voralb,30,innerhalb,29.7
-BA,Güglingen,10,innerhalb,34.72
+BA,Göppingen,476,innerhalb,29.7
+BA,Göppingen-Voralb,39,innerhalb,29.7
+BA,Güglingen,11,innerhalb,34.72
 BA,Hardthausen am Kocher,4,innerhalb,47.69
 BA,"Hattenhofen, Württemberg",13,innerhalb,26.43
 BA,Heidenheim an der Brenz,1767,ausserhalb,62.85
-BA,"Heilbronn, Neckar",145,innerhalb,37.5
+BA,"Heilbronn, Neckar",160,innerhalb,37.5
 BA,Heimsheim,4,innerhalb,33.0
 BA,"Hemmingen, Württemberg",90,innerhalb,21.06
 BA,Herbrechtingen,337,ausserhalb,67.26
 BA,Hermaringen,34,ausserhalb,74.12
-BA,Herrenberg im Gäu,25,innerhalb,42.25
+BA,Herrenberg im Gäu,29,innerhalb,42.25
 BA,Hessigheim,2,innerhalb,20.34
-BA,"Heubach, Württemberg",152,innerhalb,45.42
+BA,"Heubach, Württemberg",154,innerhalb,45.42
 BA,"Heuchlingen, Lein",6,innerhalb,45.97
-BA,Hochdorf bei Plochingen,24,innerhalb,18.96
-BA,Holzgerlingen,8,innerhalb,30.97
+BA,Hochdorf bei Plochingen,25,innerhalb,18.96
+BA,Holzgerlingen,10,innerhalb,30.97
 BA,Holzmaden,16,innerhalb,26.57
 BA,"Hüttlingen, Württemberg",52,ausserhalb,57.76
 BA,Iggingen,17,innerhalb,41.17
-BA,"Illingen, Württemberg",9,innerhalb,31.78
+BA,"Illingen, Württemberg",12,innerhalb,31.78
 BA,Ilsfeld,259,innerhalb,25.33
-BA,"Ingersheim, Württemberg",42,innerhalb,17.61
+BA,"Ingersheim, Württemberg",43,innerhalb,17.61
+BA,Ispringen,1,innerhalb,48.43
 BA,Jagstzell,32,ausserhalb,61.17
 BA,"Jettingen, Württemberg",2,innerhalb,48.28
 BA,Kaisersbach im Welzheimer Wald,14,innerhalb,25.98
-BA,Kernen im Remstal,340,innerhalb,2.8
+BA,Kernen im Remstal,342,innerhalb,2.8
 BA,Kieselbronn,1,innerhalb,42.91
 BA,Kirchardt,5,innerhalb,47.72
 BA,Kirchberg an der Murr,105,innerhalb,12.43
 BA,Kirchentellinsfurt,8,innerhalb,35.52
 BA,Kirchheim am Neckar,98,innerhalb,26.85
 BA,Kirchheim am Ries,3,ausserhalb,79.47
-BA,Kirchheim unter Teck,747,innerhalb,22.97
+BA,Kirchheim unter Teck,751,innerhalb,22.97
 BA,Knittlingen,1,innerhalb,46.19
 BA,"Korb, Remstal",98,innerhalb,3.58
-BA,Korntal-Münchingen,293,innerhalb,14.72
-BA,Kornwestheim,576,innerhalb,10.1
+BA,Korntal-Münchingen,296,innerhalb,14.72
+BA,Kornwestheim,579,innerhalb,10.1
+BA,"Kuchen, Fils",3,innerhalb,41.66
 BA,Kusterdingen,5,innerhalb,37.32
 BA,Köngen,112,innerhalb,16.98
 BA,"Königsbronn, Württemberg",134,ausserhalb,59.12
-BA,Laichingen,5,innerhalb,46.82
+BA,"Kürnbach, Baden",1,innerhalb,43.87
+BA,Laichingen,24,innerhalb,46.82
 BA,Lauchheim,50,ausserhalb,67.88
 BA,Lauffen am Neckar,53,innerhalb,29.55
 BA,Lauterstein,19,innerhalb,42.45
 BA,Lehrensteinsfeld,9,innerhalb,33.22
-BA,Leinfelden-Echterdingen,566,innerhalb,18.83
+BA,Leinfelden-Echterdingen,570,innerhalb,18.83
 BA,Leingarten,24,innerhalb,37.83
 BA,Leinzell,2,innerhalb,41.11
-BA,"Leonberg, Württemberg",407,innerhalb,22.24
-BA,"Leutenbach, Württemberg",81,innerhalb,8.32
+BA,"Lenningen, Württemberg",1,innerhalb,32.42
+BA,"Leonberg, Württemberg",413,innerhalb,22.24
+BA,"Leutenbach, Württemberg",85,innerhalb,8.32
 BA,"Lichtenstein, Württemberg",1,innerhalb,43.93
 BA,"Lichtenwald, Württemberg",16,innerhalb,15.28
 BA,"Lorch, Württemberg",232,innerhalb,27.72
-BA,"Ludwigsburg, Württemberg",2703,innerhalb,13.15
+BA,"Ludwigsburg, Württemberg",2719,innerhalb,13.15
 BA,Löchgau,33,innerhalb,24.45
 BA,"Löwenstein, Württemberg",71,innerhalb,29.63
-BA,Magstadt,68,innerhalb,27.41
+BA,Magstadt,69,innerhalb,27.41
 BA,Maihingen,1,ausserhalb,87.1
 BA,Mainhardt,59,innerhalb,32.27
 BA,Marbach am Neckar,231,innerhalb,15.33
-BA,Markgröningen,192,innerhalb,19.04
+BA,Markgröningen,194,innerhalb,19.04
 BA,Marktoffingen,4,ausserhalb,85.05
 BA,Maulbronn,4,innerhalb,41.84
 BA,"Merklingen, Alb",3,innerhalb,48.08
-BA,"Metzingen, Württemberg",30,innerhalb,32.94
+BA,"Metzingen, Württemberg",31,innerhalb,32.94
 BA,Michelbach an der Bilz,3,innerhalb,41.96
 BA,"Michelfeld, Kreis Schwäbisch Hall",42,innerhalb,39.72
 BA,Mundelsheim,17,innerhalb,20.34
 BA,"Murr, Württemberg",157,innerhalb,15.02
-BA,Murrhardt,233,innerhalb,24.92
+BA,Murrhardt,234,innerhalb,24.92
 BA,Mutlangen,97,innerhalb,35.19
 BA,Mögglingen,104,innerhalb,47.31
 BA,"Möglingen, Kreis Ludwigsburg, Württ.",150,innerhalb,15.15
 BA,Mönchsroth,5,ausserhalb,78.9
 BA,Mönsheim,3,innerhalb,33.13
-BA,Mühlacker,15,innerhalb,37.33
+BA,Mühlacker,18,innerhalb,37.33
 BA,Nattheim,103,ausserhalb,69.43
-BA,Neckarsulm,41,innerhalb,40.22
+BA,Neckarsulm,44,innerhalb,40.22
 BA,Neckartailfingen,30,innerhalb,24.84
 BA,Neckartenzlingen,56,innerhalb,27.63
-BA,Neckarwestheim,60,innerhalb,25.58
+BA,Neckarwestheim,61,innerhalb,25.58
 BA,"Nehren, Württemberg",1,innerhalb,48.17
 BA,"Nellingen, Alb",2,innerhalb,47.48
 BA,Neresheim,218,ausserhalb,74.77
 BA,Neu Asbach,1,ausserhalb,183.54
-BA,Neuenstadt am Kocher,13,innerhalb,44.78
+BA,Neuenstadt am Kocher,19,innerhalb,44.78
 BA,"Neuenstein, Württemberg",2,innerhalb,45.66
 BA,Neuffen,1,innerhalb,31.19
-BA,Neuhausen auf den Fildern,295,innerhalb,16.76
+BA,Neuhausen auf den Fildern,299,innerhalb,16.76
 BA,Neuler,37,ausserhalb,56.04
-BA,Niefern-Öschelbronn,10,innerhalb,40.1
+BA,Niefern-Öschelbronn,11,innerhalb,40.1
 BA,"Nordheim, Württemberg",1,innerhalb,33.66
-BA,Notzingen,12,innerhalb,20.72
-BA,Nufringen,11,innerhalb,39.02
+BA,Notzingen,13,innerhalb,20.72
+BA,Nufringen,13,innerhalb,39.02
 BA,Nördlingen,773,ausserhalb,85.82
-BA,Nürtingen,715,innerhalb,23.07
+BA,Nürtingen,721,innerhalb,23.07
 BA,Oberboihingen,24,innerhalb,20.61
-BA,Oberderdingen,5,innerhalb,45.58
+BA,Oberderdingen,6,innerhalb,45.58
 BA,Obere Rauhmühle,2,unklar,
 BA,Oberkochen,1266,ausserhalb,58.02
 BA,Oberriexingen,5,innerhalb,23.61
-BA,Oberrot bei Gaildorf,87,innerhalb,32.66
-BA,Obersontheim,371,innerhalb,49.33
+BA,Oberrot bei Gaildorf,88,innerhalb,32.66
+BA,Obersontheim,375,innerhalb,49.33
 BA,Oberstenfeld,67,innerhalb,21.54
-BA,Obersulm,197,innerhalb,34.06
+BA,Obersulm,198,innerhalb,34.06
+BA,Oedheim,1,innerhalb,45.59
 BA,"Offenau, Württemberg",1,innerhalb,47.35
 BA,Ohmden,2,innerhalb,25.85
-BA,Oppenweiler,71,innerhalb,19.68
+BA,Oppenweiler,73,innerhalb,19.68
 BA,Ostelsheim,1,innerhalb,36.28
-BA,Ostfildern,343,innerhalb,12.7
+BA,Ostfildern,346,innerhalb,12.7
 BA,"Ottenbach, Württemberg",2,innerhalb,33.4
+BA,"Owen, Teck",1,innerhalb,28.95
 BA,"Pfaffenhofen, Württemberg",2,innerhalb,35.8
-BA,Pfedelbach,146,innerhalb,40.83
-BA,Pforzheim,158,innerhalb,47.91
-BA,Pfullingen,5,innerhalb,41.41
-BA,Pleidelsheim,126,innerhalb,16.35
+BA,Pfedelbach,148,innerhalb,40.83
+BA,Pforzheim,182,innerhalb,47.91
+BA,Pfullingen,7,innerhalb,41.41
+BA,Pleidelsheim,127,innerhalb,16.35
 BA,Pliezhausen,3,innerhalb,31.4
-BA,Plochingen,286,innerhalb,15.5
+BA,Plochingen,291,innerhalb,15.5
 BA,Plüderhausen,149,innerhalb,20.8
 BA,"Rainau, Württemberg",16,ausserhalb,61.98
-BA,Rechberghausen,51,innerhalb,26.54
-BA,Reichenbach an der Fils,94,innerhalb,17.39
+BA,Rechberghausen,53,innerhalb,26.54
+BA,Reichenbach an der Fils,98,innerhalb,17.39
 BA,Reimlingen,3,ausserhalb,87.89
 BA,Remseck am Neckar,275,innerhalb,6.24
 BA,Remshalden,231,innerhalb,8.1
-BA,Renningen,161,innerhalb,28.53
-BA,Reutlingen,67,innerhalb,39.72
-BA,Riederich,12,innerhalb,30.46
+BA,Renningen,165,innerhalb,28.53
+BA,Reutlingen,79,innerhalb,39.72
+BA,Riederich,13,innerhalb,30.46
 BA,Riesbürg,27,ausserhalb,81.76
 BA,"Rosenberg, Württemberg",124,ausserhalb,56.08
 BA,"Rosengarten, Württemberg",103,innerhalb,39.53
@@ -255,50 +262,51 @@ BA,"Rudersberg, Württemberg",120,innerhalb,16.64
 BA,Ruppertshofen bei Schwäbisch Gmünd,16,innerhalb,36.91
 BA,Rutesheim,51,innerhalb,27.3
 BA,Römerstein,1,innerhalb,40.12
-BA,"Sachsenheim, Württemberg",107,innerhalb,22.77
+BA,"Sachsenheim, Württemberg",109,innerhalb,22.77
 BA,"Salach, Württemberg",11,innerhalb,34.56
 BA,Schechingen,24,innerhalb,44.21
 BA,Schlaitdorf,7,innerhalb,26.28
 BA,"Schlierbach, Württemberg",61,innerhalb,23.03
-BA,"Schorndorf, Württemberg",828,innerhalb,15.72
+BA,"Schorndorf, Württemberg",832,innerhalb,15.72
 BA,Schurrenhof,3,unklar,
-BA,"Schwaigern, Württemberg",4,innerhalb,39.63
+BA,"Schwaigern, Württemberg",6,innerhalb,39.63
 BA,Schwaikheim,127,innerhalb,5.55
 BA,Schwieberdingen,89,innerhalb,18.37
-BA,Schwäbisch Gmünd,1077,innerhalb,37.08
-BA,Schwäbisch Hall,55,innerhalb,43.75
+BA,Schwäbisch Gmünd,1082,innerhalb,37.08
+BA,Schwäbisch Hall,63,innerhalb,43.75
 BA,"Schönaich, Württemberg",46,innerhalb,26.95
-BA,Sersheim,65,innerhalb,26.51
-BA,Sindelfingen,816,innerhalb,28.54
+BA,Sersheim,68,innerhalb,26.51
+BA,Sindelfingen,821,innerhalb,28.54
 BA,Sperrhof,2,unklar,
 BA,"Spiegelberg, Württemberg",4,innerhalb,24.99
 BA,Spraitbach,35,innerhalb,33.05
 BA,"Steinenbronn, Württemberg",42,innerhalb,23.53
 BA,Steinheim am Albuch,172,ausserhalb,57.0
-BA,Steinheim an der Murr,87,innerhalb,14.82
+BA,Steinheim an der Murr,88,innerhalb,14.82
 BA,Steinächle,1,unklar,
+BA,Sternenfels,3,innerhalb,41.83
 BA,Stimpfach,186,ausserhalb,62.15
-BA,Stuttgart,15732,innerhalb,15.34
+BA,Stuttgart,15824,innerhalb,15.34
 BA,Stödtlen,6,ausserhalb,74.25
-BA,Sulzbach an der Murr,128,innerhalb,23.25
+BA,Sulzbach an der Murr,129,innerhalb,23.25
 BA,Sulzbach-Laufen,65,innerhalb,41.77
 BA,"Sulzfeld, Baden",3,innerhalb,45.25
 BA,"Syrgenstein, Schwaben",17,ausserhalb,75.3
-BA,Süßen,7,innerhalb,36.4
+BA,Süßen,8,innerhalb,36.4
 BA,"Talheim, Neckar",71,innerhalb,29.32
-BA,Tamm,107,innerhalb,17.62
+BA,Tamm,108,innerhalb,17.62
 BA,"Tannhausen bei Ellwangen, Jagst",7,ausserhalb,78.08
 BA,Traubenmühle,3,unklar,
 BA,Täferrot,2,innerhalb,38.24
-BA,Tübingen,78,innerhalb,40.7
+BA,Tübingen,88,innerhalb,40.7
 BA,Uhingen,112,innerhalb,24.31
-BA,Unterensingen,49,innerhalb,20.02
+BA,Unterensingen,50,innerhalb,20.02
 BA,Untergruppenbach,65,innerhalb,28.73
 BA,Unterschneidheim,15,ausserhalb,77.61
-BA,"Urbach, Rems",246,innerhalb,19.15
-BA,Vaihingen an der Enz,170,innerhalb,28.45
+BA,"Urbach, Rems",248,innerhalb,19.15
+BA,Vaihingen an der Enz,172,innerhalb,28.45
 BA,Vellberg,1,innerhalb,49.72
-BA,"Waiblingen, Rems",1406,innerhalb,0.5
+BA,"Waiblingen, Rems",1414,innerhalb,0.5
 BA,Walddorfhäslach,2,innerhalb,29.03
 BA,Waldenbuch,26,innerhalb,25.45
 BA,"Waldenburg, Württemberg",4,innerhalb,45.73
@@ -307,35 +315,35 @@ BA,"Walheim, Württemberg",12,innerhalb,23.55
 BA,Wallerstein,67,ausserhalb,85.04
 BA,"Wangen, Kreis Göppingen",48,innerhalb,24.49
 BA,Wannweil,3,innerhalb,37.17
-BA,Weil der Stadt,8,innerhalb,33.85
+BA,Weil der Stadt,9,innerhalb,33.85
 BA,Weil im Schönbuch,5,innerhalb,29.8
-BA,Weilheim an der Teck,21,innerhalb,29.05
+BA,Weilheim an der Teck,23,innerhalb,29.05
 BA,Weinsberg,23,innerhalb,35.52
-BA,Weinstadt,527,innerhalb,5.16
+BA,Weinstadt,532,innerhalb,5.16
 BA,Weissach im Tal,60,innerhalb,15.99
-BA,"Weissach, Württemberg",73,innerhalb,28.45
-BA,Welzheim,138,innerhalb,23.78
-BA,Wendlingen am Neckar,159,innerhalb,18.45
-BA,Wernau (Neckar),134,innerhalb,17.1
-BA,"Westerheim, Württemberg",2,innerhalb,41.9
+BA,"Weissach, Württemberg",75,innerhalb,28.45
+BA,Welzheim,139,innerhalb,23.78
+BA,Wendlingen am Neckar,160,innerhalb,18.45
+BA,Wernau (Neckar),135,innerhalb,17.1
+BA,"Westerheim, Württemberg",3,innerhalb,41.9
 BA,"Westhausen, Württemberg",237,ausserhalb,63.67
 BA,Wiernsheim,3,innerhalb,34.59
 BA,Wiesbaden,1,ausserhalb,153.66
 BA,Wilburgstetten,64,ausserhalb,81.63
 BA,"Wildberg, Württemberg",3,innerhalb,47.91
-BA,Wimsheim,6,innerhalb,35.41
-BA,"Winnenden, Württemberg",490,innerhalb,7.67
-BA,"Winterbach bei Schorndorf, Württ.",210,innerhalb,12.47
+BA,Wimsheim,7,innerhalb,35.41
+BA,"Winnenden, Württemberg",494,innerhalb,7.67
+BA,"Winterbach bei Schorndorf, Württ.",213,innerhalb,12.47
 BA,Wolfschlugen,96,innerhalb,20.43
 BA,"Wurmberg, Württemberg",8,innerhalb,36.76
 BA,Wäschenbeuren,15,innerhalb,28.34
 BA,"Wört, Württemberg",81,ausserhalb,73.23
-BA,Wüstenrot,81,innerhalb,29.56
+BA,Wüstenrot,82,innerhalb,29.56
 BA,Zaberfeld,1,innerhalb,37.79
 BA,Zell unter Aichelberg,15,innerhalb,27.68
 BA,Ziertheim,4,ausserhalb,81.85
 BA,Zöschingen,13,ausserhalb,76.03
-BA,Öhringen,30,innerhalb,43.05
+BA,Öhringen,35,innerhalb,43.05
 BA,Ötisheim,1,innerhalb,40.59
 Karriereseite,,39,unklar,
 Karriereseite,02943 Boxberg DE,1,ausserhalb,470.61
@@ -369,7 +377,7 @@ Karriereseite,70173 Stuttgart Bade DE,1,innerhalb,12.18
 Karriereseite,70173 Stuttgart Deutschland,12,innerhalb,12.18
 Karriereseite,70173 Stuttgart Stuttgart-Mitte BW DE,1,innerhalb,12.18
 Karriereseite,70174 Stuttgart BW DE,2,innerhalb,12.18
-Karriereseite,70174 Stuttgart Deutschland,9,innerhalb,12.18
+Karriereseite,70174 Stuttgart Deutschland,10,innerhalb,12.18
 Karriereseite,70174 Stuttgart/Mitte Bade DE,1,innerhalb,12.18
 Karriereseite,70178 Stuttgart BW DE,1,innerhalb,13.25
 Karriereseite,70178 Stuttgart DE,19,innerhalb,13.25
@@ -486,6 +494,7 @@ Karriereseite,71034 Böblingen / Flugfeld Bade DE,4,innerhalb,29.88
 Karriereseite,71034 Böblingen BW DE,7,innerhalb,29.88
 Karriereseite,71034 Böblingen Deutschland,7,innerhalb,29.88
 Karriereseite,71034 Böblingen-Hulb DE,1,innerhalb,29.88
+Karriereseite,71063 Sindelfingen BW DE,1,innerhalb,27.0
 Karriereseite,71063 Sindelfingen DE,9,innerhalb,27.0
 Karriereseite,71063 Sindelfingen Deutschland,2,innerhalb,27.0
 Karriereseite,71065 Sindelfingen Baden-Württemberg DE,2,innerhalb,25.98
@@ -511,6 +520,7 @@ Karriereseite,71139 Ehningen DE,8,innerhalb,33.61
 Karriereseite,71144 Steinenbronn Deutschland,2,innerhalb,23.53
 Karriereseite,71154 Nufringen BW DE,1,innerhalb,39.02
 Karriereseite,71154 Nufringen DE,5,innerhalb,39.02
+Karriereseite,71154 Nufringen Deutschland,1,innerhalb,39.02
 Karriereseite,71229 Ditzingen BW DE,1,innerhalb,22.24
 Karriereseite,71229 Leonberg BW DE,11,innerhalb,22.24
 Karriereseite,71229 Leonberg Bade DE,2,innerhalb,22.24
@@ -522,11 +532,11 @@ Karriereseite,71254 Ditzingen DE,5,innerhalb,18.27
 Karriereseite,71254 Ditzingen Deutschland,2,innerhalb,18.27
 Karriereseite,71254 Höfinger Weg 6 BW DE,1,innerhalb,18.27
 Karriereseite,71263 Altbach BW DE,1,innerhalb,33.85
-Karriereseite,71263 Weil der Stadt DE,3,innerhalb,33.85
+Karriereseite,71263 Weil der Stadt DE,4,innerhalb,33.85
 Karriereseite,71263 Weil der Stadt Deutschland,3,innerhalb,33.85
 Karriereseite,71272 Renningen DE,4,innerhalb,28.53
-Karriereseite,71272 Renningen Deutschland,4,innerhalb,28.53
-Karriereseite,71282 Hemmingen Deutschland,1,innerhalb,21.06
+Karriereseite,71272 Renningen Deutschland,5,innerhalb,28.53
+Karriereseite,71282 Hemmingen Deutschland,2,innerhalb,21.06
 Karriereseite,71292 Friolzheim BW DE,1,innerhalb,35.36
 Karriereseite,71296 Heimsheim BW DE,1,innerhalb,33.0
 Karriereseite,71296 Heimsheim DE,7,innerhalb,33.0
@@ -555,7 +565,7 @@ Karriereseite,71364 Winnenden,5,innerhalb,7.67
 Karriereseite,71364 Winnenden BW DE,1,innerhalb,7.67
 Karriereseite,71364 Winnenden BW de,15,innerhalb,7.67
 Karriereseite,71364 Winnenden Bade DE,2,innerhalb,7.67
-Karriereseite,71364 Winnenden Baden-Württemberg DE,19,innerhalb,7.67
+Karriereseite,71364 Winnenden Baden-Württemberg DE,21,innerhalb,7.67
 Karriereseite,71364 Winnenden Baden-Württemberg Deutschland,4,innerhalb,7.67
 Karriereseite,71364 Winnenden DE,22,innerhalb,7.67
 Karriereseite,71364 Winnenden DE / 71332 Waiblingen DE / 71522 Backnang DE / 73614 Schorndorf DE / 70736 Fellbach ,1,innerhalb,15.72
@@ -564,14 +574,14 @@ Karriereseite,"71364 Winnenden, Württemberg Deutschland",11,innerhalb,7.67
 Karriereseite,71364 Winnenden-Hertmannsweiler Baden-Württemberg DE,2,innerhalb,7.67
 Karriereseite,71384 Weinstadt / Beutelsbach Bade DE,2,innerhalb,5.16
 Karriereseite,71384 Weinstadt BW DE,3,innerhalb,5.16
-Karriereseite,71384 Weinstadt Baden-Württemberg DE,14,innerhalb,5.16
+Karriereseite,71384 Weinstadt Baden-Württemberg DE,15,innerhalb,5.16
 Karriereseite,71384 Weinstadt Baden-Württemberg Deutschland,4,innerhalb,5.16
 Karriereseite,71384 Weinstadt DE,9,innerhalb,5.16
 Karriereseite,71384 Weinstadt Deutschland,6,innerhalb,5.16
-Karriereseite,71394 Kernen im Remstal Baden-Württemberg DE,9,innerhalb,2.8
+Karriereseite,71394 Kernen im Remstal Baden-Württemberg DE,10,innerhalb,2.8
 Karriereseite,71394 Kernen im Remstal Baden-Württemberg Deutschland,26,innerhalb,2.8
 Karriereseite,71394 Kernen im Remstal Deutschland,1,innerhalb,2.8
-Karriereseite,71397 Leutenbach Deutschland,6,innerhalb,8.32
+Karriereseite,71397 Leutenbach Deutschland,7,innerhalb,8.32
 Karriereseite,71404 Korb Bade DE,2,innerhalb,3.58
 Karriereseite,71404 Korb Baden-Württemberg DE,1,innerhalb,3.58
 Karriereseite,71409 Schwaikheim Baden-Württemberg DE,2,innerhalb,5.55
@@ -583,23 +593,24 @@ Karriereseite,71522 Backnang Baden-Württemberg DE / 71540 Murrhardt Baden-Würt
 Karriereseite,71522 Backnang DE,40,innerhalb,15.54
 Karriereseite,71522 Backnang DE / 71384 Weinstadt DE,1,innerhalb,15.54
 Karriereseite,71522 Backnang Deutschland,2,innerhalb,15.54
-Karriereseite,71522 Backnang de,4,innerhalb,15.54
+Karriereseite,71522 Backnang de,5,innerhalb,15.54
 Karriereseite,71522 Stuttgart DE-BW DE,5,innerhalb,15.54
 Karriereseite,71522 Sulzbach/Murr BW DE,2,innerhalb,15.54
 Karriereseite,71540 Murrhardt BW DE,8,innerhalb,24.92
 Karriereseite,71540 Murrhardt Bade DE,1,innerhalb,24.92
-Karriereseite,71540 Murrhardt Baden-Württemberg DE,3,innerhalb,24.92
+Karriereseite,71540 Murrhardt Baden-Württemberg DE,4,innerhalb,24.92
 Karriereseite,71540 Murrhardt DE,9,innerhalb,24.92
 Karriereseite,71543 Wüstenrot BW DE,4,innerhalb,29.56
 Karriereseite,71543 Wüstenrot Bade DE,2,innerhalb,29.56
 Karriereseite,71546 Aspach BW DE,1,innerhalb,16.14
 Karriereseite,71549 Auenwald-Däfern BW DE,1,innerhalb,17.5
+Karriereseite,71554 Weissach im Tal Baden-Württemberg DE,1,innerhalb,15.99
 Karriereseite,71554 Weissach im Tal Baden-Württemberg Deutschland,1,innerhalb,15.99
 Karriereseite,71560 Sulzbach Deutschland,1,innerhalb,23.25
 Karriereseite,71560 Sulzbach/Murr BW DE,2,innerhalb,23.25
 Karriereseite,71566 Althütte Deutschland,1,innerhalb,20.71
 Karriereseite,71570 Oppenweiler BW DE,1,innerhalb,19.68
-Karriereseite,71570 Oppenweiler Deutschland,15,innerhalb,19.68
+Karriereseite,71570 Oppenweiler Deutschland,16,innerhalb,19.68
 Karriereseite,71573 Allmersbach BW DE,1,innerhalb,13.83
 Karriereseite,71573 Allmersbach im Tal BW DE,2,innerhalb,13.83
 Karriereseite,71573 Allmersbach im Tal Baden-Württemberg Deutschland,1,innerhalb,13.83
@@ -725,7 +736,7 @@ Karriereseite,73 Remshalden Baden-Württemberg DE,3,innerhalb,8.1
 Karriereseite,73 Schorndorf Baden-Württemberg DE,1,innerhalb,15.72
 Karriereseite,73 Schorndorf Baden-Württemberg DE / Waiblingen Baden-Württemberg DE,2,innerhalb,15.72
 Karriereseite,73 Welzheim Baden-Württemberg DE,1,innerhalb,23.78
-Karriereseite,73 Winterbach Baden-Württemberg DE,4,innerhalb,12.47
+Karriereseite,73 Winterbach Baden-Württemberg DE,5,innerhalb,12.47
 Karriereseite,73033 Eislingen BW DE,1,innerhalb,28.21
 Karriereseite,73033 Göppingen Baden-Württemberg DE,1,innerhalb,28.21
 Karriereseite,73033 Göppingen DE,2,innerhalb,28.21
@@ -742,7 +753,7 @@ Karriereseite,73054 Eislingen Bade DE,2,innerhalb,32.09
 Karriereseite,73054 Eislingen DE,4,innerhalb,32.09
 Karriereseite,73054 Eislingen Deutschland,1,innerhalb,32.09
 Karriereseite,73054 Eislingen/Fils BW DE,1,innerhalb,32.09
-Karriereseite,73054 Eislingen/Fils Deutschland,7,innerhalb,32.09
+Karriereseite,73054 Eislingen/Fils Deutschland,8,innerhalb,32.09
 Karriereseite,73061 Ebersbach BW DE,2,innerhalb,19.95
 Karriereseite,73061 Ebersbach Deutschland,1,innerhalb,19.95
 Karriereseite,73061 Ebersbach an der Fils Baden-Württemberg Deutschland,1,innerhalb,19.95
@@ -788,6 +799,7 @@ Karriereseite,73312 Geislingen an der Steige DE,15,innerhalb,45.53
 Karriereseite,73312 Geislingen an der Steige Deutschland,2,innerhalb,45.53
 Karriereseite,73312 Geislingen an der Steige Türkheim Deutschland,2,innerhalb,45.53
 Karriereseite,73329 Kuchen DE,2,innerhalb,41.66
+Karriereseite,73333 Gingen Deutschland,1,innerhalb,39.09
 Karriereseite,73333 Gingen an der Fils Deutschland,1,innerhalb,39.09
 Karriereseite,73337 Bad Überkingen BW DE,1,innerhalb,43.66
 Karriereseite,73342 Bad Ditzenbach DE,6,innerhalb,39.31
@@ -813,7 +825,7 @@ Karriereseite,73566 Bartholomä Baden-Württemberg Deutschland,2,innerhalb,49.94
 Karriereseite,73574 Iggingen DE,2,innerhalb,41.17
 Karriereseite,73614 Schorndorf BW DE,5,innerhalb,15.72
 Karriereseite,73614 Schorndorf Baden-Wurttemberg DE,6,innerhalb,15.72
-Karriereseite,73614 Schorndorf Baden-Württemberg DE,18,innerhalb,15.72
+Karriereseite,73614 Schorndorf Baden-Württemberg DE,19,innerhalb,15.72
 Karriereseite,73614 Schorndorf Baden-Württemberg Deutschland,1,innerhalb,15.72
 Karriereseite,73614 Schorndorf DE,30,innerhalb,15.72
 Karriereseite,73614 Schorndorf DE / 71364 Winnenden DE,1,innerhalb,15.72
@@ -828,7 +840,7 @@ Karriereseite,73642 Welzheim Baden-Württemberg DE,4,innerhalb,23.78
 Karriereseite,73642 Welzheim DE,6,innerhalb,23.78
 Karriereseite,73642 Welzheim Deutschland,1,innerhalb,23.78
 Karriereseite,73650 Winterbach Baden-Württemberg DE,9,innerhalb,12.47
-Karriereseite,73650 Winterbach DE,24,innerhalb,12.47
+Karriereseite,73650 Winterbach DE,25,innerhalb,12.47
 Karriereseite,73650 Winterbach DE / 6403 Küssnacht am Rigi CH,1,unklar,
 Karriereseite,73650 Winterbach Deutschland,1,innerhalb,12.47
 Karriereseite,73655 Pluederhausen Bade DE,3,innerhalb,20.8
@@ -874,7 +886,7 @@ Karriereseite,73779 Deizisau BW DE,3,innerhalb,14.31
 Karriereseite,73779 Deizisau Bade DE,2,innerhalb,14.31
 Karriereseite,74072 Heilbronn BW DE,2,innerhalb,35.12
 Karriereseite,74072 Heilbronn Baden-Württemberg DE,1,innerhalb,35.12
-Karriereseite,74072 Heilbronn DE,38,innerhalb,35.12
+Karriereseite,74072 Heilbronn DE,40,innerhalb,35.12
 Karriereseite,"74072 Heilbronn, Neckar Deutschland",1,innerhalb,35.12
 Karriereseite,74072 Neckarsulm BW DE,2,innerhalb,35.12
 Karriereseite,74074 Heilbronn BW DE,1,innerhalb,33.66
@@ -891,9 +903,9 @@ Karriereseite,74080 Heilbronn BW DE,1,innerhalb,35.17
 Karriereseite,74080 Heilbronn DE,13,innerhalb,35.17
 Karriereseite,74080 Heilbronn/Boeckingen Bade DE,3,innerhalb,35.17
 Karriereseite,74081 Heilbronn DE,3,innerhalb,33.53
-Karriereseite,74167 Neckarsulm DE,112,innerhalb,39.42
+Karriereseite,74167 Neckarsulm DE,114,innerhalb,39.42
 Karriereseite,74172 Neckarsulm Bade DE,3,innerhalb,40.22
-Karriereseite,74172 Neckarsulm DE,87,innerhalb,40.22
+Karriereseite,74172 Neckarsulm DE,88,innerhalb,40.22
 Karriereseite,74177 Bad Friedrichshall BW DE,1,innerhalb,45.31
 Karriereseite,74177 Bad Friedrichshall DE,11,innerhalb,45.31
 Karriereseite,74182 Obersulm BW DE,3,innerhalb,34.06
@@ -914,7 +926,7 @@ Karriereseite,74219 Möckmühl DE,26,ausserhalb,54.85
 Karriereseite,74223 Flein DE,8,innerhalb,31.07
 Karriereseite,74226 Nordheim Bade DE,3,innerhalb,33.66
 Karriereseite,74226 Nordheim DE,3,innerhalb,33.66
-Karriereseite,74229 Oedheim BW DE,1,innerhalb,45.59
+Karriereseite,74229 Oedheim BW DE,2,innerhalb,45.59
 Karriereseite,74239 Lampoldshausen BW DE,1,innerhalb,47.69
 Karriereseite,74254 Offenau DE,7,innerhalb,47.35
 Karriereseite,74321 Bietigheim-Bissingen BW DE,2,innerhalb,19.12
@@ -1000,7 +1012,7 @@ Karriereseite,75438 Knittlingen DE,6,innerhalb,46.19
 Karriereseite,75438 Knittlingen Deutschland,1,innerhalb,46.19
 Karriereseite,75443 Ötisheim BW DE,1,innerhalb,40.59
 Karriereseite,75447 Sternenfels Deutschland,1,innerhalb,41.83
-Karriereseite,75449 Wurmberg Deutschland,5,innerhalb,36.76
+Karriereseite,75449 Wurmberg Deutschland,6,innerhalb,36.76
 Karriereseite,76131 Karlsruhe Baden-Württemberg DE,1,ausserhalb,68.35
 Karriereseite,76131 Karlsruhe DE,1,ausserhalb,68.35
 Karriereseite,76135 Karlsruhe DE,1,ausserhalb,71.23
@@ -1033,7 +1045,7 @@ Karriereseite,AT Wien Österreich,2,unklar,
 Karriereseite,"Ahorn, DE, 74744",1,ausserhalb,76.7
 Karriereseite,Aidlingen Baden-Württemberg DE,1,innerhalb,35.3
 Karriereseite,Albstadt Baden-Württemberg Deutschland,2,ausserhalb,68.27
-Karriereseite,Allmersbach,21,innerhalb,13.83
+Karriereseite,Allmersbach,22,innerhalb,13.83
 Karriereseite,Altbach Baden-Württemberg DE,1,innerhalb,13.08
 Karriereseite,"Am Standort Hamburg (Alsterhaus), ab sofort, Teilzeit Referenznummer 12052026",1,ausserhalb,513.5
 Karriereseite,"Am Standort Hamburg (Breuninger), ab sofort, Teilzeit Referenznummer 21032025",1,ausserhalb,513.5
@@ -1053,12 +1065,12 @@ Karriereseite,Außendienst Polen Polen,1,unklar,
 Karriereseite,Außendienst Spanien Spanien,2,unklar,
 Karriereseite,Außendienst Vereinigtes Königreich Vereinigtes Königreich,7,unklar,
 Karriereseite,"Baar, Schweiz",1,unklar,
-Karriereseite,Backnang,2,innerhalb,15.54
+Karriereseite,Backnang,3,innerhalb,15.54
 Karriereseite,Backnang BW DE / Fellbach BW DE / Schorndorf BW DE / Stuttgart BW DE / Waiblingen BW DE / Winnenden ,5,innerhalb,15.72
 Karriereseite,Backnang Baden-Württemberg DE,2,innerhalb,15.54
-Karriereseite,Backnang Deutschland,37,innerhalb,15.54
+Karriereseite,Backnang Deutschland,41,innerhalb,15.54
 Karriereseite,Backnang Gerberpark,1,innerhalb,15.54
-Karriereseite,Backnang Lerchenäcker,18,innerhalb,15.54
+Karriereseite,Backnang Lerchenäcker,19,innerhalb,15.54
 Karriereseite,"Backnang, Baden-Württemberg",4,innerhalb,15.54
 Karriereseite,"Backnang, Baden-Württemberg, deutschlandweit",10,unklar,
 Karriereseite,Backnang-Waldrems,1,innerhalb,15.54
@@ -1078,7 +1090,7 @@ Karriereseite,Crailsheim de,2,ausserhalb,64.55
 Karriereseite,DE,2,unklar,
 Karriereseite,DE Hilden Deutschland,5,ausserhalb,309.38
 Karriereseite,DE Winnenden CE Deutschland,1,innerhalb,7.67
-Karriereseite,DE Winnenden ELC Deutschland,5,innerhalb,7.67
+Karriereseite,DE Winnenden ELC Deutschland,6,innerhalb,7.67
 Karriereseite,"Delmenhorst, DE, 27755",6,ausserhalb,468.88
 Karriereseite,"Detroit, 48201, IL",1,unklar,
 Karriereseite,Deutschlandweit,2,unklar,
@@ -1091,7 +1103,7 @@ Karriereseite,"Esslingen, DE, 73734",15,innerhalb,10.8
 Karriereseite,FR,1,unklar,
 Karriereseite,Fellbach (Württemberg) DE,1,innerhalb,3.8
 Karriereseite,Fellbach Baden-Württemberg DE,1,innerhalb,3.8
-Karriereseite,Fellbach DE,8,innerhalb,3.8
+Karriereseite,Fellbach DE,9,innerhalb,3.8
 Karriereseite,"Fellbach, DE, 70736",2,innerhalb,3.38
 Karriereseite,Field Based Bulgaria Bulgarien,1,unklar,
 Karriereseite,Field Based Croatia Kroatien,2,unklar,
@@ -1165,7 +1177,7 @@ Karriereseite,"Schwaikheim, DE, 71409 Schw",1,innerhalb,5.55
 Karriereseite,Schwäbisch Gmünd de,4,innerhalb,37.08
 Karriereseite,"St. Ingbert, DE, 66386",6,ausserhalb,167.74
 Karriereseite,Steinheim an der Murr Baden-Württemberg DE,1,innerhalb,14.82
-Karriereseite,Stuttgart Baden-Württemberg DE,106,innerhalb,15.34
+Karriereseite,Stuttgart Baden-Württemberg DE,109,innerhalb,15.34
 Karriereseite,Stuttgart DE,2,innerhalb,15.34
 Karriereseite,"Stuttgart, DE, 70376",38,innerhalb,12.18
 Karriereseite,"Stuttgart, DE, 70469",16,innerhalb,12.18
@@ -1181,8 +1193,8 @@ Karriereseite,"Villmar, DE, 65606",1,ausserhalb,191.46
 Karriereseite,"Vilvoorde, BE, 1800",3,unklar,
 Karriereseite,"Vöcklabruck, AT",1,unklar,
 Karriereseite,Waiblingen,6,innerhalb,1.27
-Karriereseite,Waiblingen Baden-Württemberg DE,20,innerhalb,1.27
-Karriereseite,Waiblingen DE,119,innerhalb,1.27
+Karriereseite,Waiblingen Baden-Württemberg DE,27,innerhalb,1.27
+Karriereseite,Waiblingen DE,125,innerhalb,1.27
 Karriereseite,Waldenbuch Baden-Württemberg DE,2,innerhalb,25.45
 Karriereseite,"Weener, DE, 26826",12,ausserhalb,500.79
 Karriereseite,Weiden in der Oberpfalz Bayern Deutschland,1,ausserhalb,182.57
@@ -1198,7 +1210,7 @@ Karriereseite,Winnenden Hertmannsweiler,1,innerhalb,7.67
 Karriereseite,Winnenden suchen wir,1,innerhalb,7.67
 Karriereseite,Winnenden suchen wir zur Verstärkung für den Bereich Industrie- und Gebäudetechnik,2,innerhalb,7.67
 Karriereseite,"Winnenden, DE, 71349",1,unklar,
-Karriereseite,"Winnenden, DE, 71364",63,innerhalb,7.67
+Karriereseite,"Winnenden, DE, 71364",65,innerhalb,7.67
 Karriereseite,"Winnenden, DE, Winnenden",1,innerhalb,7.67
 Karriereseite,"Wunsiedel, DE, 95632",4,ausserhalb,236.11
 Karriereseite,Würzburg Bayern Deutschland,1,ausserhalb,113.43
@@ -1210,7 +1222,7 @@ Karriereseite,deutschlandweit,1,unklar,
 Karriereseite,für Süd- und Mitteldeutschland,1,unklar,
 Karriereseite,für Süddeutschland,1,unklar,
 Karriereseite,"in Baden-Württemberg, Hessen, Bayern, Sachsen und Thüringen",1,unklar,
-Karriereseite,in Winnenden suchen wir,1,innerhalb,7.67
+Karriereseite,in Winnenden suchen wir,2,innerhalb,7.67
 Karriereseite,x Rems-Murr-Kreis DE,3,innerhalb,15.02
 Karriereseite,"София, BG, 1000",1,unklar,
 Karriereseite,"София, BG, 1434",1,unklar,
