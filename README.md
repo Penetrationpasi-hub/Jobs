@@ -83,10 +83,10 @@ Vergleichsdaten, keine 50-km-Statistik** gekennzeichnet, auch in
 
 Täglich fragt die App (Repo N-chster-Schritt2, geplante Netlify-Funktionen
 `boersen-*`) Adzuna, Google Jobs (SerpApi) und den Apify-Job-Feed (LinkedIn,
-StepStone, XING, Indeed …) für Waiblingen, 50 km ab. **Die Schlüssel liegen
-nur in Netlify**, hier sind keine Secrets nötig. `api_quellen.py` holt das
+StepStone, XING, Indeed …) für Waiblingen, 50 km ab. **Die API-Schlüssel liegen
+nur in Netlify**, hier ist nur die App-Adresse `BOERSEN_URL` hinterlegt. `api_quellen.py` holt das
 Ergebnis über den öffentlichen Lese-Link
-`<BOERSEN_URL>/api/boersen-export?seit=JJJJ-MM-TT` ab (Repo-Variable
+`<BOERSEN_URL>/api/boersen-export?seit=JJJJ-MM-TT` ab (Repo-Secret
 `BOERSEN_URL`, z. B. `https://meine-app.netlify.app`).
 
 Je Tag wird ein Berufssegment der KldB abgefragt (rotierend, nach 14 Tagen
