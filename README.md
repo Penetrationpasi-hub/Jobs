@@ -6,8 +6,15 @@ Arbeitsmarkt-Monitoring **50 km Luftlinie um Waiblingen**. `collect_jobs.py` lä
 
 ## Raumbezug: Waiblingen, 50 km
 
-- Künftige BA-Abfragen: nur `wo=Waiblingen`, `umkreis=50`
-  (`waiblingen_50km`), keine zusätzlichen Suchen um Aalen oder Backnang.
+- Auswertung: BA-Abfrage `wo=Waiblingen`, `umkreis=50` (`waiblingen_50km`).
+- **Archiv** (nicht in der Excel): die alten Suchgebiete
+  (`ARCHIV_REGIONS`: Waiblingen 30 km, Backnang 25/10 km, Aalen 30 km,
+  Fellbach 8 km) werden täglich weiter abgefragt und ungefiltert in
+  `data/archiv_jobs_log.csv`, `archiv_snapshots.csv` und
+  `archiv_berufe.csv` gespeichert. Beim ersten Lauf übernimmt das
+  Archiv-Log die Altstellen dieser Suchgebiete aus `jobs_log.csv`
+  (first_seen ab Juli 2026). Abschalten mit Umgebungsvariable `ARCHIV=0`;
+  ein Ausfall des Archivs bricht den Datenlauf nicht ab.
 - Derselbe Arbeitsortfilter gilt für BA, den Import der Karriereseiten und
   **sämtliche Stellen-Auswertungen** (Excel, Branchen, Arbeitgeber, Standzeiten,
   Zeitreihen und `data/stellen_alle.csv`). Schwäbisch Gmünd liegt innerhalb,

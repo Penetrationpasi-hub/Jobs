@@ -44,10 +44,27 @@ HEADERS = {
     "User-Agent": "ba-jobmonitor/1.0 (privates Arbeitsmarkt-Monitoring)",
 }
 
-# Ein einziges Suchgebiet; alte Regionen bleiben nur in den Rohdaten.
+# Ein einziges Suchgebiet fuer die Auswertung (Excel).
 REGIONS = {
     REGION: {"wo": "Waiblingen", "umkreis": RADIUS_KM},
 }
+
+# Archiv: die alten Suchgebiete (bis 21.11.2026) werden weiter abgefragt,
+# aber NUR in data/archiv_*.csv gespeichert, ungefiltert und ohne
+# Einfluss auf die Excel. Zweck: lange Historie auch ausserhalb des
+# 50-km-Radius (z. B. Aalen/Ostalb), falls sich der Suchraum aendert.
+# Abschalten mit ARCHIV=0. Ein Ausfall bricht den Datenlauf nicht ab.
+ARCHIV_REGIONS = {
+    "waiblingen_30km": {"wo": "Waiblingen", "umkreis": 30},
+    "rems-murr-kreis": {"wo": "Backnang", "umkreis": 25},
+    "ostalbkreis": {"wo": "Aalen", "umkreis": 30},
+    "backnang_10km": {"wo": "Backnang", "umkreis": 10},
+    "stuttgart_ost": {"wo": "Fellbach", "umkreis": 8},
+}
+ARCHIV_AKTIV = os.environ.get("ARCHIV", "1").strip() != "0"
+ARCHIV_LOG = "archiv_jobs_log.csv"
+ARCHIV_SNAPSHOTS = "archiv_snapshots.csv"
+ARCHIV_BERUFE = "archiv_berufe.csv"
 
 PAGE_SIZE = 100
 # Sicherheitslimit je Suchgebiet: 300 Seiten x 100 = 30000 Stellen.
@@ -490,14 +507,15 @@ def update_scrapjobs(today: str):
           f"{len(existing)} im Log")
 
 
-def main():
-    DATA_DIR.mkdir(exist_ok=True)
-    today = date.today().isoformat()
-    snapshot_rows = []
-    berufe_rows = []
-    seen_jobs: dict[str, dict] = {}
+def sammle(regions: dict, nur_umkreis: bool):
+    """Suchgebiete abfragen. Liefert (snapshot_rows, berufe_rows, seen).
 
-    for region, rparams in REGIONS.items():
+    nur_umkreis=True: nur Stellen mit Arbeitsort im 50-km-Radius
+    (Auswertung). False: alles, was die Suche liefert (Archiv)."""
+    today = date.today().isoformat()
+    snapshot_rows, berufe_rows = [], []
+    seen_jobs: dict[str, dict] = {}
+    for region, rparams in regions.items():
         print(f"[{region}] Abruf laeuft ...")
         try:
             jobs, total = fetch_region(rparams)
@@ -512,13 +530,13 @@ def main():
             print(f"[{region}] Hinweis: Detaildaten unvollstaendig "
                   f"({len(jobs)}/{total}).", file=sys.stderr)
 
-        jobs = [j for j in jobs
-                if im_umkreis((j.get("arbeitsort") or {}).get("ort", ""))]
-        print(f"[{region}] {len(jobs)} Stellen mit Arbeitsort im 50-km-Radius")
+        if nur_umkreis:
+            jobs = [j for j in jobs
+                    if im_umkreis((j.get("arbeitsort") or {}).get("ort", ""))]
+            print(f"[{region}] {len(jobs)} Stellen mit Arbeitsort im "
+                  "50-km-Radius")
 
         berufe = Counter()
-        arbeitszeit = Counter()
-        befristung = Counter()
         arbeitgeber = Counter()
 
         for j in jobs:
@@ -554,11 +572,61 @@ def main():
             berufe_rows.append({
                 "datum": today, "region": region, "beruf": beruf, "anzahl": n,
             })
+    return snapshot_rows, berufe_rows, seen_jobs
 
-    append_csv(DATA_DIR / "snapshots.csv",
-               ["datum", "region", "stellen_gesamt", "stellen_geladen",
-                "berufe_unique", "arbeitgeber_unique", "top_beruf", "top_arbeitgeber"],
-               snapshot_rows)
+
+SNAPSHOT_FELDER = ["datum", "region", "stellen_gesamt", "stellen_geladen",
+                   "berufe_unique", "arbeitgeber_unique", "top_beruf",
+                   "top_arbeitgeber"]
+
+
+def archiv_start():
+    """Archiv-Log beim ersten Lauf mit den Altdaten der alten Suchgebiete
+    aus jobs_log.csv anlegen, damit first_seen ab Juli 2026 erhalten
+    bleibt und noch offene Stellen nahtlos weiterlaufen."""
+    ziel = DATA_DIR / ARCHIV_LOG
+    quelle = DATA_DIR / "jobs_log.csv"
+    if ziel.exists() or not quelle.exists():
+        return
+    with quelle.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = [r for r in reader if r.get("region") in ARCHIV_REGIONS]
+        felder = reader.fieldnames
+    with ziel.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=felder)
+        w.writeheader()
+        w.writerows(rows)
+    print(f"[archiv] {ARCHIV_LOG} mit {len(rows)} Altstellen angelegt")
+
+
+def sammle_archiv(today: str):
+    """Alte Suchgebiete abfragen und nur ins Archiv schreiben."""
+    if not ARCHIV_AKTIV:
+        print("[archiv] abgeschaltet (ARCHIV=0)")
+        return
+    try:
+        archiv_start()
+        snaps, berufe, seen = sammle(ARCHIV_REGIONS, nur_umkreis=False)
+        if not snaps:
+            print("[archiv] kein Suchgebiet abrufbar, nichts gespeichert",
+                  file=sys.stderr)
+            return
+        append_csv(DATA_DIR / ARCHIV_SNAPSHOTS, SNAPSHOT_FELDER, snaps)
+        append_csv(DATA_DIR / ARCHIV_BERUFE,
+                   ["datum", "region", "beruf", "anzahl"], berufe)
+        log = update_jobs_log(DATA_DIR / ARCHIV_LOG, today, seen)
+        print(f"[archiv] {len(seen)} Stellen heute, {len(log)} im Archiv")
+    except Exception as e:
+        print(f"::warning::Archiv-Abfrage fehlgeschlagen: {e}",
+              file=sys.stderr)
+
+
+def main():
+    DATA_DIR.mkdir(exist_ok=True)
+    today = date.today().isoformat()
+    snapshot_rows, berufe_rows, seen_jobs = sammle(REGIONS, nur_umkreis=True)
+
+    append_csv(DATA_DIR / "snapshots.csv", SNAPSHOT_FELDER, snapshot_rows)
     append_csv(DATA_DIR / "berufe.csv",
                ["datum", "region", "beruf", "anzahl"],
                berufe_rows)
@@ -568,6 +636,7 @@ def main():
 
     fetch_arbeitslose()
     update_scrapjobs(today)
+    sammle_archiv(today)
 
     if not snapshot_rows:
         # Kein einziges Suchgebiet geladen: rot werden statt still eine
