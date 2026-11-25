@@ -81,25 +81,28 @@ Vergleichsdaten, keine 50-km-Statistik** gekennzeichnet, auch in
 
 ## Börsen-APIs (Stichprobe)
 
-`api_quellen.py` ergänzt täglich eine **Stichprobe** aus Adzuna, Google Jobs
-(SerpApi) und Apify (Job-Feed: LinkedIn, StepStone, XING, Indeed …). Je Tag
-wird ein Berufssegment der KldB abgefragt (rotierend, nach 14 Tagen ist jedes
-einmal dran; der Suchbegriff wechselt je Durchlauf), Ort Waiblingen, 50 km.
-Das Tagesbudget für die kostenpflichtigen Quellen ist `API_BUDGET_USD`
-(Standard 0,25 $; Repo-Variable). Reihenfolge Adzuna (kostenlos) → Apify →
-SerpApi; ist das Budget erschöpft, wird übersprungen.
+Täglich fragt die App (Repo N-chster-Schritt2, geplante Netlify-Funktionen
+`boersen-*`) Adzuna, Google Jobs (SerpApi) und den Apify-Job-Feed (LinkedIn,
+StepStone, XING, Indeed …) für Waiblingen, 50 km ab. **Die Schlüssel liegen
+nur in Netlify**, hier sind keine Secrets nötig. `api_quellen.py` holt das
+Ergebnis über den öffentlichen Lese-Link
+`<BOERSEN_URL>/api/boersen-export?seit=JJJJ-MM-TT` ab (Repo-Variable
+`BOERSEN_URL`, z. B. `https://meine-app.netlify.app`).
 
-- Secrets im Repo: `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`, `SERPAPI_API_KEY`,
-  `APIFY_API_TOKEN` (dieselben Werte wie in Netlify). Ohne Secret wird die
-  Quelle übersprungen.
+Je Tag wird ein Berufssegment der KldB abgefragt (rotierend, nach 14 Tagen
+ist jedes einmal dran, danach wechselt der Suchbegriff). Das Tagesbudget für
+die kostenpflichtigen Quellen ist in Netlify `API_BUDGET_USD` (Standard
+0,25 $).
+
 - `data/api_jobs_log.csv` (je Stelle) und `data/api_laeufe.csv` (je Quelle und
-  Tag: Treffer, Kosten, Status). Derselbe Arbeitsortfilter wie überall.
+  Tag: Treffer, Kosten, Status). Hier greift der 50-km-Filter (`umkreis.py`).
 - Excel-Blatt **Börsen-Stichprobe**: Stellen je Branche, Anteil „nicht in
   BA-Daten“ (gleicher Arbeitgeber und Titel wie bei der BA = Dublette), je
   Börse, alle Stellen, Kostenübersicht.
 - **Keine Hochrechnung:** die Stichprobe fließt weder in Summen noch in
   Zeitreihen ein, sondern zeigt, was an der BA vorbeiläuft.
-- Prüfen ohne Abfrage: `python api_quellen.py --dry-run`.
+- Fehlt `BOERSEN_URL` oder ist Netlify nicht erreichbar, wird übersprungen.
+- Prüfen ohne Schreiben: `python api_quellen.py --dry-run`.
 
 ## Quellen
 
