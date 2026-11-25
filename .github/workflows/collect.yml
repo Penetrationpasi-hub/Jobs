@@ -68,8 +68,8 @@ jobs:
           GENESIS_BASE: ${{ vars.GENESIS_BASE }}
           # Boersen-Stichprobe: Netlify fragt Adzuna, Google Jobs und Apify
           # selbst ab (Schluessel liegen dort). Hier nur die Adresse der
-          # App als Repo-Variable (Settings > Variables), kein Secret.
-          BOERSEN_URL: ${{ vars.BOERSEN_URL }}
+          # App (Repo-Secret BOERSEN_URL, z. B. https://meine-app.netlify.app).
+          BOERSEN_URL: ${{ secrets.BOERSEN_URL }}
         run: python collect_jobs.py
 
       - name: Ergebnisse committen
