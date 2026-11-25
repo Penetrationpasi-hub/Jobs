@@ -638,7 +638,7 @@ def main():
     update_scrapjobs(today)
     try:
         import api_quellen
-        api_quellen.sammle(today)
+        api_quellen.sammle(today, DATA_DIR)
     except Exception as e:      # Boersen-Stichprobe darf den Lauf nie stoppen
         print(f"[api] uebersprungen: {e}", file=sys.stderr)
     sammle_archiv(today)
