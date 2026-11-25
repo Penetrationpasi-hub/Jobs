@@ -79,6 +79,28 @@ für ganze Kreise/Agenturbezirke vor. Sie sind ausdrücklich als **separate
 Vergleichsdaten, keine 50-km-Statistik** gekennzeichnet, auch in
 `arbeitsmarkt_historie.xlsx`.
 
+## Börsen-APIs (Stichprobe)
+
+`api_quellen.py` ergänzt täglich eine **Stichprobe** aus Adzuna, Google Jobs
+(SerpApi) und Apify (Job-Feed: LinkedIn, StepStone, XING, Indeed …). Je Tag
+wird ein Berufssegment der KldB abgefragt (rotierend, nach 14 Tagen ist jedes
+einmal dran; der Suchbegriff wechselt je Durchlauf), Ort Waiblingen, 50 km.
+Das Tagesbudget für die kostenpflichtigen Quellen ist `API_BUDGET_USD`
+(Standard 0,25 $; Repo-Variable). Reihenfolge Adzuna (kostenlos) → Apify →
+SerpApi; ist das Budget erschöpft, wird übersprungen.
+
+- Secrets im Repo: `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`, `SERPAPI_API_KEY`,
+  `APIFY_API_TOKEN` (dieselben Werte wie in Netlify). Ohne Secret wird die
+  Quelle übersprungen.
+- `data/api_jobs_log.csv` (je Stelle) und `data/api_laeufe.csv` (je Quelle und
+  Tag: Treffer, Kosten, Status). Derselbe Arbeitsortfilter wie überall.
+- Excel-Blatt **Börsen-Stichprobe**: Stellen je Branche, Anteil „nicht in
+  BA-Daten“ (gleicher Arbeitgeber und Titel wie bei der BA = Dublette), je
+  Börse, alle Stellen, Kostenübersicht.
+- **Keine Hochrechnung:** die Stichprobe fließt weder in Summen noch in
+  Zeitreihen ein, sondern zeigt, was an der BA vorbeiläuft.
+- Prüfen ohne Abfrage: `python api_quellen.py --dry-run`.
+
 ## Quellen
 
 - **BA-Jobsuche**: `data/jobs_log.csv`, `berufe.csv`, `snapshots.csv`.
