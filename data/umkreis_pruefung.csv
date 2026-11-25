@@ -12,12 +12,12 @@ BA,"Aichwald, Schurw",101,innerhalb,10.49
 BA,"Aidlingen, Württemberg",3,innerhalb,35.3
 BA,Albershausen,21,innerhalb,24.03
 BA,Alfdorf,133,innerhalb,29.46
-BA,Allmersbach im Tal,74,innerhalb,13.83
-BA,"Altbach, Württemberg",107,innerhalb,13.08
+BA,Allmersbach im Tal,75,innerhalb,13.83
+BA,"Altbach, Württemberg",108,innerhalb,13.08
 BA,Altdorf bei Nürtingen,10,innerhalb,26.69
 BA,Altenriet,6,innerhalb,27.68
 BA,Altheim (Alb),1,ausserhalb,59.45
-BA,Althengstett,5,innerhalb,40.14
+BA,Althengstett,7,innerhalb,40.14
 BA,"Althütte, Württemberg",1,innerhalb,20.71
 BA,Ammerbuch,2,innerhalb,40.01
 BA,"Amstetten, Württemberg",5,innerhalb,49.69
@@ -52,7 +52,7 @@ BA,"Bretten, Baden",12,innerhalb,49.95
 BA,Bretzfeld,165,innerhalb,39.6
 BA,Burgstetten,56,innerhalb,11.4
 BA,Böbingen an der Rems,41,innerhalb,44.3
-BA,Böblingen,427,innerhalb,29.88
+BA,Böblingen,429,innerhalb,29.88
 BA,Böhmenkirch,124,innerhalb,48.16
 BA,Bönnigheim,64,innerhalb,28.25
 BA,"Börtlingen, Kreis Göppingen",7,innerhalb,24.7
@@ -83,18 +83,18 @@ BA,"Ellenberg, Württemberg",1,ausserhalb,68.89
 BA,"Ellhofen, Württemberg",60,innerhalb,34.95
 BA,Ellwangen (Jagst),825,ausserhalb,62.95
 BA,Engelsbrand,2,innerhalb,48.78
-BA,Eningen unter Achalm,3,innerhalb,38.64
+BA,Eningen unter Achalm,18,innerhalb,38.64
 BA,Eppingen,10,innerhalb,44.86
 BA,Erdmannhausen,99,innerhalb,12.34
 BA,Erligheim,25,innerhalb,26.52
 BA,Eschach bei Schwäbisch Gmünd,33,innerhalb,43.92
 BA,"Essingen, Württemberg",168,ausserhalb,52.14
-BA,Esslingen am Neckar,2386,innerhalb,11.15
+BA,Esslingen am Neckar,2388,innerhalb,11.15
 BA,Ettenheim,1,ausserhalb,127.86
 BA,"Fellbach, Württemberg",1025,innerhalb,3.8
 BA,Fichtenau,82,ausserhalb,70.72
 BA,"Fichtenberg, Württemberg",60,innerhalb,33.58
-BA,Filderstadt,591,innerhalb,20.73
+BA,Filderstadt,594,innerhalb,20.73
 BA,"Flein bei Heilbronn, Neckar",44,innerhalb,31.07
 BA,Forheim,5,ausserhalb,83.35
 BA,Frankenhardt,29,ausserhalb,56.12
@@ -103,9 +103,9 @@ BA,Fremdingen,11,ausserhalb,84.85
 BA,"Freudental, Württemberg",5,innerhalb,27.24
 BA,"Frickenhausen, Württemberg",70,innerhalb,26.76
 BA,Friolzheim,1,innerhalb,35.36
-BA,Gaildorf,324,innerhalb,38.01
+BA,Gaildorf,325,innerhalb,38.01
 BA,"Gechingen, Kreis Calw",3,innerhalb,44.22
-BA,Geislingen an der Steige,21,innerhalb,44.05
+BA,Geislingen an der Steige,22,innerhalb,44.05
 BA,Gemmrigheim,35,innerhalb,24.75
 BA,"Gerlingen, Württemberg",184,innerhalb,18.9
 BA,Gerschweiler,1,unklar,
@@ -127,7 +127,7 @@ BA,Güglingen,12,innerhalb,34.72
 BA,Hardthausen am Kocher,4,innerhalb,47.69
 BA,"Hattenhofen, Württemberg",13,innerhalb,26.43
 BA,Heidenheim an der Brenz,1767,ausserhalb,62.85
-BA,"Heilbronn, Neckar",173,innerhalb,37.5
+BA,"Heilbronn, Neckar",174,innerhalb,37.5
 BA,Heimsheim,4,innerhalb,33.0
 BA,"Hemmingen, Württemberg",90,innerhalb,21.06
 BA,Herbrechtingen,337,ausserhalb,67.26
@@ -141,7 +141,7 @@ BA,Holzgerlingen,10,innerhalb,30.97
 BA,Holzmaden,16,innerhalb,26.57
 BA,"Hüttlingen, Württemberg",52,ausserhalb,57.76
 BA,Iggingen,17,innerhalb,41.17
-BA,"Illingen, Württemberg",12,innerhalb,31.78
+BA,"Illingen, Württemberg",13,innerhalb,31.78
 BA,Ilsfeld,259,innerhalb,25.33
 BA,"Ingersheim, Württemberg",44,innerhalb,17.61
 BA,Ispringen,1,innerhalb,48.43
@@ -159,7 +159,7 @@ BA,Kirchheim unter Teck,756,innerhalb,22.97
 BA,Knittlingen,2,innerhalb,46.19
 BA,"Korb, Remstal",100,innerhalb,3.58
 BA,Korntal-Münchingen,297,innerhalb,14.72
-BA,Kornwestheim,589,innerhalb,10.1
+BA,Kornwestheim,590,innerhalb,10.1
 BA,"Kuchen, Fils",3,innerhalb,41.66
 BA,Kusterdingen,5,innerhalb,37.32
 BA,Köngen,112,innerhalb,16.98
@@ -179,7 +179,7 @@ BA,"Leutenbach, Württemberg",85,innerhalb,8.32
 BA,"Lichtenstein, Württemberg",6,innerhalb,43.93
 BA,"Lichtenwald, Württemberg",16,innerhalb,15.28
 BA,"Lorch, Württemberg",232,innerhalb,27.72
-BA,"Ludwigsburg, Württemberg",2728,innerhalb,13.15
+BA,"Ludwigsburg, Württemberg",2730,innerhalb,13.15
 BA,Löchgau,33,innerhalb,24.45
 BA,"Löwenstein, Württemberg",71,innerhalb,29.63
 BA,Magstadt,70,innerhalb,27.41
@@ -222,7 +222,7 @@ BA,"Nordheim, Württemberg",1,innerhalb,33.66
 BA,Notzingen,13,innerhalb,20.72
 BA,Nufringen,13,innerhalb,39.02
 BA,Nördlingen,773,ausserhalb,85.82
-BA,Nürtingen,724,innerhalb,23.07
+BA,Nürtingen,725,innerhalb,23.07
 BA,Oberboihingen,24,innerhalb,20.61
 BA,Oberderdingen,8,innerhalb,45.58
 BA,Obere Rauhmühle,2,unklar,
@@ -242,12 +242,12 @@ BA,"Ottenbach, Württemberg",2,innerhalb,33.4
 BA,"Owen, Teck",1,innerhalb,28.95
 BA,"Pfaffenhofen, Württemberg",2,innerhalb,35.8
 BA,Pfedelbach,148,innerhalb,40.83
-BA,Pforzheim,199,innerhalb,47.91
+BA,Pforzheim,203,innerhalb,47.91
 BA,Pfullingen,8,innerhalb,41.41
 BA,Pleidelsheim,127,innerhalb,16.35
 BA,Pliezhausen,9,innerhalb,31.4
-BA,Plochingen,292,innerhalb,15.5
-BA,Plüderhausen,149,innerhalb,20.8
+BA,Plochingen,293,innerhalb,15.5
+BA,Plüderhausen,150,innerhalb,20.8
 BA,"Rainau, Württemberg",16,ausserhalb,61.98
 BA,Rechberghausen,54,innerhalb,26.54
 BA,Reichenbach an der Fils,98,innerhalb,17.39
@@ -272,7 +272,7 @@ BA,"Schlierbach, Württemberg",61,innerhalb,23.03
 BA,"Schorndorf, Württemberg",838,innerhalb,15.72
 BA,Schurrenhof,3,unklar,
 BA,"Schwaigern, Württemberg",10,innerhalb,39.63
-BA,Schwaikheim,129,innerhalb,5.55
+BA,Schwaikheim,132,innerhalb,5.55
 BA,Schwieberdingen,89,innerhalb,18.37
 BA,Schwäbisch Gmünd,1089,innerhalb,37.08
 BA,Schwäbisch Hall,70,innerhalb,43.75
@@ -288,7 +288,7 @@ BA,Steinheim an der Murr,89,innerhalb,14.82
 BA,Steinächle,1,unklar,
 BA,Sternenfels,6,innerhalb,41.83
 BA,Stimpfach,186,ausserhalb,62.15
-BA,Stuttgart,15901,innerhalb,15.34
+BA,Stuttgart,15905,innerhalb,15.34
 BA,Stödtlen,6,ausserhalb,74.25
 BA,Sulzbach an der Murr,129,innerhalb,23.25
 BA,Sulzbach-Laufen,65,innerhalb,41.77
@@ -308,7 +308,7 @@ BA,Unterschneidheim,15,ausserhalb,77.61
 BA,"Urbach, Rems",248,innerhalb,19.15
 BA,Vaihingen an der Enz,173,innerhalb,28.45
 BA,Vellberg,1,innerhalb,49.72
-BA,"Waiblingen, Rems",1419,innerhalb,0.5
+BA,"Waiblingen, Rems",1420,innerhalb,0.5
 BA,Walddorfhäslach,2,innerhalb,29.03
 BA,Waldenbuch,26,innerhalb,25.45
 BA,"Waldenburg, Württemberg",6,innerhalb,45.73
@@ -334,9 +334,9 @@ BA,Wiesbaden,1,ausserhalb,153.66
 BA,Wilburgstetten,64,ausserhalb,81.63
 BA,"Wildberg, Württemberg",3,innerhalb,47.91
 BA,Wimsheim,7,innerhalb,35.41
-BA,"Winnenden, Württemberg",494,innerhalb,7.67
+BA,"Winnenden, Württemberg",495,innerhalb,7.67
 BA,"Winterbach bei Schorndorf, Württ.",214,innerhalb,12.47
-BA,Wolfschlugen,97,innerhalb,20.43
+BA,Wolfschlugen,98,innerhalb,20.43
 BA,"Wurmberg, Württemberg",9,innerhalb,36.76
 BA,Wäschenbeuren,15,innerhalb,28.34
 BA,"Wört, Württemberg",81,ausserhalb,73.23

@@ -14754,7 +14754,7 @@ refnr,region,beruf,titel,arbeitgeber,ort,first_seen,last_seen
 10001-1002706817-S,waiblingen_30km,Rechtsanwaltsfachangestellte/r,Rechtsanwaltsfachangestellte/r bzw. Rechtsfachwirt/in in Teilzeit (m/w/d),Schickhardt Rechtsanwälte PartG mbB,"Ludwigsburg, Württemberg",2026-07-17,2026-11-25
 19100-dyGt77yK-S,waiblingen_30km,Polier/in - Hochbau,Polier im Ingenieurbau (w/m/d),WOLFF & MÜLLER Holding GmbH&Co.KG Service-Einheiten (Hauptverwaltung),Stuttgart,2026-07-17,2026-11-18
 19100-qMBzfTRT-S,waiblingen_30km,Bauleiter/in,Bauingenieur / Bauleiter Brückenbau (w/m/d),WOLFF & MÜLLER Holding GmbH&Co.KG Service-Einheiten (Hauptverwaltung),Stuttgart,2026-07-17,2026-11-15
-19100-KfbmzXWe-S,waiblingen_30km,Vorarbeiter/in - Hochbau,Vorarbeiter Ingenieurbau (w/m/d),WOLFF & MÜLLER Holding GmbH&Co.KG Service-Einheiten (Hauptverwaltung),Stuttgart,2026-07-17,2026-11-15
+19100-KfbmzXWe-S,waiblingen_30km,Vorarbeiter/in - Hochbau,Vorarbeiter Ingenieurbau (w/m/d),WOLFF & MÜLLER Holding GmbH&Co.KG Service-Einheiten (Hauptverwaltung),Stuttgart,2026-07-17,2026-11-25
 10001-1003157423-S,waiblingen_30km,Versicherungsberater/in,Senior Consultant / Manager - Strategic Risk Consulting (m/w/d),Marsh GmbH,Stuttgart,2026-07-17,2026-08-03
 10001-1003157262-S,waiblingen_30km,Versicherungsberater/in,Kundenbetreuer (w/m/d) Industrieversicherungen Außendienst,Marsh GmbH,Stuttgart,2026-07-17,2026-07-31
 12122-1004240-1761001-0-S,waiblingen_30km,Personalberater/in,Personalberater Vertrieb (m/w/d),persona service AG & Co. KG,"Ludwigsburg, Württemberg",2026-07-17,2026-08-03
@@ -52520,7 +52520,7 @@ refnr,region,beruf,titel,arbeitgeber,ort,first_seen,last_seen
 17560-24085b1f602d4ea-S,ostalbkreis,Lackierer/in - Spritzlackierung,Lackierer (m/w/d),AlphaConsult KG - Heidenheim,Steinheim am Albuch,2026-11-20,2026-11-25
 17560-eb05dba8d064454-S,ostalbkreis,MAG-Schweißer/in,Schweißer (MAG/WIG) (m/w/d),AlphaConsult KG - Heidenheim,Steinheim am Albuch,2026-11-20,2026-11-25
 12265-528769_JB5303248-S,ostalbkreis,IT-Tester/in,Embedded Software Testentwickler (m/w/d),FERCHAU GmbH Niederlassung Heidenheim,Heidenheim an der Brenz,2026-11-20,2026-11-25
-12122-984996941-S,ostalbkreis,"Helfer/in - Maschinenbau, Betriebstechnik",Produktionsmitarbeiter Saugbandabteilung (m/w/d),Persona Service AG & Co. KG Niederlassung Heidenheim,Heidenheim an der Brenz,2026-11-20,2026-11-21
+12122-984996941-S,ostalbkreis,"Helfer/in - Maschinenbau, Betriebstechnik",Produktionsmitarbeiter Saugbandabteilung (m/w/d),Persona Service AG & Co. KG Niederlassung Heidenheim,Heidenheim an der Brenz,2026-11-20,2026-11-25
 12336-a26f816j0458038-S,ostalbkreis,KI-Manager/in,Procurement Digitalization Manager (m|w|d),Voith SE & Co. KG,Heidenheim an der Brenz,2026-11-20,2026-11-25
 12811-2381960-S,ostalbkreis,Fachwirt/in - Zahnärztliches Praxismanagement,"Operations Team Leader (m/w/d), Praxis Heidenheim",Ortivity GmbH,Heidenheim an der Brenz,2026-11-20,2026-11-25
 10001-1004046053-S,ostalbkreis,Bürogehilf(e/in),Bürokraft mit Vertriebserfahrung (M/W/D),Lernstudio Barbarossa MegaKids Fortbildungs GmbH,Heidenheim an der Brenz,2026-11-20,2026-11-25
@@ -54965,3 +54965,30 @@ refnr,region,beruf,titel,arbeitgeber,ort,first_seen,last_seen
 15986-REF285645X-d12e02d-S,stuttgart_ost,Ingenieur/in - Maschinenbau,Freiwilliges Praktikum für Absolventen (m/w/div.) im Projekt- und Veranstaltungsmanagement,Robert Bosch GmbH,Stuttgart,2026-11-25,2026-11-25
 10000-1206260638-S,stuttgart_ost,Fachberater/in - Finanzdienstleistungen,Real Estate Investment & Asset Management (m/w/d),CLAIDA GmbH,Stuttgart,2026-11-25,2026-11-25
 10000-1206260323-S,stuttgart_ost,Kaufmännische/r Assistent/in/Wirtschaftsassistent/in - Bürowirtschaft,Kaufmännische Assistenz / Back Office Immobilien (m/w/d),CLAIDA GmbH,Stuttgart,2026-11-25,2026-11-25
+14089-01516037-S,waiblingen_30km,Facharzt/-ärztin - Kinder- und Jugendmedizin,Leitung des Fachbereichs Kinder- und Jugendärztlicher Dienst (w/m/d),"Ministerium für Soziales, Arbeit und Gesundheit Baden-Württemberg","Waiblingen, Rems",2026-11-25,2026-11-25
+12147-20261125228491-S,waiblingen_30km,Anlagenmechaniker/in,Anlagenmechaniker (m/w/d),JobImpulse Süd GmbH Esslingen,Schwaikheim,2026-11-25,2026-11-25
+12288-5011358341-S,waiblingen_30km,"Trainer/in, Supervisor/in - Callcenter",Trainer (f/m/d),Techtronic Industries ELC GmbH,"Winnenden, Württemberg",2026-11-25,2026-11-25
+14089-01515754-S,waiblingen_30km,Betreuungskraft / Alltagsbegleiter/in,"Betreuungskraft für die Schulkindbetreuung am Innenstadtcampus (m, w, d)",Stadt Ludwigsburg,"Ludwigsburg, Württemberg",2026-11-25,2026-11-25
+12688-REG-47650-RJA-S,waiblingen_30km,Verkäufer/in,Mitarbeiter im ABEX / Fachverkäufer SHK als Springer (w/m/d),WILHELM GIENGER KG,Kornwestheim,2026-11-25,2026-11-25
+14089-01515906-S,waiblingen_30km,Straßenwärter/in,"Handwerklicher Quereinsteiger bzw. Handwerkliche Quereinsteigerin mit Führerschein (m, w, d)",Stadt Ludwigsburg,"Ludwigsburg, Württemberg",2026-11-25,2026-11-25
+12456-1657927-1-S,waiblingen_30km,Gleisbauer/in,Zweiwegebaggerfahrer:in / Baugeräteführer:in,Deutsche Bahn AG,Esslingen am Neckar,2026-11-25,2026-11-25
+12456-1657478-1-S,waiblingen_30km,Ingenieur/in - Rettungswesen,Spezialist:in Brandschutz und Sicherheit,Deutsche Bahn AG,Stuttgart,2026-11-25,2026-11-25
+12456-1657485-1-S,waiblingen_30km,Ingenieur/in - Bau,Senior Projektingenieur:in Schnittstellen- und Restleistungsmanagement,Deutsche Bahn AG,Stuttgart,2026-11-25,2026-11-25
+12456-1657730-1-S,waiblingen_30km,Kundeninformationsfachkraft,Mitarbeiter Fundstelle und Schließfachservice (w/m/d),DB Zeitarbeit GmbH,Stuttgart,2026-11-25,2026-11-25
+12147-20261125228486-S,waiblingen_30km,Helfer/in - Küche,Küchenhelfer (m/w/d),JobImpulse Süd GmbH Esslingen,Allmersbach im Tal,2026-11-25,2026-11-25
+12147-20261125228483-S,waiblingen_30km,Helfer/in - Metallbearbeitung,Montagehelfer (m/w/d),JobImpulse Süd GmbH Nürtingen,"Altbach, Württemberg",2026-11-25,2026-11-25
+12811-2385856-S,waiblingen_30km,Pflegefachmann/-frau (Gesundheits- und Krankenpflege),"Pflegefachmann/-frau  (m/w/d) Palliativstation, Stuttgart",Marienhospital,Stuttgart,2026-11-25,2026-11-25
+12147-20261125228489-S,waiblingen_30km,Helfer/in - Metallbearbeitung,Montagemitarbeiter (m/w/d),JobImpulse Süd GmbH Esslingen,Plochingen,2026-11-25,2026-11-25
+12811-2385779-S,waiblingen_30km,Altenpfleger/in,"Altenpfleger / Pflegefachkraft im stationären Dienst (m/w/d), Seniorenzentrum Haus am Brunnenrain",Die Zieglerschen - Sued - gem. GmbH,Plüderhausen,2026-11-25,2026-11-25
+12147-20261125228498-S,waiblingen_30km,Gabelstaplerfahrer/in,Staplerfahrer (m/w/d),JobImpulse Süd GmbH Nürtingen,Wolfschlugen,2026-11-25,2026-11-25
+12811-2385910-S,waiblingen_30km,Ingenieur/in - Maschinenbau,"Projektingenieur / Projektleiter Fördertechnik (m/w/d), Movetexx GmbH & Co. KG",Movetexx GmbH & Co. KG,Filderstadt,2026-11-25,2026-11-25
+12811-2385905-S,waiblingen_30km,Ingenieur/in - Elektrotechnik,"Projektleiter Elektrotechnik (m/w/d), Müller & Bleher Filderstadt GmbH & Co. KG",Müller & Bleher Filderstadt GmbH & Co. KG,Filderstadt,2026-11-25,2026-11-25
+12811-2385904-S,waiblingen_30km,Ingenieur/in - Energietechnik,"Projektleiter Hochspannungstechnik (m/w/d), Müller & Bleher Filderstadt GmbH & Co. KG",Müller & Bleher Filderstadt GmbH & Co. KG,Filderstadt,2026-11-25,2026-11-25
+12147-20261125228487-S,waiblingen_30km,Helfer/in - Metallbearbeitung,Produktionsmitarbeiter (m/w/d),JobImpulse Süd GmbH Nürtingen,Nürtingen,2026-11-25,2026-11-25
+12811-2385830-S,waiblingen_30km,Anwendungssystemberater/in,"(Senior) AI Software Developer: AI Consulting & Solutions (m/w/d), Böblingen 5",STAR Cooperation GmbH,Böblingen,2026-11-25,2026-11-25
+10001-1004071248-S,ostalbkreis,Bürokaufmann/-frau,Assistenz der Abteilungsleitung Prozessentwicklung & Integration (m/w/d) 1112-666,PAPEVE GmbH Der Spezialist für Ingenieure Techniker und Fachpersonal,"Aalen, Württemberg",2026-11-25,2026-11-25
+12811-2385774-S,ostalbkreis,Verkäufer/in,"Aushilfe (m/w/d), 1155 Abtsgmünd",AWG,Abtsgmünd,2026-11-25,2026-11-25
+17394-2024-11560234-S,ostalbkreis,Bürokaufmann/-frau,Assistenz (m/w/d),VARGA Personal GmbH,Neresheim,2026-11-25,2026-11-25
+17394-2024-11560233-S,ostalbkreis,Bürokaufmann/-frau,Sachbearbeiter (m/w/d),VARGA Personal GmbH,Neresheim,2026-11-25,2026-11-25
+15701-k52604.17808-S,ostalbkreis,Helfer/in - Reinigung,Mitarbeiter (m/w/d) für den Service TZ,BrotHaus GmbH,Dinkelsbühl,2026-11-25,2026-11-25
+12147-20261125228476-S,ostalbkreis,Lohn- und Gehaltsbuchhalter/in,Kreditorenbuchhalterin (m/w/d),JobImpulse Süd GmbH Esslingen,Gaildorf,2026-11-25,2026-11-25
