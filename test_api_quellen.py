@@ -1,91 +1,74 @@
 """Tests fuer die Boersen-Stichprobe (python -m pytest -q), ohne Netz."""
 import csv
-from datetime import date, timedelta
 
 import api_quellen as a
 import collect_jobs as c
 
 
-def _stelle(i, titel="Industriemechaniker (m/w/d)", firma="Muster GmbH", ort="71332 Waiblingen"):
-    return {"id": f"X:{i}", "quelle": "Test", "portal": "Test", "arbeitgeber": firma,
-            "titel": titel, "ort": ort, "url": "https://example.org/" + str(i),
-            "veroeffentlicht": ""}
+def _stelle(i, titel="Industriemechaniker (m/w/d)", firma="Muster GmbH",
+            ort="71332 Waiblingen", quelle="Adzuna"):
+    return {"id": f"X:{i}", "quelle": quelle, "portal": "LinkedIn",
+            "arbeitgeber": firma, "titel": titel, "ort": ort,
+            "url": "https://example.org/" + str(i), "veroeffentlicht": ""}
 
 
-def test_rotation_deckt_alle_segmente_ab():
-    tage = [a.tages_plan(a.START + timedelta(days=n)) for n in range(14)]
-    assert {s for s, _ in tage} == set(a.SUCHBEGRIFFE)
-    # naechster Durchlauf: gleiche Segmente, naechster Begriff
-    assert a.tages_plan(a.START)[0] == a.tages_plan(a.START + timedelta(days=14))[0]
-    assert a.tages_plan(a.START)[1] != a.tages_plan(a.START + timedelta(days=14))[1]
+def _tag(datum, stellen, status="ok", kosten=0.02):
+    return {"datum": datum, "segment": "S13", "suchbegriff": "Mechatroniker",
+            "laeufe": [{"datum": datum, "quelle": "Adzuna", "segment": "S13",
+                        "suchbegriff": "Mechatroniker", "abfragen": 1,
+                        "treffer_roh": len(stellen), "kosten_usd": kosten,
+                        "status": status}],
+            "stellen": stellen}
 
 
-def test_sammle_filtert_umkreis_schreibt_log_und_sperrt_doppelte_abfrage(tmp_path):
-    aufrufe = []
+def _csv(pfad):
+    return list(csv.DictReader(open(pfad, encoding="utf-8")))
 
-    def quelle(b, r):
-        aufrufe.append(b)
-        return [_stelle(1), _stelle(2, ort="Hamburg")], 1, 0.02
 
-    heute = date(2026, 12, 1).isoformat()
-    log = a.sammle(heute, tmp_path, {"Test": quelle}, budget=0.25)
+def test_sammle_filtert_umkreis_und_schreibt_log(tmp_path):
+    tage = [_tag("2026-12-01", [_stelle(1), _stelle(2, ort="Hamburg")])]
+    log = a.sammle("2026-12-02", tmp_path, export=lambda seit: tage)
     assert [r["id"] for r in log] == ["X:1"]
-    a.sammle(heute, tmp_path, {"Test": quelle}, budget=0.25)
-    assert len(aufrufe) == 1                        # kein zweiter (bezahlter) Abruf
-    morgen = (date(2026, 12, 1) + timedelta(days=1)).isoformat()
-    log = a.sammle(morgen, tmp_path, {"Test": quelle}, budget=0.25)
-    assert log[0]["first_seen"] == heute and log[0]["last_seen"] == morgen
-    laeufe = list(csv.DictReader(open(tmp_path / a.LAEUFE, encoding="utf-8")))
-    assert [(r["datum"], r["im_umkreis"], r["neu"]) for r in laeufe] == [(heute, "1", "1"), (morgen, "1", "0")]
+    lauf = _csv(tmp_path / a.LAEUFE)[0]
+    assert (lauf["datum"], lauf["treffer_roh"], lauf["im_umkreis"], lauf["neu"]) == ("2026-12-01", "2", "1", "1")
+    assert _csv(tmp_path / a.LOG)[0]["first_seen"] == "2026-12-01"
 
 
-def test_budget_und_fehler_stoppen_nicht_die_anderen_quellen(tmp_path):
-    def teuer(b, r):
-        assert r == 0.25
-        return [], 1, 0.25
+def test_zweiter_import_gleicher_tage_aendert_nichts_und_fortschreibung(tmp_path):
+    erster = [_tag("2026-12-01", [_stelle(1)])]
+    a.sammle("2026-12-05", tmp_path, export=lambda seit: erster)
+    seiten = []
 
-    def kaputt(b, r):
-        raise a.QuellenFehler("HTTP 500")
+    def export(seit):
+        seiten.append(seit)
+        return erster + [_tag("2026-12-02", [_stelle(1), _stelle(3)])]
 
-    def spaet(b, r):
-        assert r == 0
-        raise a.QuellenFehler("Budget aufgebraucht")
-
-    a.sammle("2026-12-01", tmp_path, {"A": teuer, "B": kaputt, "C": spaet}, budget=0.25)
-    status = {r["quelle"]: r["status"] for r in csv.DictReader(open(tmp_path / a.LAEUFE, encoding="utf-8"))}
-    assert status == {"A": "ok", "B": "fehler: HTTP 500", "C": "uebersprungen: Budget aufgebraucht"}
-
-
-def test_ohne_zugang_wird_uebersprungen(monkeypatch):
-    for v in ("ADZUNA_APP_ID", "ADZUNA_APP_KEY", "SERPAPI_API_KEY", "APIFY_API_TOKEN"):
-        monkeypatch.delenv(v, raising=False)
-    for f in (lambda: a.adzuna("x"), lambda: a.google_jobs("x", 1), lambda: a.apify("x", 1)):
-        try:
-            f()
-            assert False
-        except a.QuellenFehler as e:
-            assert str(e) == "kein Zugang"
+    a.sammle("2026-12-05", tmp_path, export=export)
+    assert seiten == ["2026-12-01"]                 # holt ab dem letzten bekannten Tag
+    log = {r["id"]: r for r in _csv(tmp_path / a.LOG)}
+    assert (log["X:1"]["first_seen"], log["X:1"]["last_seen"]) == ("2026-12-01", "2026-12-02")
+    assert log["X:3"]["first_seen"] == "2026-12-02"
+    laeufe = _csv(tmp_path / a.LAEUFE)
+    assert [(r["datum"], r["neu"]) for r in laeufe] == [("2026-12-01", "1"), ("2026-12-02", "1")]
 
 
-def test_adzuna_und_google_mapping(monkeypatch):
-    monkeypatch.setenv("ADZUNA_APP_ID", "i")
-    monkeypatch.setenv("ADZUNA_APP_KEY", "k")
-    monkeypatch.setenv("SERPAPI_API_KEY", "k")
-    adz = {"results": [{"id": "9", "title": "Koch", "company": {"display_name": "Gasthaus"},
-                        "location": {"display_name": "Waiblingen"}, "redirect_url": "https://x", "created": "2026-12-01T00:00:00Z"}]}
-    s, n, k = a.adzuna("Koch", http=lambda url, *a_: adz)
-    assert (s[0]["id"], s[0]["arbeitgeber"], s[0]["veroeffentlicht"], n, k) == ("ADZUNA:9", "Gasthaus", "2026-12-01", 1, 0.0)
-    goo = {"jobs_results": [{"title": "Koch", "company_name": "Gasthaus", "location": "Waiblingen",
-                             "job_id": "abc", "via": "über LinkedIn", "apply_options": [{"link": "https://y"}]}]}
-    s, n, k = a.google_jobs("Koch", 1.0, http=lambda url, *a_: goo)
-    assert (s[0]["portal"], s[0]["url"], n, k) == ("LinkedIn", "https://y", 1, a.SERPAPI_USD)
+def test_zukunft_und_ausfall_brechen_nicht_ab(tmp_path):
+    a.sammle("2026-12-01", tmp_path, export=lambda seit: [_tag("2026-12-09", [_stelle(1)])])
+    assert _csv(tmp_path / a.LOG) == []
+
+    def kaputt(seit):
+        raise a.QuellenFehler("HTTP 502")
+
+    assert a.sammle("2026-12-01", tmp_path, export=kaputt) == []
 
 
-def test_google_beachtet_restbudget(monkeypatch):
-    monkeypatch.setenv("SERPAPI_API_KEY", "k")
-    seite = {"jobs_results": [], "serpapi_pagination": {"next_page_token": "t"}}
-    _, n, k = a.google_jobs("x", a.SERPAPI_USD * 2.5, http=lambda url, *a_: seite)
-    assert n == 2
+def test_ohne_url_wird_uebersprungen(monkeypatch):
+    monkeypatch.delenv("BOERSEN_URL", raising=False)
+    try:
+        a.hole_export("2026-12-01")
+        assert False
+    except a.QuellenFehler as e:
+        assert "BOERSEN_URL" in str(e)
 
 
 def test_boersen_zeilen_erkennt_ba_dubletten():
