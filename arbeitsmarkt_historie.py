@@ -35,9 +35,12 @@ from datetime import date
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.chart import AreaChart3D, BarChart, LineChart, Reference
+from openpyxl.chart import BarChart, LineChart, Reference
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
+
+from historie_analyse import analyse_blatt
+from historie_grafiken import grafiken_blatt
 
 BASE = Path(__file__).parent
 DATA = BASE / "data_historie"
@@ -472,13 +475,13 @@ def style_header(ws, ncols, row=1):
 
 
 def flaeche3d(titel, hoehe=9, breite=18):
-    ch = AreaChart3D()
-    ch.grouping = "standard"
+    """Zeitreihendiagramm je Kreis. Frueher 3D-Flaeche; Linien sind
+    lesbarer, weil sich die Kreise nicht gegenseitig verdecken."""
+    ch = LineChart()
     ch.title = titel
     ch.height, ch.width = hoehe, breite
     ch.x_axis.delete = False
     ch.y_axis.delete = False
-    ch.z_axis.delete = False
     ch.y_axis.number_format = "#,##0"
     ch.legend.position = "b"
     return ch
@@ -809,6 +812,8 @@ def build_excel():
                               titel)
 
     ba_berufe_blatt(wb)
+    analyse_blatt(wb, lade, KREISE, DATA, position=1)
+    grafiken_blatt(wb, lade, KREISE, DATA, position=2)
 
     # ---------------- Perspektive (Kennzahlen statt Kaffeesatz)
     pe = wb.create_sheet("Perspektive")
@@ -935,10 +940,18 @@ def build_excel():
               "siehe Actions-Log)."))
 
     for ws in wb.worksheets:
+        # Linien nicht glaetten: geglaettete Kurven taeuschen Ausschlaege
+        # zwischen den Jahreswerten vor
+        for ch in ws._charts:
+            if isinstance(ch, LineChart):
+                for ser in ch.series:
+                    ser.smooth = False
         for row in ws.iter_rows():
             for cell in row:
                 if cell.font is None or cell.font.name is None:
                     cell.font = Font(name=ARIAL)
+        if getattr(ws, "_feste_breiten", False):
+            continue
         for col in ws.columns:
             breite = max((len(str(c.value)) for c in col
                           if c.value is not None), default=0)

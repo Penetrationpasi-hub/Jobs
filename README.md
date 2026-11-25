@@ -61,6 +61,19 @@ weiterhin begrenzen; gezählt werden nur geladene, örtlich zuordenbare Stellen.
 Der Methodenwechsel steht im Excel-Blatt **Zeitreihe**; Veränderungen über
 die Umstellung hinweg sind nicht als reine Arbeitsmarktentwicklung zu deuten.
 
+`arbeitsmarkt_historie.xlsx` beginnt mit dem Blatt **Analyse**
+(`historie_analyse.py`): automatisch formulierte Kernaussagen,
+Kreisvergleich, Arbeitslosenquote, Beschäftigungsindex, Anteil 60+,
+Strukturwandel nach Wirtschaftszweigen seit 2019 und Arbeitslose je
+gemeldeter Stelle (Agentur Waiblingen). Danach folgt das Blatt
+**Grafiken** (`historie_grafiken.py`, aufgebaut wie das Blatt „Branchen“
+der Stellen-Excel): 11 nummerierte Diagramme, u. a. Schere Arbeitslose/
+Beschäftigte, Quoten nach Personengruppen, Gewinner/Verlierer nach
+Wirtschaftszweig (grün/rot), Branchenmix und Altersstruktur als
+100-%-Flächen, Bevölkerung nach Alter sowie Engpass und Vorjahres-
+veränderung je Berufssegment. Alles wird bei jedem Lauf neu aus
+`data_historie/` berechnet.
+
 Amtliche Arbeitslosen-, Bevölkerungs- und Beschäftigtenzahlen liegen nur
 für ganze Kreise/Agenturbezirke vor. Sie sind ausdrücklich als **separate
 Vergleichsdaten, keine 50-km-Statistik** gekennzeichnet, auch in
