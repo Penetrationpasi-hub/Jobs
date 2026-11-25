@@ -636,6 +636,11 @@ def main():
 
     fetch_arbeitslose()
     update_scrapjobs(today)
+    try:
+        import api_quellen
+        api_quellen.sammle(today)
+    except Exception as e:      # Boersen-Stichprobe darf den Lauf nie stoppen
+        print(f"[api] uebersprungen: {e}", file=sys.stderr)
     sammle_archiv(today)
 
     if not snapshot_rows:
@@ -888,6 +893,32 @@ def baue_stellen_alle(log, sj, ba_stand):
         w.writeheader()
         w.writerows(alle)
     return alle
+
+
+def boersen_zeilen(api, ba_log):
+    """Boersen-Stichprobe (api_jobs_log.csv) gegen die BA-Stellen abgleichen.
+
+    Gleiche Stelle = gleicher Arbeitgeber (ag_passt) und gleicher Titel
+    (norm_titel), egal wann gesehen. Nur im Umkreis. Rueckgabe: Liste
+    von Dicts mit zusaetzlich 'auch_bei_ba' ('ja'/'nein') und 'branche'.
+    Die Stichprobe steht nur in ihrem eigenen Blatt und fliesst nicht in
+    BA-Summen oder Zeitreihen ein.
+    """
+    ba_idx = {}
+    for r in ba_log:
+        ba_idx.setdefault(norm_ag(r["arbeitgeber"]), set()).add(norm_titel(r["titel"]))
+    ba_keys = [k for k in ba_idx if len(k) >= 6]
+    out = []
+    for r in filter_stellen(api):
+        t = norm_titel(r["titel"])
+        k = norm_ag(r["arbeitgeber"])
+        auch = bool(t) and any(t in ba_idx[b] for b in ba_keys if ag_passt(k, b))
+        hg = einordnung(r["titel"]).hauptgruppe
+        branche = (SEGMENTE[HAUPTGRUPPEN[hg][1]] if hg in HAUPTGRUPPEN
+                   else SONSTIGE)
+        out.append({**r, "auch_bei_ba": "ja" if auch else "nein",
+                    "branche": branche})
+    return out
 
 
 def style_header(ws, ncols, row=1):
@@ -2099,10 +2130,72 @@ def build_excel():
         for col in range(1, bws.max_column + 1):
             bst = get_column_letter(col)
             bws.column_dimensions[bst].width = breiten.get(bst, 14)
+    # ---------------- Boersen-Stichprobe (Adzuna, Google Jobs, Apify)
+    api_roh = read_csv("api_jobs_log.csv")
+    if api_roh:
+        boersen = boersen_zeilen(api_roh, log)
+        bs = wb.create_sheet("Börsen-Stichprobe")
+        bs.append(["Stichprobe aus Börsen-APIs: je Tag ein rotierendes "
+                   "Berufssegment, gedeckelt durch ein Tagesbudget. Nicht "
+                   "hochrechenbar und nicht in Summen/Zeitreihen enthalten."])
+        bs.append([])
+        bs.append(["Branche", "Stellen", "davon nicht in BA-Daten",
+                   "Anteil nicht in BA"])
+        je_br = {}
+        for r in boersen:
+            z = je_br.setdefault(r["branche"], [0, 0])
+            z[0] += 1
+            z[1] += r["auch_bei_ba"] == "nein"
+        for i, (br, (n, nur)) in enumerate(sorted(je_br.items()), start=4):
+            bs.append([br, n, nur, f"=C{i}/B{i}"])
+            bs.cell(row=i, column=4).number_format = "0%"
+        style_header(bs, 4, row=3)
+        zl = 5 + len(je_br)
+        bs.cell(row=zl, column=1, value="Quelle / Börse").font = Font(name=ARIAL, bold=True)
+        bs.cell(row=zl, column=2, value="Stellen").font = Font(name=ARIAL, bold=True)
+        je_pt = Counter((r["quelle"], r["portal"]) for r in boersen)
+        for k, ((q, pt), n) in enumerate(sorted(je_pt.items()), start=zl + 1):
+            bs.cell(row=k, column=1, value=f"{q}: {pt}")
+            bs.cell(row=k, column=2, value=n)
+        sp = zl + len(je_pt) + 3
+        kopf = ["Arbeitgeber", "Stelle", "Ort", "Branche", "Quelle", "Börse",
+                "Suchbegriff", "Link", "Erstmals gesehen", "Zuletzt gesehen",
+                "Auch in BA-Daten"]
+        for j, v in enumerate(kopf, start=1):
+            bs.cell(row=sp, column=j, value=v)
+        style_header(bs, len(kopf), row=sp)
+        for i, r in enumerate(sorted(boersen, key=lambda r: (r["arbeitgeber"], r["titel"])), start=sp + 1):
+            for j, v in enumerate([r["arbeitgeber"], r["titel"], r["ort"],
+                                   r["branche"], r["quelle"], r["portal"],
+                                   r["suchbegriff"], r["url"],
+                                   as_date(r["first_seen"]),
+                                   as_date(r["last_seen"]),
+                                   r["auch_bei_ba"]], start=1):
+                bs.cell(row=i, column=j, value=v)
+            bs.cell(row=i, column=9).number_format = DATUM_FMT
+            bs.cell(row=i, column=10).number_format = DATUM_FMT
+        laeufe = read_csv("api_laeufe.csv")
+        if laeufe:
+            kz = sp + len(boersen) + 3
+            for j, v in enumerate(["Datum", "Quelle", "Segment", "Suchbegriff",
+                                   "Abfragen", "Treffer roh", "Im Umkreis",
+                                   "Neu", "Kosten (USD)", "Status"], start=1):
+                bs.cell(row=kz, column=j, value=v)
+            style_header(bs, 10, row=kz)
+            for i, r in enumerate(sorted(laeufe, key=lambda r: (r["datum"], r["quelle"]), reverse=True), start=kz + 1):
+                for j, f in enumerate(["datum", "quelle", "segment", "suchbegriff", "abfragen",
+                                       "treffer_roh", "im_umkreis", "neu", "kosten_usd", "status"], start=1):
+                    v = r[f]
+                    bs.cell(row=i, column=j, value=float(v) if f == "kosten_usd" else
+                            int(v) if f in ("abfragen", "treffer_roh", "im_umkreis", "neu") else v)
+        autosize(bs)
+        bs.freeze_panes = None
+
     # Gemeinsame/ScrapJobs-Blaetter direkt hinter die Zusammenfassung,
     # damit sie nicht hinter den langen BA-Blaettern verschwinden
     vorn = [n for n in ("Gesamt-Übersicht", "Alle Stellen", "ScrapJobs",
-                        "ScrapJobs-Abgleich") if n in wb.sheetnames]
+                        "ScrapJobs-Abgleich", "Börsen-Stichprobe")
+            if n in wb.sheetnames]
     for pos, name in enumerate(vorn, start=1):
         ws = wb[name]
         wb.move_sheet(ws, offset=pos - wb.worksheets.index(ws))

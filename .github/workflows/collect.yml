@@ -66,6 +66,13 @@ jobs:
           GENESIS_USER: ${{ secrets.GENESIS_USER }}
           GENESIS_PASS: ${{ secrets.GENESIS_PASS }}
           GENESIS_BASE: ${{ vars.GENESIS_BASE }}
+          # Boersen-Stichprobe (api_quellen.py); fehlt ein Secret, wird die
+          # Quelle uebersprungen. Tagesbudget in USD, Standard 0.25.
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          API_BUDGET_USD: ${{ vars.API_BUDGET_USD }}
         run: python collect_jobs.py
 
       - name: Ergebnisse committen
